@@ -3,15 +3,17 @@ using UnityEngine;
 namespace HSM {
     public class Airborne : State {
         readonly PlayerContext ctx;
+        readonly PlayerRoot rootState;
 
         public Airborne(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
+            rootState = parent as PlayerRoot;
             Add(new ColorPhaseActivity(ctx.renderer){
                 enterColor = Color.red, // runs while Airborne is activating
             });
         }
         
-        protected override State GetTransition() => ctx.grounded ? ((PlayerRoot)Parent).Grounded : null;
+        protected override State GetTransition() => ctx.grounded ? rootState.Grounded : null;
 
         protected override void OnExit() {
             ctx.justLanded = true;
@@ -24,7 +26,7 @@ namespace HSM {
             ctx.velocity.z = avg.y;
 
             if (ctx.anim != null) {
-                ctx.anim.CrossFade("Airborne", 0.1f);
+                ctx.anim.CrossFade(global::HSM.AnimatorKeys.States.Airborne, 0.1f);
             }
         }
     }

@@ -5,6 +5,8 @@ using UnityEngine;
 namespace HSM {
     public class Move : State {
         readonly PlayerContext ctx;
+        readonly Grounded groundedState;
+        readonly PlayerRoot rootState;
         Vector2 smoothInput = Vector2.zero;
         Vector2 currentVelocity = Vector2.zero;
         const float inputDeadZone = 0.01f;
@@ -16,30 +18,32 @@ namespace HSM {
         // 真实移动速度（单位/秒），用于平滑驱动动画 Speed
         float smoothMoveSpeed;
         float speedVelocity;
-        public Move(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
+        public Move(StateMachine m, State parent, PlayerRoot rootState, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
+            groundedState = parent as Grounded;
+            this.rootState = rootState;
         }
 
         protected override State GetTransition() {
             if (!ctx.grounded) {
-                return ((PlayerRoot)Parent.Parent).Airborne;
+                return rootState.Airborne;
             }
 
             if (ctx.dodgePressed) {
                 ctx.dodgePressed = false;
-                return ((Grounded)Parent).Dodge;
+                return groundedState.Dodge;
             }
 
             if (ctx.attackPressed) {
                 ctx.attackPressed = false;
-                return ((Grounded)Parent).Combat;
+                return groundedState.Combat;
             }
 
             // 松开移动输入且当前仍有明显水平速度时，进入急停状态。
             // 速度很小时继续留在 NormalMove（由混合树自然回到 Idle），避免低速抖动频繁切换。
             var horizontalSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
             if (ctx.moveInput.magnitude <= inputDeadZone && horizontalSpeed > ctx.stopEnterSpeedThreshold) {
-                return ((Grounded)Parent).Stop;
+                return groundedState.Stop;
             }
             // grounded 下始终留在 Move：由 NormalMove 混合树根据 Speed(0/1/2) 表示站立/走/跑
             return null;
@@ -49,7 +53,7 @@ namespace HSM {
             // 从 Stop/Landing 退出时 Animator 已由过渡切到 Locomotion，不再 CrossFade；承接 Animator 当前的 Speed。
             if ((ctx.exitedStopThisFrame || ctx.exitedLandingThisFrame) && ctx.anim != null) {
                 float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
-                float animSpeed = ctx.anim.GetFloat("Speed");
+                float animSpeed = ctx.anim.GetFloat(AnimatorKeys.Params.Speed);
                 smoothMoveSpeed = animSpeed * walkReal;
             } else {
                 smoothMoveSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
@@ -57,20 +61,20 @@ namespace HSM {
             speedVelocity = 0f;
 
             if (ctx.anim != null && !ctx.exitedStopThisFrame && !ctx.exitedLandingThisFrame) {
-                ctx.anim.CrossFade("NormalMove", 0.1f);
+                ctx.anim.CrossFade(AnimatorKeys.States.NormalMove, 0.1f);
             }
             if (ctx.anim != null) {
                 float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
                 float animSpeed = Mathf.Clamp(smoothMoveSpeed / walkReal, 0f, 2f);
-                ctx.anim.SetFloat("Speed", animSpeed);
+                ctx.anim.SetFloat(AnimatorKeys.Params.Speed, animSpeed);
 
                 if (ctx.moveInput.magnitude > inputDeadZone) {
                     var dir = ctx.moveInput.normalized;
-                    ctx.anim.SetFloat("MoveX", dir.x);
-                    ctx.anim.SetFloat("MoveZ", dir.y);
+                    ctx.anim.SetFloat(AnimatorKeys.Params.MoveX, dir.x);
+                    ctx.anim.SetFloat(AnimatorKeys.Params.MoveZ, dir.y);
                 } else {
-                    ctx.anim.SetFloat("MoveX", 0f);
-                    ctx.anim.SetFloat("MoveZ", 0f);
+                    ctx.anim.SetFloat(AnimatorKeys.Params.MoveX, 0f);
+                    ctx.anim.SetFloat(AnimatorKeys.Params.MoveZ, 0f);
                 }
             }
 
@@ -110,16 +114,30 @@ namespace HSM {
                 camYaw = cam != null ? cam.transform.eulerAngles.y : 0f;
             }
 
-            Quaternion targetRot = Quaternion.identity;
+            Vector3 worldMoveDir = Vector3.zero;
 
             // 旋转统一在 PlayerStateDriver.FixedUpdate 里应用（用 MoveRotation），避免 Update 里直接写 Rigidbody.rotation 导致抖动。
             ctx.hasRotationTarget = false;
             if (hasInput) {
                 float targetYaw = camYaw + Mathf.Atan2(smoothInput.x, smoothInput.y) * Mathf.Rad2Deg;
-                targetRot = Quaternion.Euler(0f, targetYaw, 0f);
-                ctx.rotationTarget = targetRot;
-                ctx.rotationTurnSpeed = turnSpeed;
-                ctx.hasRotationTarget = true;
+                var targetRot = Quaternion.Euler(0f, targetYaw, 0f);
+                worldMoveDir = targetRot * Vector3.forward;
+
+                // On slopes, movement direction is plane-corrected to reduce climb jitter.
+                if (ctx.grounded && ctx.groundNormal.sqrMagnitude > 0.0001f) {
+                    var slopeDir = Vector3.ProjectOnPlane(worldMoveDir, ctx.groundNormal);
+                    if (slopeDir.sqrMagnitude > 0.0001f) {
+                        worldMoveDir = slopeDir.normalized;
+                    }
+                }
+
+                var faceDir = targetRot * Vector3.forward;
+                faceDir.y = 0f;
+                if (faceDir.sqrMagnitude > 0.0001f) {
+                    ctx.rotationTarget = Quaternion.LookRotation(faceDir.normalized, Vector3.up);
+                    ctx.rotationTurnSpeed = turnSpeed;
+                    ctx.hasRotationTarget = true;
+                }
             }
 
             // 3) 真实速度：由走/跑真实速度接口 + 输入大小得到目标速度，再 SmoothDamp 到当前速度
@@ -130,9 +148,7 @@ namespace HSM {
             Vector3 currentHorizontal = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z);
             Vector3 targetHorizontalVelocity = Vector3.zero;
             if (hasInput && smoothMoveSpeed > 0.0001f) {
-                Vector3 targetDir = targetRot * Vector3.forward; // world dir
-                targetHorizontalVelocity =
-                    new Vector3(targetDir.x, 0f, targetDir.z).normalized * smoothMoveSpeed;
+                targetHorizontalVelocity = worldMoveDir.normalized * smoothMoveSpeed;
             }
 
             Vector3 nextHorizontal = Vector3.MoveTowards(
@@ -147,14 +163,14 @@ namespace HSM {
             if (ctx.anim != null) {
                 float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
                 float animSpeed = Mathf.Clamp(smoothMoveSpeed / walkReal, 0f, 2f);
-                ctx.anim.SetFloat("Speed", animSpeed);
+                ctx.anim.SetFloat(AnimatorKeys.Params.Speed, animSpeed);
 
                 if (hasInput) {
-                    ctx.anim.SetFloat("MoveX", smoothInput.x);
-                    ctx.anim.SetFloat("MoveZ", smoothInput.y);
+                    ctx.anim.SetFloat(AnimatorKeys.Params.MoveX, smoothInput.x);
+                    ctx.anim.SetFloat(AnimatorKeys.Params.MoveZ, smoothInput.y);
                 } else {
-                    ctx.anim.SetFloat("MoveX", 0f);
-                    ctx.anim.SetFloat("MoveZ", 0f);
+                    ctx.anim.SetFloat(AnimatorKeys.Params.MoveX, 0f);
+                    ctx.anim.SetFloat(AnimatorKeys.Params.MoveZ, 0f);
                 }
             }
         }

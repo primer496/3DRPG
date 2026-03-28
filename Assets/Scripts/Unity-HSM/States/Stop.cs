@@ -3,15 +3,19 @@ using UnityEngine;
 namespace HSM {
     public class Stop : State {
         readonly PlayerContext ctx;
+        readonly Grounded groundedState;
+        readonly PlayerRoot rootState;
         float remainingTime;
         float stopAnimSpeed;
         bool waitAnimatorExitOnDeactivate;
 
-        public Stop(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
+        public Stop(StateMachine m, State parent, PlayerRoot rootState, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
+            groundedState = parent as Grounded;
+            this.rootState = rootState;
             Add(new AnimatorStateExitActivity(
                 animatorProvider: () => this.ctx.anim,
-                stateName: "StopType",
+                stateName: AnimatorKeys.States.StopType,
                 layerIndex: 0,
                 timeoutSeconds: 2f,
                 requireSeenStateBeforeExit: true,
@@ -22,34 +26,34 @@ namespace HSM {
         protected override State GetTransition() {
             if (!ctx.grounded) {
                 waitAnimatorExitOnDeactivate = false;
-                return ((PlayerRoot)Parent.Parent).Airborne;
+                return rootState.Airborne;
             }
 
             if (ctx.dodgePressed) {
                 ctx.dodgePressed = false;
                 ctx.exitedStopThisFrame = false;
                 waitAnimatorExitOnDeactivate = false;
-                return ((Grounded)Parent).Dodge;
+                return groundedState.Dodge;
             }
 
             if (ctx.attackPressed) {
                 ctx.attackPressed = false;
                 ctx.exitedStopThisFrame = false;
                 waitAnimatorExitOnDeactivate = false;
-                return ((Grounded)Parent).Combat;
+                return groundedState.Combat;
             }
 
             // 最短停留时间到后申请切回 Move；离开 StopType 的等待由退出 Activity 处理。
             if (remainingTime <= 0f) {
                 waitAnimatorExitOnDeactivate = ctx.anim != null;
                 ctx.exitedStopThisFrame = true;
-                return ((Grounded)Parent).Move;
+                return groundedState.Move;
             }
 
             if (ctx.moveInput.magnitude > 0.01f) {
                 ctx.exitedStopThisFrame = false;
                 waitAnimatorExitOnDeactivate = false;
-                return ((Grounded)Parent).Move;
+                return groundedState.Move;
             }
 
             return null;
@@ -62,7 +66,7 @@ namespace HSM {
             if (ctx.anim != null) {
                 // 使用 Stop 子状态机（二维混合树：走急停 / 跑急停）
                 // HH.controller 里对应状态名是 StopType
-                ctx.anim.CrossFade("StopType", Mathf.Max(0f, ctx.stopEnterCrossFade));
+                ctx.anim.CrossFade(AnimatorKeys.States.StopType, Mathf.Max(0f, ctx.stopEnterCrossFade));
 
                 // 与 Move/Dodge 一致：相机 yaw 来自 ThirdPersonCamera（与冲刺同一套空间）
                 float camYaw = ThirdPersonCamera.CurrentYawDeg;
@@ -77,17 +81,17 @@ namespace HSM {
                 // 与冲刺动画一致：在「角色面朝」下量化为四向（MoveX=左右，MoveZ=前后，与 NormalMove 混合树约定一致）
                 Vector2 dirLocal = WorldDirToCharacterCardinalMoveXZ(worldStopDir);
 
-                ctx.anim.SetFloat("MoveX", dirLocal.x);
-                ctx.anim.SetFloat("MoveZ", dirLocal.y);
+                ctx.anim.SetFloat(AnimatorKeys.Params.MoveX, dirLocal.x);
+                ctx.anim.SetFloat(AnimatorKeys.Params.MoveZ, dirLocal.y);
 
                 // 左右脚：仅由走路/跑步 clip 的 OnFootPlant 事件提供；未收到事件前 StopFoot=0。
-                ctx.anim.SetFloat("StopFoot", ComputeStopFoot());
+                ctx.anim.SetFloat(AnimatorKeys.Params.StopFoot, ComputeStopFoot());
 
                 // 进急停时固定一次 Speed，用于 StopType 在走停/跑停之间分流。
                 float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
                 float horizontalSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
                 stopAnimSpeed = Mathf.Clamp(horizontalSpeed / walkReal, 0f, 2f);
-                ctx.anim.SetFloat("Speed", stopAnimSpeed);
+                ctx.anim.SetFloat(AnimatorKeys.Params.Speed, stopAnimSpeed);
             }
         }
 
@@ -169,7 +173,7 @@ namespace HSM {
                 if (stopAnimSpeed < 1e-4f) {
                     stopAnimSpeed = 0f;
                 }
-                ctx.anim.SetFloat("Speed", Mathf.Clamp(stopAnimSpeed, 0f, 2f));
+                ctx.anim.SetFloat(AnimatorKeys.Params.Speed, Mathf.Clamp(stopAnimSpeed, 0f, 2f));
             }
         }
     }

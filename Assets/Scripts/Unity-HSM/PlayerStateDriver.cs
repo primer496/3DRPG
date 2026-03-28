@@ -2,14 +2,22 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 //using UnityUtils;
 
 namespace HSM {
     public class PlayerStateDriver : MonoBehaviour {
+        const string VerticalSpeedParam = "VerticalSpeed";
         public PlayerContext ctx = new PlayerContext();
         public Transform groundCheck;
         public float groundRadius = 0.2f;
+        public float groundProbeDistance = 0.3f;
+        [Range(1f, 89f)]
+        public float maxGroundAngle = 55f;
+        [Range(0f, 30f)]
+        public float minProjectSlopeAngle = 3f;
+        public float groundedSnapDownVelocity = 2f;
+        [Tooltip("Ground probe miss grace time to avoid false airborne flicker on slope seams.")]
+        public float groundUngroundedGraceTime = 0.08f;
         public LayerMask groundMask;
         public bool drawGizmos = true;
         string lastPath;
@@ -17,6 +25,11 @@ namespace HSM {
         Rigidbody rb;
         StateMachine machine;
         State root;
+        Vector3 lastAppliedPlanarVelocity;
+        float ungroundedTimer;
+        bool hasGroundHitThisFrame;
+        readonly InputReader inputReader = new InputReader();
+        readonly GroundChecker groundProbe = new GroundChecker();
 
         // Input System actions
         public InputAction moveAction;
@@ -26,17 +39,56 @@ namespace HSM {
         public InputAction attackAction;
 
         void Awake() {
+            InitializeRigidbody();
+            InitializeContextReferences();
+            BuildStateMachine();
+            EnsureGroundCheck();
+            InitializeSwordState();
+        }
+
+        void OnEnable() {
+            ToggleInputActions(true);
+        }
+
+        void OnDisable() {
+            ToggleInputActions(false);
+        }
+
+        void Update() {
+            ReadInputIntoContext();
+            UpdateGroundedState();
+            TickStateMachine();
+            SyncAirborneVerticalSpeed();
+            LogStatePathIfChanged();
+        }
+
+        void FixedUpdate() {
+            ApplyPlanarMotionToRigidbody();
+            SyncPlanarVelocityFromRigidbody();
+            ApplyQueuedRotation();
+        }
+
+        void InitializeRigidbody() {
             rb = GetComponent<Rigidbody>();
             rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             // ƽ����������Ⱦ֮֡���λ�ˣ�������������������������µĶ�����
             rb.interpolation = RigidbodyInterpolation.Interpolate;
+        }
+
+        void InitializeContextReferences() {
             ctx.rb = rb;
             ctx.anim = GetComponentInChildren<Animator>();
             ctx.renderer = GetComponent<Renderer>();
+        }
+
+        void BuildStateMachine() {
             root = new PlayerRoot(null, ctx);
             var builder = new StateMachineBuilder(root);
             machine = builder.Build();
+        }
 
+        void EnsureGroundCheck() {
             // fallback: create a groundCheck just below the collider's bounds
             if (groundCheck == null) {
                 var col = GetComponent<Collider>();
@@ -46,21 +98,24 @@ namespace HSM {
                 t.localPosition = new Vector3(0, y, 0);
                 groundCheck = t;
             }
+        }
 
+        void InitializeSwordState() {
             if (ctx.swordObject != null) {
                 ctx.swordObject.SetActive(false);
             }
         }
 
-        void OnEnable() {
-            moveAction?.Enable();
-            jumpAction?.Enable();
-            runAction?.Enable();
-            dodgeAction?.Enable();
-            attackAction?.Enable();
-        }
+        void ToggleInputActions(bool enabled) {
+            if (enabled) {
+                moveAction?.Enable();
+                jumpAction?.Enable();
+                runAction?.Enable();
+                dodgeAction?.Enable();
+                attackAction?.Enable();
+                return;
+            }
 
-        void OnDisable() {
             moveAction?.Disable();
             jumpAction?.Disable();
             runAction?.Disable();
@@ -68,37 +123,89 @@ namespace HSM {
             attackAction?.Disable();
         }
 
-        void Update() {
-
-            var move = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
-            ctx.moveInput = move;
-
-
-            ctx.jumpPressed   = jumpAction  != null && jumpAction.WasPressedThisFrame();
-            ctx.runHeld       = runAction   != null && runAction.IsPressed();
-            ctx.dodgePressed  = dodgeAction != null && dodgeAction.WasPressedThisFrame();
-            ctx.attackPressed = attackAction!= null && attackAction.WasPressedThisFrame();
-
-            ctx.grounded = Physics.CheckSphere(
-                groundCheck.position,
-                groundRadius,
-                groundMask
+        void ReadInputIntoContext() {
+            var input = inputReader.Read(
+                moveAction,
+                jumpAction,
+                runAction,
+                dodgeAction,
+                attackAction
             );
 
-            if (ctx.grounded) {
-                ctx.PushGroundVelocity(ctx.velocity.x, ctx.velocity.z);
+            ctx.moveInput = input.Move;
+            ctx.jumpPressed = input.JumpPressed;
+            ctx.runHeld = input.RunHeld;
+            ctx.dodgePressed = input.DodgePressed;
+            ctx.attackPressed = input.AttackPressed;
+        }
+
+        void UpdateGroundedState() {
+            bool inAirborneState = machine != null && machine.Root != null && machine.Root.Leaf() is Airborne;
+            // Allow a small near-apex window as "still airborne" to avoid immediate re-grounding
+            // right after jump transition (before vertical speed clearly becomes positive).
+            bool risingInAir = inAirborneState && rb != null && rb.velocity.y > -0.1f;
+            if (ctx.jumpGroundDetachTimer > 0f) {
+                ctx.jumpGroundDetachTimer = Mathf.Max(0f, ctx.jumpGroundDetachTimer - Time.deltaTime);
             }
 
-            machine.Tick(Time.deltaTime);
+            bool hitGround = groundProbe.IsGrounded(
+                groundCheck,
+                groundRadius,
+                groundProbeDistance,
+                maxGroundAngle,
+                groundMask,
+                out var normal,
+                out var hasReliableNormal
+            );
 
+            // During jump ascent, feet probes can still overlap slope/collider briefly.
+            // Ignore those hits to prevent snapping back to grounded and killing the jump.
+            if (risingInAir || ctx.jumpGroundDetachTimer > 0f) {
+                hitGround = false;
+            }
+            hasGroundHitThisFrame = hitGround;
+
+            if (hitGround) {
+                // Keep previous stable normal when probe only confirms contact but cannot provide
+                // a reliable surface normal (common on slope seams / tiny ledges).
+                if (hasReliableNormal) {
+                    ctx.groundNormal = normal;
+                }
+                ctx.grounded = true;
+                ungroundedTimer = 0f;
+                ctx.PushGroundVelocity(ctx.velocity.x, ctx.velocity.z);
+                return;
+            }
+
+            // Safety: if probe missed and we're still moving upward, never keep grounded grace.
+            // This prevents rare "grounded while floating" cases after dash-jump land/touch sequences.
+            bool movingUpWithoutGround = rb != null && rb.velocity.y > 0.2f;
+            bool canUseGrace = rb != null && rb.velocity.y <= 0.5f && !movingUpWithoutGround;
+            if (ctx.grounded && canUseGrace && ungroundedTimer < groundUngroundedGraceTime) {
+                ungroundedTimer += Time.deltaTime;
+                return;
+            }
+
+            ctx.grounded = false;
+            ungroundedTimer = 0f;
+        }
+
+        void TickStateMachine() {
+            machine.Tick(Time.deltaTime);
+        }
+
+        void SyncAirborneVerticalSpeed() {
             // 空中时在 Update 末尾更新 VerticalSpeed，保证每帧写入（避免状态机更新时机问题）
             var leaf = machine.Root.Leaf();
             if (leaf is Airborne && ctx.anim != null && ctx.rb != null && ctx.jumpSpeed > 0.0001f) {
                 float vy = ctx.rb.velocity.y;
                 float vSpeed = Mathf.Clamp(vy / ctx.jumpSpeed, -1f, 1f);
-                ctx.anim.SetFloat("VerticalSpeed", vSpeed);
+                ctx.anim.SetFloat(VerticalSpeedParam, vSpeed);
             }
+        }
 
+        void LogStatePathIfChanged() {
+            var leaf = machine.Root.Leaf();
             var path = StatePath(leaf);
 
             if (path != lastPath) {
@@ -107,16 +214,75 @@ namespace HSM {
             }
         }
 
-        void FixedUpdate() {
-            var v = rb.velocity;
-            v.x = ctx.velocity.x;
-            v.z = ctx.velocity.z;
-            rb.velocity = v;
+        void ApplyPlanarMotionToRigidbody() {
+            bool forceAirControl = machine != null && machine.Root.Leaf() is Airborne;
+            bool treatAsGrounded = ctx.grounded && !forceAirControl;
+            bool reliableGround = treatAsGrounded && hasGroundHitThisFrame;
+            var desiredPlanar = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z);
+            float slopeAngle = 0f;
+            if (reliableGround) {
+                var n = ctx.groundNormal.sqrMagnitude > 0.0001f ? ctx.groundNormal.normalized : Vector3.up;
+                slopeAngle = Vector3.Angle(n, Vector3.up);
+                if (slopeAngle >= minProjectSlopeAngle) {
+                    desiredPlanar = Vector3.ProjectOnPlane(desiredPlanar, n);
+                }
+            }
+
+            lastAppliedPlanarVelocity = desiredPlanar;
+
+            if (treatAsGrounded) {
+                // During grace frames (probe miss), never accumulate vertical climb from stale slope normal.
+                if (!reliableGround) {
+                    desiredPlanar.y = 0f;
+                    lastAppliedPlanarVelocity = desiredPlanar;
+                }
+
+                // Ground motor: drive horizontal velocity only.
+                // Writing projected Y directly can cancel natural jump/fall motion near ground
+                // and cause "hovering" when state flips back to grounded too early.
+                var v = rb.velocity;
+                v.x = desiredPlanar.x;
+                v.z = desiredPlanar.z;
+
+                // Keep a mild downward bias only on temporary probe misses.
+                // Applying this continuously on slopes causes unwanted downhill sliding.
+                bool needsSnapDown = !hasGroundHitThisFrame;
+                if (needsSnapDown && v.y <= 0.5f && v.y > -groundedSnapDownVelocity) {
+                    v.y = -groundedSnapDownVelocity;
+                }
+
+                rb.velocity = v;
+                return;
+            }
+
+            // Air control keeps velocity-driven motion.
+            var airV = rb.velocity;
+            airV.x = desiredPlanar.x;
+            airV.z = desiredPlanar.z;
+            rb.velocity = airV;
+        }
+
+        void SyncPlanarVelocityFromRigidbody() {
+            bool forceAirControl = machine != null && machine.Root.Leaf() is Airborne;
+            if (ctx.grounded && !forceAirControl) {
+                ctx.velocity.x = lastAppliedPlanarVelocity.x;
+                ctx.velocity.z = lastAppliedPlanarVelocity.z;
+                return;
+            }
 
             ctx.velocity.x = rb.velocity.x;
             ctx.velocity.z = rb.velocity.z;
+        }
 
+        void ApplyQueuedRotation() {
             // ???? FixedUpdate ?????????????? Update ?????�� Rigidbody.rotation ?????????
+            // Contacts on slopes can inject Y angular velocity and fight with MoveRotation,
+            // causing visible spin jitter. Keep yaw fully driven by state logic.
+            var av = rb.angularVelocity;
+            if (Mathf.Abs(av.y) > 0.0001f) {
+                rb.angularVelocity = new Vector3(av.x, 0f, av.z);
+            }
+
             if (ctx.hasRotationTarget) {
                 float t = ctx.rotationTurnSpeed * Time.fixedDeltaTime;
                 if (t >= 1f) {
@@ -126,6 +292,7 @@ namespace HSM {
                 }
 
                 ctx.hasRotationTarget = false;
+                return;
             }
         }
 
@@ -150,170 +317,104 @@ namespace HSM {
         public void OnFootPlant(int foot) {
             ctx.RegisterFootPlantFromAnimation(foot);
         }
-    }
-    [Serializable]
-    public class PlayerContext {
-        [Header("Runtime Input/State")]
-        [HideInInspector]
-        public Vector2 moveInput;
-        [HideInInspector]
-        public Vector3 velocity;
-        [HideInInspector]
-        public bool grounded;
 
-        [Header("Movement")]
-        public float moveSpeed = 6f;
-        public float accel = 40f;
-        public float jumpSpeed = 7f;
-        [HideInInspector]
-        public bool jumpPressed;
-        [HideInInspector]
-        public bool runHeld;
-        [HideInInspector]
-        public bool dodgePressed;
-        [HideInInspector]
-        public bool attackPressed;
-        public float runSpeedMultiplier = 2f;
+        readonly struct InputSnapshot {
+            public readonly Vector2 Move;
+            public readonly bool JumpPressed;
+            public readonly bool RunHeld;
+            public readonly bool DodgePressed;
+            public readonly bool AttackPressed;
 
-        [Header("Dodge")]
-        public float dodgeSpeed = 10f;
-        public float dodgeDuration = 0.25f;
-
-        [Header("Stop Tuning")]
-        [Tooltip("急停状态最短停留时间（秒）；HSM 在此时间后才跟随 Animator 的 StopType->Locomotion 过渡切回 Move。")]
-        [Min(0f)]
-        public float stopDuration = 0.26f;
-
-        [Tooltip("速度高于该值才会从 Move 进入 Stop。")]
-        [Min(0f)]
-        public float stopEnterSpeedThreshold = 0.32f;
-
-        [Tooltip("进入 StopType 的 CrossFade 时长（秒）。")]
-        [Min(0f)]
-        public float stopEnterCrossFade = 0.06f;
-
-        [Tooltip("急停期间 Animator Speed 指数衰减的时间常数 τ（秒），供 Animator 条件过渡使用。")]
-        [FormerlySerializedAs("stopSpeedDampTime")]
-        [Min(0.001f)]
-        public float stopSpeedDecayTime = 0.12f;
-
-        [Header("Runtime / Cached")]
-        [HideInInspector]
-        [Tooltip("上一帧仍按住移动时的摇杆输入（相机空间 XZ），松开当帧用于急停方向，与冲刺输入空间一致。")]
-        public Vector2 lastStickWhileMoving;
-
-        [HideInInspector]
-        [Tooltip("地面上最近 3 帧的水平速度（XZ），用于空中继承动量。")]
-        readonly Vector2[] groundVelocityHistory = new Vector2[3];
-        int groundVelocityWriteIndex;
-        int groundVelocityCount;
-
-        /// <summary>
-        /// 地面时每帧调用，记录当前水平速度。
-        /// </summary>
-        public void PushGroundVelocity(float vx, float vz) {
-            groundVelocityHistory[groundVelocityWriteIndex] = new Vector2(vx, vz);
-            groundVelocityWriteIndex = (groundVelocityWriteIndex + 1) % 3;
-            if (groundVelocityCount < 3) groundVelocityCount++;
+            public InputSnapshot(
+                Vector2 move,
+                bool jumpPressed,
+                bool runHeld,
+                bool dodgePressed,
+                bool attackPressed
+            ) {
+                Move = move;
+                JumpPressed = jumpPressed;
+                RunHeld = runHeld;
+                DodgePressed = dodgePressed;
+                AttackPressed = attackPressed;
+            }
         }
 
-        /// <summary>
-        /// 空中时获取地面最近 3 帧的平均水平速度。
-        /// </summary>
-        public Vector2 GetAverageGroundVelocity() {
-            if (groundVelocityCount == 0) return Vector2.zero;
-            Vector2 sum = Vector2.zero;
-            for (int i = 0; i < groundVelocityCount; i++)
-                sum += groundVelocityHistory[i];
-            return sum / groundVelocityCount;
+        sealed class InputReader {
+            public InputSnapshot Read(
+                InputAction moveAction,
+                InputAction jumpAction,
+                InputAction runAction,
+                InputAction dodgeAction,
+                InputAction attackAction
+            ) {
+                var move = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
+                var jumpPressed = jumpAction != null && jumpAction.WasPressedThisFrame();
+                var runHeld = runAction != null && runAction.IsPressed();
+                var dodgePressed = dodgeAction != null && dodgeAction.WasPressedThisFrame();
+                var attackPressed = attackAction != null && attackAction.WasPressedThisFrame();
+
+                return new InputSnapshot(move, jumpPressed, runHeld, dodgePressed, attackPressed);
+            }
         }
 
-        [HideInInspector]
-        [Tooltip("是否至少收到过一次脚步动画事件（未收到前急停用交替/固定）。")]
-        public bool hasFootPlantData;
+        sealed class GroundChecker {
+            public bool IsGrounded(
+                Transform groundCheck,
+                float groundRadius,
+                float probeDistance,
+                float maxGroundAngle,
+                LayerMask groundMask,
+                out Vector3 groundNormal,
+                out bool hasReliableNormal
+            ) {
+                groundNormal = Vector3.up;
+                hasReliableNormal = false;
+                if (groundCheck == null) return false;
 
-        [HideInInspector]
-        [Tooltip("最后着地的是否为右脚（OnFootPlant 传入 1 时为 true）。")]
-        public bool lastPlantedFootIsRight;
+                var origin = groundCheck.position + Vector3.up * Mathf.Max(0f, probeDistance);
+                var castDistance = Mathf.Max(groundRadius + probeDistance, groundRadius + 0.05f);
 
-        [Header("Runtime Flags")]
-        [HideInInspector]
-        public bool exitedStopThisFrame;
+                if (Physics.SphereCast(
+                    origin,
+                    groundRadius,
+                    Vector3.down,
+                    out var hit,
+                    castDistance,
+                    groundMask,
+                    QueryTriggerInteraction.Ignore
+                )) {
+                    var slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                    if (slopeAngle <= maxGroundAngle) {
+                        groundNormal = hit.normal;
+                        hasReliableNormal = true;
+                        return true;
+                    }
+                }
 
-        [HideInInspector]
-        [Tooltip("刚从空中落地，进入 Grounded 时应先进入 Landing。")]
-        public bool justLanded;
+                // Fallback for edge cases (ledge transitions / tiny gaps).
+                if (Physics.CheckSphere(groundCheck.position, groundRadius, groundMask, QueryTriggerInteraction.Ignore)) {
+                    // Try to recover a usable normal for slope projection stability.
+                    var fallbackOrigin = groundCheck.position + Vector3.up * 0.1f;
+                    if (Physics.Raycast(
+                        fallbackOrigin,
+                        Vector3.down,
+                        out var fallbackHit,
+                        Mathf.Max(probeDistance + groundRadius + 0.2f, 0.35f),
+                        groundMask,
+                        QueryTriggerInteraction.Ignore
+                    )) {
+                        var fallbackSlopeAngle = Vector3.Angle(fallbackHit.normal, Vector3.up);
+                        if (fallbackSlopeAngle <= maxGroundAngle) {
+                            groundNormal = fallbackHit.normal;
+                            hasReliableNormal = true;
+                        }
+                    }
+                    return true;
+                }
 
-        [HideInInspector]
-        [Tooltip("从 Landing 退出到 Move 时 Animator 已由过渡切到 Locomotion，不再 CrossFade。")]
-        public bool exitedLandingThisFrame;
-
-        [Header("Combat")]
-        public float comboResetTime = 0.6f;
-        [Min(1)]
-        public int maxComboSteps = 4;
-
-        [Header("Combo Windows (Normalized Time)")]
-        [Range(0f, 1f)]
-        [Tooltip("第一段连段输入窗口起点（适当后延，避免过早抢输入）。")]
-        public float combo1WindowStart = 0.38f;
-        [Range(0f, 1f)]
-        public float combo1WindowEnd = 0.70f;
-
-        [Range(0f, 1f)]
-        public float combo2WindowStart = 0.22f;
-        [Range(0f, 1f)]
-        public float combo2WindowEnd = 0.68f;
-
-        [Range(0f, 1f)]
-        public float combo3WindowStart = 0.20f;
-        [Range(0f, 1f)]
-        public float combo3WindowEnd = 0.66f;
-
-        [Range(0f, 1f)]
-        [Tooltip("最后一段通常不再连下一段，保留参数便于后续扩展。")]
-        public float combo4WindowStart = 0.18f;
-        [Range(0f, 1f)]
-        public float combo4WindowEnd = 0.60f;
-
-        [Range(0.5f, 1.2f)]
-        [Tooltip("当前段超过该归一化时间且无可连输入时，退出 Combat。")]
-        public float comboExitNormalizedTime = 0.95f;
-
-        [Header("References")]
-        [Tooltip("攻击时显示/非攻击时隐藏的武器对象（使用 SetActive 控制）。")]
-        public GameObject swordObject;
-        [HideInInspector]
-        public Animator anim;
-        [HideInInspector]
-        public Rigidbody rb;
-        [HideInInspector]
-        public Renderer renderer;
-        [HideInInspector]
-        public Vector2 lookInput;
-
-        // ????? State ???????????? FixedUpdate ????��?? Rigidbody?????? Update �� rotation ??????
-        [HideInInspector]
-        public Quaternion rotationTarget;
-        [HideInInspector]
-        public bool hasRotationTarget;
-        [HideInInspector]
-        public float rotationTurnSpeed;
-
-        // ??/??????????????????/??????????????????????? Speed ???????
-        public float GetWalkRealSpeed() => moveSpeed;
-        public float GetRunRealSpeed() => moveSpeed * runSpeedMultiplier;
-        public float GetTargetRealSpeed(float inputMagnitude) {
-            var baseSpeed = runHeld ? GetRunRealSpeed() : GetWalkRealSpeed();
-            return baseSpeed * Mathf.Clamp01(inputMagnitude);
-        }
-
-        /// <summary>
-        /// 由 Animation Event <c>OnFootPlant</c> 调用：0=左脚，1=右脚。
-        /// </summary>
-        public void RegisterFootPlantFromAnimation(int foot) {
-            lastPlantedFootIsRight = foot == 0;
-            hasFootPlantData = true;
+                return false;
+            }
         }
     }
 }

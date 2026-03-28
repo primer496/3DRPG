@@ -3,15 +3,17 @@ using UnityEngine;
 namespace HSM {
     public class Landing : State {
         readonly PlayerContext ctx;
+        readonly Grounded groundedState;
         float elapsed;
         bool hasBeenInLandingState;
         bool waitAnimatorExitOnDeactivate;
 
         public Landing(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
+            groundedState = parent as Grounded;
             Add(new AnimatorStateExitActivity(
                 animatorProvider: () => this.ctx.anim,
-                stateName: "Landing",
+                stateName: AnimatorKeys.States.Landing,
                 layerIndex: 0,
                 timeoutSeconds: 2f,
                 requireSeenStateBeforeExit: true,
@@ -26,7 +28,7 @@ namespace HSM {
         protected override State GetTransition() {
             if (ctx.anim != null) {
                 var info = ctx.anim.GetCurrentAnimatorStateInfo(0);
-                if (info.IsName("Landing")) hasBeenInLandingState = true;
+                if (info.IsName(AnimatorKeys.States.Landing)) hasBeenInLandingState = true;
             }
 
             // 一旦确认进入过 Landing，就申请切回 Move；离开 Landing 的等待由退出 Activity 处理。
@@ -34,7 +36,7 @@ namespace HSM {
             if (hasBeenInLandingState || elapsed >= 2f) {
                 waitAnimatorExitOnDeactivate = hasBeenInLandingState && ctx.anim != null;
                 ctx.exitedLandingThisFrame = true;
-                return ((Grounded)Parent).Move;
+                return groundedState.Move;
             }
             return null;
         }
@@ -46,8 +48,8 @@ namespace HSM {
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
             if (ctx.anim != null) {
-                ctx.anim.CrossFade("Landing", 0.1f);
-                ctx.anim.SetFloat("Speed", 0f);
+                ctx.anim.CrossFade(AnimatorKeys.States.Landing, 0.1f);
+                ctx.anim.SetFloat(AnimatorKeys.Params.Speed, 0f);
             }
         }
 

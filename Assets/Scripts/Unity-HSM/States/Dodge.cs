@@ -3,20 +3,24 @@ using UnityEngine;
 namespace HSM {
     public class Dodge : State {
         readonly PlayerContext ctx;
+        readonly Grounded groundedState;
+        readonly PlayerRoot rootState;
         float remainingTime;
         Vector2 dodgeDir; // 2D 8向方向，用于动画混合（DodgeX/DodgeY）
 
-        public Dodge(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
+        public Dodge(StateMachine m, State parent, PlayerRoot rootState, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
+            groundedState = parent as Grounded;
+            this.rootState = rootState;
         }
 
         protected override State GetTransition() {
             if (!ctx.grounded) {
-                return ((PlayerRoot)Parent.Parent).Airborne;
+                return rootState.Airborne;
             }
 
             if (remainingTime <= 0f) {
-                return ((Grounded)Parent).Move;
+                return groundedState.Move;
             }
 
             return null;
@@ -80,9 +84,9 @@ namespace HSM {
             dodgeDir = QuantizeTo8Dir(relativeAngle);
 
             if (ctx.anim != null) {
-                ctx.anim.SetFloat("DodgeX", dodgeDir.x);
-                ctx.anim.SetFloat("DodgeY", dodgeDir.y);
-                ctx.anim.CrossFade("Dodge", 0.05f);
+                ctx.anim.SetFloat(AnimatorKeys.Params.DodgeX, dodgeDir.x);
+                ctx.anim.SetFloat(AnimatorKeys.Params.DodgeY, dodgeDir.y);
+                ctx.anim.CrossFade(AnimatorKeys.States.Dodge, 0.05f);
             }
         }
 

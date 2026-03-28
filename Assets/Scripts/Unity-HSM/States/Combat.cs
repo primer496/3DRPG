@@ -3,26 +3,30 @@ using UnityEngine;
 namespace HSM {
     public class Combat : State {
         readonly PlayerContext ctx;
+        readonly Grounded groundedState;
+        readonly PlayerRoot rootState;
         int currentComboStep;
         bool queuedNextAttack;
 
-        public Combat(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
+        public Combat(StateMachine m, State parent, PlayerRoot rootState, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
+            groundedState = parent as Grounded;
+            this.rootState = rootState;
         }
 
         protected override State GetTransition() {
             if (!ctx.grounded) {
-                return ((PlayerRoot)Parent.Parent).Airborne;
+                return rootState.Airborne;
             }
 
             if (ctx.anim == null) {
-                return ((Grounded)Parent).Move;
+                return groundedState.Move;
             }
 
             // 动画播放到收尾且没有成功连段输入时，退出战斗状态。
             var info = ctx.anim.GetCurrentAnimatorStateInfo(0);
             if (IsCurrentComboState(info) && GetNormalized01(info) >= ctx.comboExitNormalizedTime) {
-                return ((Grounded)Parent).Move;
+                return groundedState.Move;
             }
 
             return null;
@@ -32,6 +36,7 @@ namespace HSM {
             currentComboStep = 1;
             queuedNextAttack = false;
             ctx.attackPressed = false;
+            StopHorizontalMotion();
             if (ctx.swordObject != null) {
                 ctx.swordObject.SetActive(true);
             }
@@ -80,22 +85,22 @@ namespace HSM {
 
             switch (currentComboStep) {
                 case 1:
-                    ctx.anim.CrossFade("Combo1", 0.05f);
+                    ctx.anim.CrossFade(AnimatorKeys.ComboState(1), 0.05f);
                     break;
                 case 2:
-                    ctx.anim.CrossFade("Combo2", 0.05f);
+                    ctx.anim.CrossFade(AnimatorKeys.ComboState(2), 0.05f);
                     break;
                 case 3:
-                    ctx.anim.CrossFade("Combo3", 0.05f);
+                    ctx.anim.CrossFade(AnimatorKeys.ComboState(3), 0.05f);
                     break;
                 case 4:
-                    ctx.anim.CrossFade("Combo4", 0.05f);
+                    ctx.anim.CrossFade(AnimatorKeys.ComboState(4), 0.05f);
                     break;
             }
         }
 
         bool IsCurrentComboState(AnimatorStateInfo info) {
-            return info.IsName($"Combo{currentComboStep}");
+            return info.IsName(AnimatorKeys.ComboState(currentComboStep));
         }
 
         static float GetNormalized01(AnimatorStateInfo info) {
@@ -130,6 +135,18 @@ namespace HSM {
             if (end < start) {
                 end = start;
             }
+        }
+
+        void StopHorizontalMotion() {
+            ctx.velocity.x = 0f;
+            ctx.velocity.z = 0f;
+            ctx.hasRotationTarget = false;
+
+            if (ctx.rb == null) return;
+            var rbVelocity = ctx.rb.velocity;
+            rbVelocity.x = 0f;
+            rbVelocity.z = 0f;
+            ctx.rb.velocity = rbVelocity;
         }
     }
 }
