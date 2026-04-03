@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 71152091}
   - component: {fileID: 71152090}
   - component: {fileID: 71152089}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Ramp_Up_30
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -588,7 +588,7 @@ GameObject:
   - component: {fileID: 244342240}
   - component: {fileID: 244342239}
   - component: {fileID: 244342238}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wall_High_Thin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -853,7 +853,7 @@ GameObject:
   - component: {fileID: 311810992}
   - component: {fileID: 311810991}
   - component: {fileID: 311810990}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wall_Mid_Thick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1729,7 +1729,7 @@ GameObject:
   - component: {fileID: 510073605}
   - component: {fileID: 510073604}
   - component: {fileID: 510073603}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wall_SuperHigh_Thick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2370,7 +2370,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 623724492}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: TraversalTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2934,7 +2934,7 @@ GameObject:
   - component: {fileID: 680981041}
   - component: {fileID: 680981040}
   - component: {fileID: 680981039}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wall_Low_Thin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4304,7 +4304,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 776124562}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Walls_Thin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4360,7 +4360,7 @@ GameObject:
   - component: {fileID: 827990801}
   - component: {fileID: 827990800}
   - component: {fileID: 827990799}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wall_Mid_Thin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4532,7 +4532,7 @@ GameObject:
   - component: {fileID: 836878989}
   - component: {fileID: 836878988}
   - component: {fileID: 836878987}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Ramp_Down_30
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23896,7 +23896,7 @@ GameObject:
   - component: {fileID: 1233811555}
   - component: {fileID: 1233811554}
   - component: {fileID: 1233811553}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wall_High_Thick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32305,7 +32305,9 @@ MonoBehaviour:
     groundNormal: {x: 0, y: 1, z: 0}
     moveSpeed: 1
     accel: 40
+    jumpHeight: 2.5
     jumpSpeed: 7
+    jumpGroundDetachTime: 0.12
     jumpPressed: 0
     runHeld: 0
     dodgePressed: 0
@@ -32323,6 +32325,7 @@ MonoBehaviour:
     exitedStopThisFrame: 0
     justLanded: 0
     exitedLandingThisFrame: 0
+    jumpGroundDetachTimer: 0
     comboResetTime: 0.6
     maxComboSteps: 4
     combo1WindowStart: 0.5
@@ -32351,7 +32354,13 @@ MonoBehaviour:
   groundUngroundedGraceTime: 0.08
   groundMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 192
+  airWallMask:
+    serializedVersion: 2
+    m_Bits: 128
+  airWallBlockDistance: 0.22
+  airWallNormalHoldTime: 0.08
+  airWallEdgeDetachSpeed: 0.8
   drawGizmos: 1
   moveAction:
     m_Name: Move
@@ -33022,7 +33031,7 @@ GameObject:
   - component: {fileID: 1732963311}
   - component: {fileID: 1732963310}
   - component: {fileID: 1732963309}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wall_SuperHigh_Thin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33662,7 +33671,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1863572861}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Walls_Thick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33809,7 +33818,7 @@ GameObject:
   - component: {fileID: 1916256444}
   - component: {fileID: 1916256443}
   - component: {fileID: 1916256442}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wall_Low_Thick
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -3,6 +3,10 @@ namespace HSM {
     /// Centralized animator parameter and state names.
     /// </summary>
     public static class AnimatorKeys {
+        public static class Layers {
+            public const string Base = "Base Layer";
+        }
+
         public static class Params {
             public const string MoveX = "MoveX";
             public const string MoveZ = "MoveZ";
@@ -16,7 +20,9 @@ namespace HSM {
         public static class States {
             public const string NormalMove = "NormalMove";
             public const string StopType = "StopType";
-            public const string Airborne = "Airborne";
+            public const string Airborne = Layers.Base + ".Airborne";
+            public const string AirborneHang = Layers.Base + ".Airborne.AirborneFall";
+            public const string AirborneFall = Layers.Base + ".Airborne.AirborneFall";
             public const string Dodge = "Dodge";
             public const string Landing = "Landing";
         }

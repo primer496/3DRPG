@@ -18,6 +18,10 @@ namespace HSM {
         [Header("Movement")]
         public float moveSpeed = 6f;
         public float accel = 40f;
+        [Tooltip("目标跳跃高度（米）；实际起跳速度将由该高度自动计算。")]
+        [Min(0.1f)]
+        public float jumpHeight = 2.5f;
+        [Tooltip("旧版本起跳速度参数（兼容保留）。当 jumpHeight 非法时用作兜底。")]
         public float jumpSpeed = 7f;
         [Tooltip("起跳后忽略地面重判时长（秒），用于避免吃跳。")]
         [Range(0f, 0.3f)]
@@ -166,6 +170,16 @@ namespace HSM {
         public float GetTargetRealSpeed(float inputMagnitude) {
             var baseSpeed = runHeld ? GetRunRealSpeed() : GetWalkRealSpeed();
             return baseSpeed * Mathf.Clamp01(inputMagnitude);
+        }
+
+        public float GetJumpTakeoffSpeed() {
+            float safeHeight = Mathf.Max(0f, jumpHeight);
+            if (safeHeight > 0.0001f) {
+                float gravity = Mathf.Max(0.01f, -Physics.gravity.y);
+                return Mathf.Sqrt(2f * gravity * safeHeight);
+            }
+
+            return Mathf.Max(0.0001f, jumpSpeed);
         }
 
         /// <summary>

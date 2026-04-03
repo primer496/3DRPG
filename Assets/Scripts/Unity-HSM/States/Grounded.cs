@@ -46,7 +46,7 @@ namespace HSM {
 
                 if (rb != null) {
                     var v = rb.velocity;
-                    v.y = ctx.jumpSpeed;
+                    v.y = ctx.GetJumpTakeoffSpeed();
                     rb.velocity = v;
                 }
                 return rootState.Airborne;

@@ -19,6 +19,18 @@ namespace HSM {
         [Tooltip("Ground probe miss grace time to avoid false airborne flicker on slope seams.")]
         public float groundUngroundedGraceTime = 0.08f;
         public LayerMask groundMask;
+        [Header("Air Wall Handling")]
+        [Tooltip("Air control forward wall detection mask. Leave empty to auto-use Wall layer.")]
+        public LayerMask airWallMask;
+        [Range(0.05f, 0.6f)]
+        [Tooltip("Forward wall check distance for removing into-wall velocity while airborne.")]
+        public float airWallBlockDistance = 0.22f;
+        [Range(0f, 0.2f)]
+        [Tooltip("Keep last valid wall normal for this long to avoid frame-by-frame wall constraint flicker.")]
+        public float airWallNormalHoldTime = 0.08f;
+        [Range(0f, 2f)]
+        [Tooltip("Extra planar detach speed from wall near apex/fall to prevent top-edge sticking.")]
+        public float airWallEdgeDetachSpeed = 0.8f;
         public bool drawGizmos = true;
         string lastPath;
 
@@ -28,6 +40,8 @@ namespace HSM {
         Vector3 lastAppliedPlanarVelocity;
         float ungroundedTimer;
         bool hasGroundHitThisFrame;
+        Vector3 cachedAirWallNormalPlanar;
+        float airWallNormalHoldTimer;
         readonly InputReader inputReader = new InputReader();
         readonly GroundChecker groundProbe = new GroundChecker();
 
@@ -140,7 +154,7 @@ namespace HSM {
         }
 
         void UpdateGroundedState() {
-            bool inAirborneState = machine != null && machine.Root != null && machine.Root.Leaf() is Airborne;
+            bool inAirborneState = IsInAirborneState();
             // Allow a small near-apex window as "still airborne" to avoid immediate re-grounding
             // right after jump transition (before vertical speed clearly becomes positive).
             bool risingInAir = inAirborneState && rb != null && rb.velocity.y > -0.1f;
@@ -197,9 +211,10 @@ namespace HSM {
         void SyncAirborneVerticalSpeed() {
             // 空中时在 Update 末尾更新 VerticalSpeed，保证每帧写入（避免状态机更新时机问题）
             var leaf = machine.Root.Leaf();
-            if (leaf is Airborne && ctx.anim != null && ctx.rb != null && ctx.jumpSpeed > 0.0001f) {
+            float jumpTakeoffSpeed = ctx.GetJumpTakeoffSpeed();
+            if (IsAirborneState(leaf) && ctx.anim != null && ctx.rb != null && jumpTakeoffSpeed > 0.0001f) {
                 float vy = ctx.rb.velocity.y;
-                float vSpeed = Mathf.Clamp(vy / ctx.jumpSpeed, -1f, 1f);
+                float vSpeed = Mathf.Clamp(vy / jumpTakeoffSpeed, -1f, 1f);
                 ctx.anim.SetFloat(VerticalSpeedParam, vSpeed);
             }
         }
@@ -215,7 +230,7 @@ namespace HSM {
         }
 
         void ApplyPlanarMotionToRigidbody() {
-            bool forceAirControl = machine != null && machine.Root.Leaf() is Airborne;
+            bool forceAirControl = IsInAirborneState();
             bool treatAsGrounded = ctx.grounded && !forceAirControl;
             bool reliableGround = treatAsGrounded && hasGroundHitThisFrame;
             var desiredPlanar = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z);
@@ -256,6 +271,7 @@ namespace HSM {
             }
 
             // Air control keeps velocity-driven motion.
+            desiredPlanar = RemoveIntoWallComponentWhileAirborne(desiredPlanar);
             var airV = rb.velocity;
             airV.x = desiredPlanar.x;
             airV.z = desiredPlanar.z;
@@ -263,7 +279,7 @@ namespace HSM {
         }
 
         void SyncPlanarVelocityFromRigidbody() {
-            bool forceAirControl = machine != null && machine.Root.Leaf() is Airborne;
+            bool forceAirControl = IsInAirborneState();
             if (ctx.grounded && !forceAirControl) {
                 ctx.velocity.x = lastAppliedPlanarVelocity.x;
                 ctx.velocity.z = lastAppliedPlanarVelocity.z;
@@ -306,6 +322,149 @@ namespace HSM {
         static string StatePath(State s) {
             return string.Join(" > ", s.PathToRoot().Reverse().Select(n => n.GetType().Name));
         }
+
+        bool IsInAirborneState() {
+            if (machine == null || machine.Root == null) {
+                return false;
+            }
+
+            return IsAirborneState(machine.Root.Leaf());
+        }
+
+        static bool IsAirborneState(State state) {
+            for (State current = state; current != null; current = current.Parent) {
+                if (current is Airborne) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        Vector3 RemoveIntoWallComponentWhileAirborne(Vector3 desiredPlanar) {
+            if (desiredPlanar.sqrMagnitude <= 0.0001f) {
+                return desiredPlanar;
+            }
+
+            int wallMask = ResolveAirWallMask();
+            if (wallMask == 0 || rb == null) {
+                return desiredPlanar;
+            }
+
+            Vector3 wallNormalPlanar;
+            if (TryGetWallNormalPlanar(desiredPlanar, wallMask, out wallNormalPlanar)) {
+                cachedAirWallNormalPlanar = wallNormalPlanar;
+                airWallNormalHoldTimer = airWallNormalHoldTime;
+            } else if (airWallNormalHoldTimer > 0f && cachedAirWallNormalPlanar.sqrMagnitude > 0.0001f) {
+                airWallNormalHoldTimer = Mathf.Max(0f, airWallNormalHoldTimer - Time.fixedDeltaTime);
+                wallNormalPlanar = cachedAirWallNormalPlanar;
+            } else {
+                airWallNormalHoldTimer = 0f;
+                return desiredPlanar;
+            }
+            float intoWallSpeed = Vector3.Dot(desiredPlanar, -wallNormalPlanar);
+            if (intoWallSpeed <= 0f) {
+                return desiredPlanar;
+            }
+
+            // Strict rule: wall handling only changes planar motion (X/Z), never vertical speed (Y).
+            var adjustedPlanar = desiredPlanar + wallNormalPlanar * intoWallSpeed;
+            if (rb.velocity.y <= 0.05f) {
+                adjustedPlanar += wallNormalPlanar * airWallEdgeDetachSpeed;
+            }
+            rb.angularVelocity = new Vector3(rb.angularVelocity.x, 0f, rb.angularVelocity.z);
+            ctx.hasRotationTarget = false;
+            return adjustedPlanar;
+        }
+
+        bool TryGetWallNormalPlanar(Vector3 desiredPlanar, int wallMask, out Vector3 wallNormalPlanar) {
+            wallNormalPlanar = Vector3.zero;
+            Vector3 desiredDirection = desiredPlanar.normalized;
+
+            if (TryGetWallHit(desiredDirection, wallMask, out var hitFromPlanar)) {
+                return TryBuildPlanarNormal(hitFromPlanar.normal, out wallNormalPlanar);
+            }
+
+            Vector3 forward = rb.transform.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude > 0.0001f) {
+                forward.Normalize();
+                if (TryGetWallHit(forward, wallMask, out var hitFromForward)) {
+                    return TryBuildPlanarNormal(hitFromForward.normal, out wallNormalPlanar);
+                }
+            }
+
+            return false;
+        }
+
+        static bool TryBuildPlanarNormal(Vector3 normal, out Vector3 wallNormalPlanar) {
+            wallNormalPlanar = new Vector3(normal.x, 0f, normal.z);
+            if (wallNormalPlanar.sqrMagnitude <= 0.0001f) {
+                return false;
+            }
+
+            wallNormalPlanar.Normalize();
+            return true;
+        }
+
+        int ResolveAirWallMask() {
+            if (airWallMask.value != 0) {
+                return airWallMask.value;
+            }
+
+            int wallLayer = LayerMask.NameToLayer("Wall");
+            return wallLayer >= 0 ? 1 << wallLayer : 0;
+        }
+
+        bool TryGetWallHit(Vector3 direction, int wallMask, out RaycastHit hit) {
+            hit = default;
+            var bodyCollider = rb.GetComponent<Collider>();
+            if (bodyCollider == null) {
+                return false;
+            }
+
+            var bounds = bodyCollider.bounds;
+            float radius = Mathf.Clamp(Mathf.Min(bounds.extents.x, bounds.extents.z) * 0.8f, 0.1f, 0.35f);
+            Vector3 origin = bounds.center;
+            origin.y = Mathf.Lerp(bounds.min.y + radius, bounds.center.y, 0.65f);
+            float distance = Mathf.Max(0.05f, airWallBlockDistance);
+
+            var hits = Physics.SphereCastAll(
+                origin,
+                radius,
+                direction,
+                distance,
+                wallMask,
+                QueryTriggerInteraction.Ignore
+            );
+
+            if (hits == null || hits.Length == 0) {
+                return false;
+            }
+
+            float nearestDistance = float.MaxValue;
+            bool found = false;
+            for (int i = 0; i < hits.Length; i++) {
+                var candidate = hits[i];
+                if (candidate.collider == null) {
+                    continue;
+                }
+
+                // Only treat near-vertical surfaces as walls.
+                if (candidate.normal.y > 0.35f) {
+                    continue;
+                }
+
+                if (candidate.distance < nearestDistance) {
+                    nearestDistance = candidate.distance;
+                    hit = candidate;
+                    found = true;
+                }
+            }
+
+            return found;
+        }
+
         public void OnLook(InputValue value)
         {
             ctx.lookInput = value.Get<Vector2>();
@@ -393,8 +552,9 @@ namespace HSM {
                 }
 
                 // Fallback for edge cases (ledge transitions / tiny gaps).
+                // Important: when Wall is included in groundMask, side walls can overlap the sphere.
+                // Only accept fallback as grounded if we can recover a walkable slope normal.
                 if (Physics.CheckSphere(groundCheck.position, groundRadius, groundMask, QueryTriggerInteraction.Ignore)) {
-                    // Try to recover a usable normal for slope projection stability.
                     var fallbackOrigin = groundCheck.position + Vector3.up * 0.1f;
                     if (Physics.Raycast(
                         fallbackOrigin,
@@ -408,9 +568,11 @@ namespace HSM {
                         if (fallbackSlopeAngle <= maxGroundAngle) {
                             groundNormal = fallbackHit.normal;
                             hasReliableNormal = true;
+                            return true;
                         }
                     }
-                    return true;
+
+                    return false;
                 }
 
                 return false;
