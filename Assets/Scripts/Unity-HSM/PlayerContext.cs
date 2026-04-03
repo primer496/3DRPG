@@ -40,6 +40,48 @@ namespace HSM {
         public float dodgeSpeed = 10f;
         public float dodgeDuration = 0.25f;
 
+        [Header("Vault")]
+        [Tooltip("翻越状态总时长（秒）。")]
+        [Min(0.05f)]
+        public float vaultDuration = 0.42f;
+        [Tooltip("进入翻越动画的 CrossFade 时长（秒）。")]
+        [Min(0f)]
+        public float vaultEnterCrossFade = 0.08f;
+        [Tooltip("翻越结束切回 Locomotion 的 CrossFade 时长（秒）。")]
+        [Min(0f)]
+        public float vaultExitCrossFade = 0.1f;
+        [Tooltip("Vault 动画播放到该归一化时间后即可退出（减少完整播放占比）。")]
+        [Range(0.6f, 0.99f)]
+        public float vaultExitNormalizedTime = 0.9f;
+        [Tooltip("走跑中触发翻越所需的最小水平速度。")]
+        [Min(0f)]
+        public float vaultMinMoveSpeed = 0.2f;
+        [Tooltip("翻越墙体检测图层。为空时自动使用 Wall 图层。")]
+        public LayerMask vaultWallMask;
+        [Tooltip("前向墙体检测最大距离（米）。")]
+        [Min(0.05f)]
+        public float vaultDetectDistance = 0.75f;
+        [Tooltip("角色前向与入墙方向（-墙法线）夹角阈值（度）。")]
+        [Range(1f, 89f)]
+        public float vaultMaxFacingAngle = 45f;
+        [Tooltip("翻越墙体可接受最小高度（米）。")]
+        [Min(0f)]
+        public float vaultMinHeight = 0.75f;
+        [Tooltip("翻越墙体可接受最大高度（米）。")]
+        [Min(0f)]
+        public float vaultMaxHeight = 1.2f;
+        [Tooltip("用于估算墙高的最低采样高度（相对脚底，米）。")]
+        [Min(0f)]
+        public float vaultSampleMinHeight = 0.2f;
+        [Tooltip("用于估算墙高的最高采样高度（相对脚底，米）。")]
+        [Min(0f)]
+        public float vaultSampleMaxHeight = 1.6f;
+        [Tooltip("墙高采样层数。")]
+        [Range(3, 10)]
+        public int vaultHeightSamples = 6;
+        [Tooltip("输出翻越判定失败原因日志，调试用。")]
+        public bool vaultDebugLog = true;
+
         [Header("Stop Tuning")]
         [Tooltip("急停状态最短停留时间（秒）；HSM 在此时间后才跟随 Animator 的 StopType->Locomotion 过渡切回 Move。")]
         [Min(0f)]
@@ -109,6 +151,12 @@ namespace HSM {
         [Tooltip("从 Landing 退出到 Move 时 Animator 已由过渡切到 Locomotion，不再 CrossFade。")]
         public bool exitedLandingThisFrame;
         [HideInInspector]
+        [Tooltip("从 Vault 退出到 Move 时 Animator 已做过渡，不再重复 CrossFade。")]
+        public bool exitedVaultThisFrame;
+        [HideInInspector]
+        [Tooltip("翻越执行中：用于屏蔽父状态的跳跃等中断转移。")]
+        public bool isVaulting;
+        [HideInInspector]
         [Tooltip("起跳后剩余离地锁定时间（秒），倒计时期间忽略 grounded 重判。")]
         public float jumpGroundDetachTimer;
 
@@ -150,13 +198,15 @@ namespace HSM {
         [HideInInspector]
         public Animator anim;
         [HideInInspector]
-        public Rigidbody rb;
+        public CharacterController cc;
+        [HideInInspector]
+        public float verticalVelocity;
         [HideInInspector]
         public Renderer renderer;
         [HideInInspector]
         public Vector2 lookInput;
 
-        // 状态中只设置目标旋转，统一在 FixedUpdate 里应用，避免 Update 直接写 Rigidbody.rotation 造成抖动。
+        // 状态中只设置目标旋转，统一在 PlayerStateDriver.Update 末尾应用，避免多处写 Transform.rotation 造成抖动。
         [HideInInspector]
         public Quaternion rotationTarget;
         [HideInInspector]

@@ -62,7 +62,7 @@ namespace HSM {
                     new Vector3(worldDashDir.x, 0f, worldDashDir.z),
                     Vector3.up
                 );
-                // 用很大的 turnSpeed 在 FixedUpdate 中“近似瞬转”，避免冲刺期间还在平滑插值
+                // 用很大的 turnSpeed 在统一旋转应用阶段“近似瞬转”，避免冲刺期间还在平滑插值
                 ctx.rotationTurnSpeed = 1000f;
                 ctx.hasRotationTarget = true;
             }
@@ -71,8 +71,8 @@ namespace HSM {
             // 前 DodgeY=1，后 DodgeY=-1，左 DodgeX=-1，右 DodgeX=1。
             Vector3 worldRawInputDir = Quaternion.Euler(0f, camYaw, 0f) * new Vector3(inputN.x, 0f, inputN.y);
             Vector3 characterForward = worldDashDir.sqrMagnitude > 0.0001f ? worldDashDir : Vector3.forward;
-            if (ctx.rb != null) {
-                characterForward = ctx.rb.transform.forward;
+            if (ctx.cc != null) {
+                characterForward = ctx.cc.transform.forward;
             }
             characterForward.y = 0f;
             worldRawInputDir.y = 0f;

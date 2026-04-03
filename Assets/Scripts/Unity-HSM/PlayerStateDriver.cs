@@ -34,7 +34,7 @@ namespace HSM {
         public bool drawGizmos = true;
         string lastPath;
 
-        Rigidbody rb;
+        CharacterController cc;
         StateMachine machine;
         State root;
         Vector3 lastAppliedPlanarVelocity;
@@ -53,7 +53,7 @@ namespace HSM {
         public InputAction attackAction;
 
         void Awake() {
-            InitializeRigidbody();
+            InitializeCharacterController();
             InitializeContextReferences();
             BuildStateMachine();
             EnsureGroundCheck();
@@ -72,27 +72,27 @@ namespace HSM {
             ReadInputIntoContext();
             UpdateGroundedState();
             TickStateMachine();
+            ApplyCharacterMotion();
+            ApplyQueuedRotation();
             SyncAirborneVerticalSpeed();
             LogStatePathIfChanged();
         }
 
-        void FixedUpdate() {
-            ApplyPlanarMotionToRigidbody();
-            SyncPlanarVelocityFromRigidbody();
-            ApplyQueuedRotation();
-        }
-
-        void InitializeRigidbody() {
-            rb = GetComponent<Rigidbody>();
-            rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-            // ƽ����������Ⱦ֮֡���λ�ˣ�������������������������µĶ�����
-            rb.interpolation = RigidbodyInterpolation.Interpolate;
+        void InitializeCharacterController() {
+            cc = GetComponent<CharacterController>();
+            if (cc == null) {
+                Debug.LogError("PlayerStateDriver requires CharacterController on the same GameObject.");
+                enabled = false;
+            }
         }
 
         void InitializeContextReferences() {
-            ctx.rb = rb;
+            ctx.cc = cc;
+            ctx.verticalVelocity = 0f;
             ctx.anim = GetComponentInChildren<Animator>();
+            if (ctx.anim != null) {
+                ctx.anim.applyRootMotion = false;
+            }
             ctx.renderer = GetComponent<Renderer>();
         }
 
@@ -103,12 +103,15 @@ namespace HSM {
         }
 
         void EnsureGroundCheck() {
-            // fallback: create a groundCheck just below the collider's bounds
+            // fallback: create a groundCheck near CharacterController feet.
             if (groundCheck == null) {
-                var col = GetComponent<Collider>();
                 var t = new GameObject("groundCheck").transform;
                 t.SetParent(transform, false);
-                var y = col ? (-col.bounds.extents.y + 0.01f) : -0.5f;
+                float y = -0.5f;
+                if (cc != null) {
+                    float halfHeight = cc.height * 0.5f;
+                    y = cc.center.y - halfHeight + cc.radius + 0.01f;
+                }
                 t.localPosition = new Vector3(0, y, 0);
                 groundCheck = t;
             }
@@ -154,10 +157,17 @@ namespace HSM {
         }
 
         void UpdateGroundedState() {
+            if (ctx.isVaulting) {
+                ctx.grounded = true;
+                ungroundedTimer = 0f;
+                hasGroundHitThisFrame = true;
+                return;
+            }
+
             bool inAirborneState = IsInAirborneState();
             // Allow a small near-apex window as "still airborne" to avoid immediate re-grounding
             // right after jump transition (before vertical speed clearly becomes positive).
-            bool risingInAir = inAirborneState && rb != null && rb.velocity.y > -0.1f;
+            bool risingInAir = inAirborneState && ctx.verticalVelocity > -0.1f;
             if (ctx.jumpGroundDetachTimer > 0f) {
                 ctx.jumpGroundDetachTimer = Mathf.Max(0f, ctx.jumpGroundDetachTimer - Time.deltaTime);
             }
@@ -171,6 +181,9 @@ namespace HSM {
                 out var normal,
                 out var hasReliableNormal
             );
+            if (!hitGround && cc != null && cc.isGrounded && ctx.verticalVelocity <= 0.5f) {
+                hitGround = true;
+            }
 
             // During jump ascent, feet probes can still overlap slope/collider briefly.
             // Ignore those hits to prevent snapping back to grounded and killing the jump.
@@ -193,8 +206,8 @@ namespace HSM {
 
             // Safety: if probe missed and we're still moving upward, never keep grounded grace.
             // This prevents rare "grounded while floating" cases after dash-jump land/touch sequences.
-            bool movingUpWithoutGround = rb != null && rb.velocity.y > 0.2f;
-            bool canUseGrace = rb != null && rb.velocity.y <= 0.5f && !movingUpWithoutGround;
+            bool movingUpWithoutGround = ctx.verticalVelocity > 0.2f;
+            bool canUseGrace = ctx.verticalVelocity <= 0.5f && !movingUpWithoutGround;
             if (ctx.grounded && canUseGrace && ungroundedTimer < groundUngroundedGraceTime) {
                 ungroundedTimer += Time.deltaTime;
                 return;
@@ -212,8 +225,8 @@ namespace HSM {
             // 空中时在 Update 末尾更新 VerticalSpeed，保证每帧写入（避免状态机更新时机问题）
             var leaf = machine.Root.Leaf();
             float jumpTakeoffSpeed = ctx.GetJumpTakeoffSpeed();
-            if (IsAirborneState(leaf) && ctx.anim != null && ctx.rb != null && jumpTakeoffSpeed > 0.0001f) {
-                float vy = ctx.rb.velocity.y;
+            if (IsAirborneState(leaf) && ctx.anim != null && jumpTakeoffSpeed > 0.0001f) {
+                float vy = ctx.verticalVelocity;
                 float vSpeed = Mathf.Clamp(vy / jumpTakeoffSpeed, -1f, 1f);
                 ctx.anim.SetFloat(VerticalSpeedParam, vSpeed);
             }
@@ -229,7 +242,12 @@ namespace HSM {
             }
         }
 
-        void ApplyPlanarMotionToRigidbody() {
+        void ApplyCharacterMotion() {
+            if (ctx.isVaulting) {
+                // Vault movement is driven by Animator root motion in OnAnimatorMove.
+                return;
+            }
+
             bool forceAirControl = IsInAirborneState();
             bool treatAsGrounded = ctx.grounded && !forceAirControl;
             bool reliableGround = treatAsGrounded && hasGroundHitThisFrame;
@@ -252,59 +270,72 @@ namespace HSM {
                     lastAppliedPlanarVelocity = desiredPlanar;
                 }
 
-                // Ground motor: drive horizontal velocity only.
-                // Writing projected Y directly can cancel natural jump/fall motion near ground
-                // and cause "hovering" when state flips back to grounded too early.
-                var v = rb.velocity;
-                v.x = desiredPlanar.x;
-                v.z = desiredPlanar.z;
-
                 // Keep a mild downward bias only on temporary probe misses.
                 // Applying this continuously on slopes causes unwanted downhill sliding.
                 bool needsSnapDown = !hasGroundHitThisFrame;
-                if (needsSnapDown && v.y <= 0.5f && v.y > -groundedSnapDownVelocity) {
-                    v.y = -groundedSnapDownVelocity;
+                if (needsSnapDown && ctx.verticalVelocity <= 0.5f && ctx.verticalVelocity > -groundedSnapDownVelocity) {
+                    ctx.verticalVelocity = -groundedSnapDownVelocity;
                 }
-
-                rb.velocity = v;
-                return;
+            } else {
+                // Air control keeps velocity-driven planar motion and explicit gravity.
+                desiredPlanar = RemoveIntoWallComponentWhileAirborne(desiredPlanar);
+                ctx.verticalVelocity += Physics.gravity.y * Time.deltaTime;
             }
 
-            // Air control keeps velocity-driven motion.
-            desiredPlanar = RemoveIntoWallComponentWhileAirborne(desiredPlanar);
-            var airV = rb.velocity;
-            airV.x = desiredPlanar.x;
-            airV.z = desiredPlanar.z;
-            rb.velocity = airV;
-        }
+            var motion = desiredPlanar + Vector3.up * ctx.verticalVelocity;
+            CollisionFlags flags = cc != null ? cc.Move(motion * Time.deltaTime) : CollisionFlags.None;
+            bool touchedGroundByMove = (flags & CollisionFlags.Below) != 0;
 
-        void SyncPlanarVelocityFromRigidbody() {
-            bool forceAirControl = IsInAirborneState();
-            if (ctx.grounded && !forceAirControl) {
+            if ((flags & CollisionFlags.Above) != 0 && ctx.verticalVelocity > 0f) {
+                ctx.verticalVelocity = 0f;
+            }
+
+            if ((treatAsGrounded || touchedGroundByMove) && ctx.verticalVelocity <= 0f) {
+                // Apply tiny down hold only after move resolution so jump takeoff won't be cancelled.
+                ctx.verticalVelocity = -Mathf.Max(0.05f, groundedSnapDownVelocity * 0.35f);
+            }
+
+            if (touchedGroundByMove) {
+                hasGroundHitThisFrame = true;
+            }
+
+            if (treatAsGrounded) {
                 ctx.velocity.x = lastAppliedPlanarVelocity.x;
                 ctx.velocity.z = lastAppliedPlanarVelocity.z;
                 return;
             }
 
-            ctx.velocity.x = rb.velocity.x;
-            ctx.velocity.z = rb.velocity.z;
+            ctx.velocity.x = desiredPlanar.x;
+            ctx.velocity.z = desiredPlanar.z;
+        }
+
+        void OnAnimatorMove() {
+            if (!ctx.isVaulting || ctx.anim == null || cc == null) {
+                return;
+            }
+
+            Vector3 deltaPos = ctx.anim.deltaPosition;
+            cc.Move(deltaPos);
+            // Vault uses root-motion translation only. Rotation stays camera-driven to avoid camera jitter.
+
+            // Keep state velocity neutral while root motion controls displacement.
+            ctx.velocity.x = 0f;
+            ctx.velocity.z = 0f;
+            ctx.verticalVelocity = 0f;
         }
 
         void ApplyQueuedRotation() {
-            // ???? FixedUpdate ?????????????? Update ?????�� Rigidbody.rotation ?????????
-            // Contacts on slopes can inject Y angular velocity and fight with MoveRotation,
-            // causing visible spin jitter. Keep yaw fully driven by state logic.
-            var av = rb.angularVelocity;
-            if (Mathf.Abs(av.y) > 0.0001f) {
-                rb.angularVelocity = new Vector3(av.x, 0f, av.z);
+            if (ctx.isVaulting) {
+                ctx.hasRotationTarget = false;
+                return;
             }
 
             if (ctx.hasRotationTarget) {
-                float t = ctx.rotationTurnSpeed * Time.fixedDeltaTime;
+                float t = ctx.rotationTurnSpeed * Time.deltaTime;
                 if (t >= 1f) {
-                    rb.MoveRotation(ctx.rotationTarget);
+                    transform.rotation = ctx.rotationTarget;
                 } else {
-                    rb.MoveRotation(Quaternion.Slerp(rb.rotation, ctx.rotationTarget, t));
+                    transform.rotation = Quaternion.Slerp(transform.rotation, ctx.rotationTarget, t);
                 }
 
                 ctx.hasRotationTarget = false;
@@ -347,7 +378,7 @@ namespace HSM {
             }
 
             int wallMask = ResolveAirWallMask();
-            if (wallMask == 0 || rb == null) {
+            if (wallMask == 0 || cc == null) {
                 return desiredPlanar;
             }
 
@@ -356,7 +387,7 @@ namespace HSM {
                 cachedAirWallNormalPlanar = wallNormalPlanar;
                 airWallNormalHoldTimer = airWallNormalHoldTime;
             } else if (airWallNormalHoldTimer > 0f && cachedAirWallNormalPlanar.sqrMagnitude > 0.0001f) {
-                airWallNormalHoldTimer = Mathf.Max(0f, airWallNormalHoldTimer - Time.fixedDeltaTime);
+                airWallNormalHoldTimer = Mathf.Max(0f, airWallNormalHoldTimer - Time.deltaTime);
                 wallNormalPlanar = cachedAirWallNormalPlanar;
             } else {
                 airWallNormalHoldTimer = 0f;
@@ -369,10 +400,9 @@ namespace HSM {
 
             // Strict rule: wall handling only changes planar motion (X/Z), never vertical speed (Y).
             var adjustedPlanar = desiredPlanar + wallNormalPlanar * intoWallSpeed;
-            if (rb.velocity.y <= 0.05f) {
+            if (ctx.verticalVelocity <= 0.05f) {
                 adjustedPlanar += wallNormalPlanar * airWallEdgeDetachSpeed;
             }
-            rb.angularVelocity = new Vector3(rb.angularVelocity.x, 0f, rb.angularVelocity.z);
             ctx.hasRotationTarget = false;
             return adjustedPlanar;
         }
@@ -385,7 +415,7 @@ namespace HSM {
                 return TryBuildPlanarNormal(hitFromPlanar.normal, out wallNormalPlanar);
             }
 
-            Vector3 forward = rb.transform.forward;
+            Vector3 forward = transform.forward;
             forward.y = 0f;
             if (forward.sqrMagnitude > 0.0001f) {
                 forward.Normalize();
@@ -418,12 +448,11 @@ namespace HSM {
 
         bool TryGetWallHit(Vector3 direction, int wallMask, out RaycastHit hit) {
             hit = default;
-            var bodyCollider = rb.GetComponent<Collider>();
-            if (bodyCollider == null) {
+            if (cc == null) {
                 return false;
             }
 
-            var bounds = bodyCollider.bounds;
+            var bounds = cc.bounds;
             float radius = Mathf.Clamp(Mathf.Min(bounds.extents.x, bounds.extents.z) * 0.8f, 0.1f, 0.35f);
             Vector3 origin = bounds.center;
             origin.y = Mathf.Lerp(bounds.min.y + radius, bounds.center.y, 0.65f);
