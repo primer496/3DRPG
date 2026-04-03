@@ -135,7 +135,7 @@ namespace HSM {
             }
             worldDir.Normalize();
 
-            Transform t = ctx.rb != null ? ctx.rb.transform : null;
+            Transform t = ctx.cc != null ? ctx.cc.transform : null;
             Vector3 forward = t != null ? t.forward : Vector3.forward;
             Vector3 right = t != null ? t.right : Vector3.right;
             forward.y = 0f;

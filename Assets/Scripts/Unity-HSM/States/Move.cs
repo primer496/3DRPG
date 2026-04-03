@@ -51,7 +51,7 @@ namespace HSM {
 
         protected override void OnEnter() {
             // 从 Stop/Landing 退出时 Animator 已由过渡切到 Locomotion，不再 CrossFade；承接 Animator 当前的 Speed。
-            if ((ctx.exitedStopThisFrame || ctx.exitedLandingThisFrame) && ctx.anim != null) {
+            if ((ctx.exitedStopThisFrame || ctx.exitedLandingThisFrame || ctx.exitedVaultThisFrame) && ctx.anim != null) {
                 float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
                 float animSpeed = ctx.anim.GetFloat(AnimatorKeys.Params.Speed);
                 smoothMoveSpeed = animSpeed * walkReal;
@@ -60,7 +60,7 @@ namespace HSM {
             }
             speedVelocity = 0f;
 
-            if (ctx.anim != null && !ctx.exitedStopThisFrame && !ctx.exitedLandingThisFrame) {
+            if (ctx.anim != null && !ctx.exitedStopThisFrame && !ctx.exitedLandingThisFrame && !ctx.exitedVaultThisFrame) {
                 ctx.anim.CrossFade(AnimatorKeys.States.NormalMove, 0.1f);
             }
             if (ctx.anim != null) {
@@ -80,6 +80,7 @@ namespace HSM {
 
             ctx.exitedStopThisFrame = false;
             ctx.exitedLandingThisFrame = false;
+            ctx.exitedVaultThisFrame = false;
         }
 
         protected override void OnUpdate(float deltaTime) {
@@ -116,7 +117,7 @@ namespace HSM {
 
             Vector3 worldMoveDir = Vector3.zero;
 
-            // 旋转统一在 PlayerStateDriver.FixedUpdate 里应用（用 MoveRotation），避免 Update 里直接写 Rigidbody.rotation 导致抖动。
+            // 旋转统一在 PlayerStateDriver.Update 末尾应用，避免多处直接写 Transform.rotation 导致抖动。
             ctx.hasRotationTarget = false;
             if (hasInput) {
                 float targetYaw = camYaw + Mathf.Atan2(smoothInput.x, smoothInput.y) * Mathf.Rad2Deg;

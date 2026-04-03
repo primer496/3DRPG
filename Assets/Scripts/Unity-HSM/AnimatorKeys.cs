@@ -25,6 +25,7 @@ namespace HSM {
             public const string AirborneFall = Layers.Base + ".Airborne.AirborneFall";
             public const string Dodge = "Dodge";
             public const string Landing = "Landing";
+            public const string Vault = "Vault";
         }
 
         public static string ComboState(int step) => $"Combo{step}";

@@ -11,6 +11,12 @@ namespace HSM {
         }
         
         protected override State GetInitialState() => Grounded;
-        protected override State GetTransition() => ctx.grounded ? null : Airborne;
+        protected override State GetTransition() {
+            if (ctx.isVaulting) {
+                return null;
+            }
+
+            return ctx.grounded ? null : Airborne;
+        }
     }
 }

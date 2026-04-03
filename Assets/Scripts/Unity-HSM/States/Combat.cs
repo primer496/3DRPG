@@ -141,12 +141,6 @@ namespace HSM {
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
             ctx.hasRotationTarget = false;
-
-            if (ctx.rb == null) return;
-            var rbVelocity = ctx.rb.velocity;
-            rbVelocity.x = 0f;
-            rbVelocity.z = 0f;
-            ctx.rb.velocity = rbVelocity;
         }
     }
 }

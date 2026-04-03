@@ -22,3 +22,9 @@ Unity 3D RPG project.
 
 - This repository uses a Unity-focused `.gitignore`.
 - Generated folders such as `Library/`, `Temp/`, and build artifacts are ignored.
+
+## Branch Strategy
+
+- `feature/rigidbody-slope`: legacy Rigidbody controller branch. Slope handling works, but vault is not implemented and still has known movement issues.
+- `feature/cc-slope-vault`: CharacterController branch. Supports slope handling and vault traversal with current HSM integration.
+- Keep both branches for comparison and incremental fixes; merge decisions should be based on playtest stability.
