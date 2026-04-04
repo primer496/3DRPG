@@ -51,7 +51,7 @@ namespace HSM {
 
         protected override void OnEnter() {
             // 从 Stop/Landing 退出时 Animator 已由过渡切到 Locomotion，不再 CrossFade；承接 Animator 当前的 Speed。
-            if ((ctx.exitedStopThisFrame || ctx.exitedLandingThisFrame || ctx.exitedVaultThisFrame) && ctx.anim != null) {
+            if ((ctx.exitedStopThisFrame || ctx.exitedLandingThisFrame || ctx.exitedVaultThisFrame || ctx.exitedClimbThisFrame) && ctx.anim != null) {
                 float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
                 float animSpeed = ctx.anim.GetFloat(AnimatorKeys.Params.Speed);
                 smoothMoveSpeed = animSpeed * walkReal;
@@ -60,7 +60,7 @@ namespace HSM {
             }
             speedVelocity = 0f;
 
-            if (ctx.anim != null && !ctx.exitedStopThisFrame && !ctx.exitedLandingThisFrame && !ctx.exitedVaultThisFrame) {
+            if (ctx.anim != null && !ctx.exitedStopThisFrame && !ctx.exitedLandingThisFrame && !ctx.exitedVaultThisFrame && !ctx.exitedClimbThisFrame) {
                 ctx.anim.CrossFade(AnimatorKeys.States.NormalMove, 0.1f);
             }
             if (ctx.anim != null) {
@@ -81,6 +81,7 @@ namespace HSM {
             ctx.exitedStopThisFrame = false;
             ctx.exitedLandingThisFrame = false;
             ctx.exitedVaultThisFrame = false;
+            ctx.exitedClimbThisFrame = false;
         }
 
         protected override void OnUpdate(float deltaTime) {

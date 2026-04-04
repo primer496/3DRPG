@@ -26,6 +26,11 @@ namespace HSM {
             public const string Dodge = "Dodge";
             public const string Landing = "Landing";
             public const string Vault = "Vault";
+            // Use full state paths to avoid ambiguity with same-name states in other sub-state machines.
+            public const string Climb05 = Layers.Base + ".Grounded.Climb.Climb05";
+            public const string Climb10 = Layers.Base + ".Grounded.Climb.Climb10";
+            public const string Climb17 = Layers.Base + ".Grounded.Climb.Climb17";
+            public const string Climb20 = Layers.Base + ".Grounded.Climb.Climb20";
         }
 
         public static string ComboState(int step) => $"Combo{step}";

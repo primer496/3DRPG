@@ -3,6 +3,14 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace HSM {
+    public enum ClimbHeightTier {
+        None,
+        Climb05,   // <= 0.75m
+        Climb10,   // 0.75 ~ 1.2m
+        Climb17,   // 1.2 ~ 1.85m
+        Climb20    // 1.85 ~ 2.2m
+    }
+
     [Serializable]
     public class PlayerContext {
         [Header("Runtime Input/State")]
@@ -81,6 +89,45 @@ namespace HSM {
         public int vaultHeightSamples = 6;
         [Tooltip("输出翻越判定失败原因日志，调试用。")]
         public bool vaultDebugLog = true;
+
+        [Header("Climb")]
+        [Tooltip("攀爬墙体检测图层。为空时自动使用 Wall 图层。")]
+        public LayerMask climbWallMask;
+        [Tooltip("前向墙体检测最大距离（米）。")]
+        [Min(0.05f)]
+        public float climbDetectDistance = 0.75f;
+        [Tooltip("角色前向与入墙方向夹角阈值（度）。")]
+        [Range(1f, 89f)]
+        public float climbMaxFacingAngle = 45f;
+        [Tooltip("用于估算墙高的最低采样高度（相对脚底，米）。")]
+        [Min(0f)]
+        public float climbSampleMinHeight = 0.1f;
+        [Tooltip("用于估算墙高的最高采样高度（相对脚底，米）。")]
+        [Min(0f)]
+        public float climbSampleMaxHeight = 2.4f;
+        [Tooltip("墙高采样层数。")]
+        [Range(4, 16)]
+        public int climbHeightSamples = 10;
+        [Tooltip("进入攀爬动画的 CrossFade 时长（秒）。")]
+        [Min(0f)]
+        public float climbEnterCrossFade = 0.1f;
+        [Tooltip("攀爬结束切回 Locomotion 的 CrossFade 时长（秒）。")]
+        [Min(0f)]
+        public float climbExitCrossFade = 0.12f;
+        [Tooltip("攀爬动画播放到该归一化时间后即可退出。")]
+        [Range(0.7f, 0.99f)]
+        public float climbExitNormalizedTime = 0.92f;
+        [Tooltip("输出攀爬判定失败原因日志，调试用。")]
+        public bool climbDebugLog = true;
+        [HideInInspector]
+        [Tooltip("攀爬执行中：屏蔽父状态的跳跃等中断转移。")]
+        public bool isClimbing;
+        [HideInInspector]
+        [Tooltip("从 Climb 退出到 Move 时不再重复 CrossFade。")]
+        public bool exitedClimbThisFrame;
+        [HideInInspector]
+        [Tooltip("本次攀爬检测到的墙高档位。")]
+        public ClimbHeightTier detectedClimbTier;
 
         [Header("Stop Tuning")]
         [Tooltip("急停状态最短停留时间（秒）；HSM 在此时间后才跟随 Animator 的 StopType->Locomotion 过渡切回 Move。")]
