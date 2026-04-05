@@ -129,6 +129,20 @@ namespace HSM {
         [Tooltip("本次攀爬检测到的墙高档位。")]
         public ClimbHeightTier detectedClimbTier;
 
+        [Header("Wall Action Facing")]
+        [Tooltip("触发 Vault/Climb 时对齐到墙面的旋转时长（秒）。")]
+        [Range(0.02f, 0.25f)]
+        public float wallActionAlignDuration = 0.08f;
+        [Tooltip("当前朝向到目标墙面朝向角度小于该值时，不触发对齐旋转（度）。")]
+        [Range(0f, 45f)]
+        public float wallActionAlignMinAngle = 8f;
+        [HideInInspector]
+        [Tooltip("最近一次墙体检测命中的墙法线。")]
+        public Vector3 detectedWallNormal;
+        [HideInInspector]
+        [Tooltip("是否存在可用于 Vault/Climb 对齐的墙法线。")]
+        public bool hasDetectedWallNormal;
+
         [Header("Stop Tuning")]
         [Tooltip("急停状态最短停留时间（秒）；HSM 在此时间后才跟随 Animator 的 StopType->Locomotion 过渡切回 Move。")]
         [Min(0f)]
@@ -260,6 +274,16 @@ namespace HSM {
         public bool hasRotationTarget;
         [HideInInspector]
         public float rotationTurnSpeed;
+        [HideInInspector]
+        public bool wallActionAlignActive;
+        [HideInInspector]
+        public float wallActionAlignElapsed;
+        [HideInInspector]
+        public float wallActionAlignDurationRuntime;
+        [HideInInspector]
+        public Quaternion wallActionAlignFrom;
+        [HideInInspector]
+        public Quaternion wallActionAlignTo;
 
         // 真实速度接口：用于动画 Speed 与物理速度的统一标定。
         public float GetWalkRealSpeed() => moveSpeed;

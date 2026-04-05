@@ -325,6 +325,18 @@ namespace HSM {
         }
 
         void ApplyQueuedRotation() {
+            if (ctx.wallActionAlignActive) {
+                float duration = Mathf.Max(0.02f, ctx.wallActionAlignDurationRuntime);
+                ctx.wallActionAlignElapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(ctx.wallActionAlignElapsed / duration);
+                transform.rotation = Quaternion.Lerp(ctx.wallActionAlignFrom, ctx.wallActionAlignTo, t);
+                if (t >= 1f) {
+                    ctx.wallActionAlignActive = false;
+                }
+                ctx.hasRotationTarget = false;
+                return;
+            }
+
             if (ctx.isVaulting || ctx.isClimbing) {
                 ctx.hasRotationTarget = false;
                 return;

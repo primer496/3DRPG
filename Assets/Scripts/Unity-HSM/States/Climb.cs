@@ -36,6 +36,7 @@ namespace HSM {
             ctx.isClimbing = true;
             ctx.jumpPressed = false;
             ctx.hasRotationTarget = false;
+            BeginWallActionAlignment();
 
             // 冻结物理速度，全部交给 Root Motion。
             ctx.velocity.x = 0f;
@@ -82,6 +83,7 @@ namespace HSM {
 
         protected override void OnExit() {
             ctx.isClimbing = false;
+            ctx.wallActionAlignActive = false;
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
             ctx.verticalVelocity = 0f;
@@ -111,6 +113,37 @@ namespace HSM {
                 case ClimbHeightTier.Climb20: return 1.5f;
                 default: return 1.0f;
             }
+        }
+
+        void BeginWallActionAlignment() {
+            if (ctx.cc == null || !ctx.hasDetectedWallNormal) {
+                ctx.wallActionAlignActive = false;
+                return;
+            }
+
+            Vector3 intoWall = -ctx.detectedWallNormal;
+            intoWall.y = 0f;
+            if (intoWall.sqrMagnitude <= 0.0001f) {
+                ctx.wallActionAlignActive = false;
+                return;
+            }
+
+            intoWall.Normalize();
+            Quaternion from = ctx.cc.transform.rotation;
+            Quaternion to = Quaternion.LookRotation(intoWall, Vector3.up);
+            float deltaAngle = Quaternion.Angle(from, to);
+            if (deltaAngle < Mathf.Max(0f, ctx.wallActionAlignMinAngle)) {
+                ctx.wallActionAlignActive = false;
+                ctx.hasDetectedWallNormal = false;
+                return;
+            }
+
+            ctx.wallActionAlignFrom = from;
+            ctx.wallActionAlignTo = to;
+            ctx.wallActionAlignDurationRuntime = Mathf.Max(0.02f, ctx.wallActionAlignDuration);
+            ctx.wallActionAlignElapsed = 0f;
+            ctx.wallActionAlignActive = true;
+            ctx.hasDetectedWallNormal = false;
         }
     }
 }

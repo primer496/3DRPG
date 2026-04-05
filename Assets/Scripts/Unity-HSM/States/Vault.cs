@@ -34,6 +34,7 @@ namespace HSM {
             ctx.isVaulting = true;
             ctx.jumpPressed = false;
             ctx.hasRotationTarget = false;
+            BeginWallActionAlignment();
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
             ctx.verticalVelocity = 0f;
@@ -58,6 +59,7 @@ namespace HSM {
 
         protected override void OnExit() {
             ctx.isVaulting = false;
+            ctx.wallActionAlignActive = false;
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
             ctx.verticalVelocity = 0f;
@@ -93,5 +95,36 @@ namespace HSM {
         float ResolveDuration() => ctx.vaultDuration > 0.05f ? ctx.vaultDuration : DefaultDuration;
         float ResolveEnterCrossFade() => Mathf.Max(0f, ctx.vaultEnterCrossFade > 0f ? ctx.vaultEnterCrossFade : DefaultEnterCrossFade);
         float ResolveExitCrossFade() => Mathf.Max(0f, ctx.vaultExitCrossFade > 0f ? ctx.vaultExitCrossFade : DefaultExitCrossFade);
+
+        void BeginWallActionAlignment() {
+            if (ctx.cc == null || !ctx.hasDetectedWallNormal) {
+                ctx.wallActionAlignActive = false;
+                return;
+            }
+
+            Vector3 intoWall = -ctx.detectedWallNormal;
+            intoWall.y = 0f;
+            if (intoWall.sqrMagnitude <= 0.0001f) {
+                ctx.wallActionAlignActive = false;
+                return;
+            }
+
+            intoWall.Normalize();
+            Quaternion from = ctx.cc.transform.rotation;
+            Quaternion to = Quaternion.LookRotation(intoWall, Vector3.up);
+            float deltaAngle = Quaternion.Angle(from, to);
+            if (deltaAngle < Mathf.Max(0f, ctx.wallActionAlignMinAngle)) {
+                ctx.wallActionAlignActive = false;
+                ctx.hasDetectedWallNormal = false;
+                return;
+            }
+
+            ctx.wallActionAlignFrom = from;
+            ctx.wallActionAlignTo = to;
+            ctx.wallActionAlignDurationRuntime = Mathf.Max(0.02f, ctx.wallActionAlignDuration);
+            ctx.wallActionAlignElapsed = 0f;
+            ctx.wallActionAlignActive = true;
+            ctx.hasDetectedWallNormal = false;
+        }
     }
 }

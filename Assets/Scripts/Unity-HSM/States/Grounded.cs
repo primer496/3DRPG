@@ -44,6 +44,8 @@ namespace HSM {
                 return null;
             }
 
+            ctx.hasDetectedWallNormal = false;
+
             // 跳跃键按下 -> 先做墙体检测，决定攀爬/翻越/普通跳跃。
             if (ctx.jumpPressed) {
                 ClimbHeightTier tier = DetectWallHeightTier();
@@ -191,6 +193,8 @@ namespace HSM {
                 return false;
             }
 
+            ctx.detectedWallNormal = primaryHit.normal;
+            ctx.hasDetectedWallNormal = true;
             return true;
         }
 
@@ -293,6 +297,8 @@ namespace HSM {
                 Debug.Log($"[ClimbCheck] estimatedHeight={estimatedWallHeight:F2}, topHit={highestHitHeight:F2}, missAbove={nearestMissAboveHitHeight:F2}, hitSamples={hitSamples}");
             }
 
+            ctx.detectedWallNormal = primaryHit.normal;
+            ctx.hasDetectedWallNormal = true;
             return ClassifyHeight(estimatedWallHeight);
         }
 
