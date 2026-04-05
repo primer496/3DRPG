@@ -11,6 +11,7 @@ namespace HSM {
         public readonly Dodge Dodge;
         public readonly Vault Vault;
         public readonly Landing Landing;
+        public readonly Climb Climb;
 
         public Grounded(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
@@ -22,6 +23,7 @@ namespace HSM {
             Dodge = new Dodge(m, this, rootState, ctx);
             Vault = new Vault(m, this, ctx);
             Landing = new Landing(m, this, ctx);
+            Climb = new Climb(m, this, ctx);
             Add(new ColorPhaseActivity(ctx.renderer){
                 enterColor = Color.yellow,  // runs while Grounded is activating
             });
@@ -37,23 +39,45 @@ namespace HSM {
         }
 
         protected override State GetTransition() {
-            if (ctx.isVaulting) {
+            // 攀爬/翻越执行中不中断。
+            if (ctx.isVaulting || ctx.isClimbing) {
                 return null;
             }
 
-            if (ctx.jumpPressed && TryBuildVaultTarget()) {
-                ctx.jumpPressed = false;
-                return Vault;
-            }
+            // 跳跃键按下 -> 先做墙体检测，决定攀爬/翻越/普通跳跃。
+            if (ctx.jumpPressed) {
+                ClimbHeightTier tier = DetectWallHeightTier();
 
-            if (!ctx.grounded) {
-                return rootState.Airborne;
-            }
+                if (tier != ClimbHeightTier.None) {
+                    bool isMoving = ctx.moveInput.sqrMagnitude > 0.01f;
 
-            if (!ctx.isVaulting && ctx.jumpPressed) {
+                    // 1m 档位 + 移动中 -> 翻越。
+                    if (tier == ClimbHeightTier.Climb10 && isMoving) {
+                        if (TryBuildVaultTarget()) {
+                            ctx.jumpPressed = false;
+                            return Vault;
+                        }
+                        // Vault 检测失败则 fallthrough 到普通跳跃。
+                    } else {
+                        // 其他档位（或 1m 站立）-> 攀爬。
+                        ctx.detectedClimbTier = tier;
+                        ctx.jumpPressed = false;
+                        return Climb;
+                    }
+                }
+
+                // 无墙 / 不满足攀爬条件 -> 普通跳跃。
+                if (!ctx.grounded) {
+                    return rootState.Airborne;
+                }
+
                 ctx.jumpPressed = false;
                 ctx.jumpGroundDetachTimer = Mathf.Max(0f, ctx.jumpGroundDetachTime);
                 ctx.verticalVelocity = ctx.GetJumpTakeoffSpeed();
+                return rootState.Airborne;
+            }
+
+            if (!ctx.grounded) {
                 return rootState.Airborne;
             }
 
@@ -168,6 +192,134 @@ namespace HSM {
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// 从高到低打射线扫描前方墙体，返回匹配的高度档位。
+        /// 检测逻辑与 Vault 类似：角度 ±climbMaxFacingAngle，SphereCast 从高到低。
+        /// </summary>
+        ClimbHeightTier DetectWallHeightTier() {
+            if (ctx.cc == null || !ctx.grounded) {
+                return ClimbHeightTier.None;
+            }
+
+            int wallMask = ResolveClimbWallMask();
+            if (wallMask == 0) {
+                LogClimbFail("wall mask is 0 (Wall layer not found?)");
+                return ClimbHeightTier.None;
+            }
+
+            Vector3 forward = ctx.cc.transform.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude <= 0.0001f) {
+                LogClimbFail("forward is near zero");
+                return ClimbHeightTier.None;
+            }
+            forward.Normalize();
+
+            var bounds = ctx.cc.bounds;
+            float detectDistance = Mathf.Max(0.05f, ctx.climbDetectDistance);
+            float originBackOffset = Mathf.Min(0.15f, ctx.cc.radius * 0.6f);
+            float castDistance = detectDistance + originBackOffset;
+            float feetY = bounds.min.y + 0.05f;
+            float sampleRadius = Mathf.Clamp(ctx.cc.radius * 0.22f, 0.04f, 0.12f);
+            Vector3 baseOrigin = bounds.center - forward * originBackOffset;
+
+            bool hasPrimaryHit = false;
+            RaycastHit primaryHit = default;
+            float highestHitHeight = -1f; // first hit height when scanning from high to low
+            float nearestMissAboveHitHeight = -1f; // nearest miss sample just above highest hit
+            float lastMissHeightBeforeAnyHit = -1f;
+            int hitSamples = 0;
+
+            int samples = Mathf.Max(4, ctx.climbHeightSamples);
+            float sampleMin = Mathf.Max(0f, ctx.climbSampleMinHeight);
+            float sampleMax = Mathf.Max(sampleMin + 0.05f, ctx.climbSampleMaxHeight);
+
+            // 从高到低扫描。
+            for (int i = samples - 1; i >= 0; i--) {
+                float u = samples == 1 ? 0f : (float)i / (samples - 1);
+                float h = Mathf.Lerp(sampleMin, sampleMax, u);
+                Vector3 origin = new Vector3(baseOrigin.x, feetY + h, baseOrigin.z);
+                bool hasHit = Physics.SphereCast(
+                    origin, sampleRadius, forward, out var hit,
+                    castDistance, wallMask, QueryTriggerInteraction.Ignore
+                ) && hit.normal.y <= 0.35f;
+
+                if (hasHit) {
+                    if (!hasPrimaryHit) {
+                        hasPrimaryHit = true;
+                        primaryHit = hit;
+                        // First hit from top. The nearest previous miss is just above wall top.
+                        nearestMissAboveHitHeight = lastMissHeightBeforeAnyHit;
+                    }
+                    hitSamples++;
+                    // 从高到低扫，所以第一次命中就是最高命中。
+                    if (highestHitHeight < 0f) {
+                        highestHitHeight = h;
+                    }
+                    continue;
+                }
+
+                if (!hasPrimaryHit) {
+                    lastMissHeightBeforeAnyHit = h;
+                }
+            }
+
+            if (!hasPrimaryHit || highestHitHeight < 0f || hitSamples < 2) {
+                LogClimbFail($"wall sampling failed (hasHit={hasPrimaryHit}, hitSamples={hitSamples})");
+                return ClimbHeightTier.None;
+            }
+
+            // 角度检查。
+            Vector3 intoWall = new Vector3(-primaryHit.normal.x, 0f, -primaryHit.normal.z);
+            if (intoWall.sqrMagnitude <= 0.0001f) {
+                LogClimbFail("wall normal planar magnitude too small");
+                return ClimbHeightTier.None;
+            }
+            intoWall.Normalize();
+            float facingAngle = Vector3.Angle(forward, intoWall);
+            if (facingAngle > Mathf.Clamp(ctx.climbMaxFacingAngle, 1f, 89f)) {
+                LogClimbFail($"facing angle {facingAngle:F1} > max {ctx.climbMaxFacingAngle:F1}");
+                return ClimbHeightTier.None;
+            }
+
+            // 估算墙顶高度。
+            float estimatedWallHeight = nearestMissAboveHitHeight > 0f
+                ? 0.5f * (highestHitHeight + nearestMissAboveHitHeight)
+                : highestHitHeight;
+
+            if (ctx.climbDebugLog) {
+                Debug.Log($"[ClimbCheck] estimatedHeight={estimatedWallHeight:F2}, topHit={highestHitHeight:F2}, missAbove={nearestMissAboveHitHeight:F2}, hitSamples={hitSamples}");
+            }
+
+            return ClassifyHeight(estimatedWallHeight);
+        }
+
+        static ClimbHeightTier ClassifyHeight(float height) {
+            if (height <= 0.75f) return ClimbHeightTier.Climb05;
+            if (height <= 1.2f) return ClimbHeightTier.Climb10;
+            // Recalibrated: Climb17 clip behaves closer to ~1.5m in-game.
+            if (height <= 1.65f) return ClimbHeightTier.Climb17;
+            if (height <= 2.2f) return ClimbHeightTier.Climb20;
+            return ClimbHeightTier.None;
+        }
+
+        int ResolveClimbWallMask() {
+            if (ctx.climbWallMask.value != 0) {
+                return ctx.climbWallMask.value;
+            }
+
+            int wallLayer = LayerMask.NameToLayer("Wall");
+            return wallLayer >= 0 ? 1 << wallLayer : 0;
+        }
+
+        void LogClimbFail(string reason) {
+            if (!ctx.climbDebugLog) {
+                return;
+            }
+
+            Debug.Log($"[ClimbCheck] {reason}");
         }
 
         int ResolveVaultWallMask() {

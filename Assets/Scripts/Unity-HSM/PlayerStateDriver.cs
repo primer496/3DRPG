@@ -157,7 +157,7 @@ namespace HSM {
         }
 
         void UpdateGroundedState() {
-            if (ctx.isVaulting) {
+            if (ctx.isVaulting || ctx.isClimbing) {
                 ctx.grounded = true;
                 ungroundedTimer = 0f;
                 hasGroundHitThisFrame = true;
@@ -243,8 +243,8 @@ namespace HSM {
         }
 
         void ApplyCharacterMotion() {
-            if (ctx.isVaulting) {
-                // Vault movement is driven by Animator root motion in OnAnimatorMove.
+            if (ctx.isVaulting || ctx.isClimbing) {
+                // Vault/Climb movement is driven by Animator root motion in OnAnimatorMove.
                 return;
             }
 
@@ -310,13 +310,13 @@ namespace HSM {
         }
 
         void OnAnimatorMove() {
-            if (!ctx.isVaulting || ctx.anim == null || cc == null) {
+            if ((!ctx.isVaulting && !ctx.isClimbing) || ctx.anim == null || cc == null) {
                 return;
             }
 
             Vector3 deltaPos = ctx.anim.deltaPosition;
             cc.Move(deltaPos);
-            // Vault uses root-motion translation only. Rotation stays camera-driven to avoid camera jitter.
+            // Vault/Climb use root-motion translation only. Rotation stays camera-driven to avoid camera jitter.
 
             // Keep state velocity neutral while root motion controls displacement.
             ctx.velocity.x = 0f;
@@ -325,7 +325,7 @@ namespace HSM {
         }
 
         void ApplyQueuedRotation() {
-            if (ctx.isVaulting) {
+            if (ctx.isVaulting || ctx.isClimbing) {
                 ctx.hasRotationTarget = false;
                 return;
             }
