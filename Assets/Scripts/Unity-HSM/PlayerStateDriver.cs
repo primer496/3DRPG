@@ -89,6 +89,7 @@ namespace HSM {
         void InitializeContextReferences() {
             ctx.cc = cc;
             ctx.verticalVelocity = 0f;
+            ctx.combatRootMotionActive = false;
             ctx.anim = GetComponentInChildren<Animator>();
             if (ctx.anim != null) {
                 ctx.anim.applyRootMotion = false;
@@ -243,8 +244,8 @@ namespace HSM {
         }
 
         void ApplyCharacterMotion() {
-            if (ctx.isVaulting || ctx.isClimbing) {
-                // Vault/Climb movement is driven by Animator root motion in OnAnimatorMove.
+            if (IsRootMotionTranslationActive()) {
+                // Vault/Climb/Combat root motion translation is handled in OnAnimatorMove.
                 return;
             }
 
@@ -310,18 +311,53 @@ namespace HSM {
         }
 
         void OnAnimatorMove() {
-            if ((!ctx.isVaulting && !ctx.isClimbing) || ctx.anim == null || cc == null) {
+            if (!IsRootMotionTranslationActive() || ctx.anim == null || cc == null) {
                 return;
             }
 
             Vector3 deltaPos = ctx.anim.deltaPosition;
+            if (ctx.combatRootMotionActive) {
+                deltaPos = BuildCombatRootMotionDelta(deltaPos);
+            }
+
             cc.Move(deltaPos);
-            // Vault/Climb use root-motion translation only. Rotation stays camera-driven to avoid camera jitter.
+            // Root-motion states use translation only. Rotation stays camera-driven to avoid camera jitter.
 
             // Keep state velocity neutral while root motion controls displacement.
-            ctx.velocity.x = 0f;
-            ctx.velocity.z = 0f;
+            if (ctx.combatRootMotionActive && Time.deltaTime > 0.0001f) {
+                // Preserve a meaningful planar speed sample so later combat-exit blending can reuse it.
+                ctx.velocity.x = deltaPos.x / Time.deltaTime;
+                ctx.velocity.z = deltaPos.z / Time.deltaTime;
+            } else {
+                ctx.velocity.x = 0f;
+                ctx.velocity.z = 0f;
+            }
             ctx.verticalVelocity = 0f;
+        }
+
+        bool IsRootMotionTranslationActive() {
+            return ctx.isVaulting || ctx.isClimbing || ctx.combatRootMotionActive;
+        }
+
+        Vector3 BuildCombatRootMotionDelta(Vector3 animatorDeltaPosition) {
+            float planarScale = Mathf.Max(0f, ctx.combatRootMotionPlanarScale);
+            // For grounded melee, only keep planar displacement from animation.
+            // Vertical combat motion can be introduced later by specific skills (launcher, leap slash, etc.).
+            var proposedDelta = new Vector3(
+                animatorDeltaPosition.x * planarScale,
+                0f,
+                animatorDeltaPosition.z * planarScale
+            );
+            return ResolveCombatRootMotionWithFutureHooks(proposedDelta);
+        }
+
+        Vector3 ResolveCombatRootMotionWithFutureHooks(Vector3 proposedDelta) {
+            // Placeholder interface for future enemy interaction:
+            // 1) Stop-on-hit: block or reduce proposedDelta when colliding with target.
+            // 2) Push-target: keep forward delta while pushing enemy (requires enemy motor contract).
+            // 3) Pass-through skill: temporarily allow overlap by per-skill policy.
+            // Current implementation intentionally does not alter root motion.
+            return proposedDelta;
         }
 
         void ApplyQueuedRotation() {

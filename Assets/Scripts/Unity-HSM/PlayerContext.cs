@@ -220,11 +220,19 @@ namespace HSM {
         [HideInInspector]
         [Tooltip("起跳后剩余离地锁定时间（秒），倒计时期间忽略 grounded 重判。")]
         public float jumpGroundDetachTimer;
+        [HideInInspector]
+        [Tooltip("Combat 状态运行中且启用了 Root Motion。由状态机驱动，移动层只读。")]
+        public bool combatRootMotionActive;
 
         [Header("Combat")]
         public float comboResetTime = 0.6f;
         [Min(1)]
         public int maxComboSteps = 4;
+        [Tooltip("攻击状态是否使用动画 Root Motion 驱动位移。")]
+        public bool useCombatRootMotion = true;
+        [Range(0f, 2f)]
+        [Tooltip("攻击 Root Motion 的水平位移缩放；1=原动画位移。")]
+        public float combatRootMotionPlanarScale = 1f;
 
         [Header("Combo Windows (Normalized Time)")]
         [Range(0f, 1f)]

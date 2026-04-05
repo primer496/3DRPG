@@ -36,6 +36,7 @@ namespace HSM {
             currentComboStep = 1;
             queuedNextAttack = false;
             ctx.attackPressed = false;
+            EnableCombatRootMotionIfNeeded();
             StopHorizontalMotion();
             if (ctx.swordObject != null) {
                 ctx.swordObject.SetActive(true);
@@ -44,6 +45,7 @@ namespace HSM {
         }
 
         protected override void OnExit() {
+            DisableCombatRootMotion();
             if (ctx.swordObject != null) {
                 ctx.swordObject.SetActive(false);
             }
@@ -141,6 +143,20 @@ namespace HSM {
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
             ctx.hasRotationTarget = false;
+        }
+
+        void EnableCombatRootMotionIfNeeded() {
+            ctx.combatRootMotionActive = ctx.useCombatRootMotion;
+            if (ctx.anim != null) {
+                ctx.anim.applyRootMotion = ctx.combatRootMotionActive;
+            }
+        }
+
+        void DisableCombatRootMotion() {
+            ctx.combatRootMotionActive = false;
+            if (ctx.anim != null) {
+                ctx.anim.applyRootMotion = false;
+            }
         }
     }
 }
