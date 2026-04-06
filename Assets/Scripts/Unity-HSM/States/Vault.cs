@@ -32,6 +32,8 @@ namespace HSM {
             animationCompleted = false;
             ctx.exitedVaultThisFrame = false;
             ctx.isVaulting = true;
+            ctx.wallActionHeightOffsetRemainingY = ctx.pendingWallActionHeightOffsetY;
+            ctx.pendingWallActionHeightOffsetY = 0f;
             ctx.jumpPressed = false;
             ctx.hasRotationTarget = false;
             BeginWallActionAlignment();
@@ -60,6 +62,7 @@ namespace HSM {
         protected override void OnExit() {
             ctx.isVaulting = false;
             ctx.wallActionAlignActive = false;
+            ctx.wallActionHeightOffsetRemainingY = 0f;
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
             ctx.verticalVelocity = 0f;

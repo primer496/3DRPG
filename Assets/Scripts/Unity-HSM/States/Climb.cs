@@ -34,6 +34,8 @@ namespace HSM {
             hasEnteredTargetState = false;
             ctx.exitedClimbThisFrame = false;
             ctx.isClimbing = true;
+            ctx.wallActionHeightOffsetRemainingY = ctx.pendingWallActionHeightOffsetY;
+            ctx.pendingWallActionHeightOffsetY = 0f;
             ctx.jumpPressed = false;
             ctx.hasRotationTarget = false;
             BeginWallActionAlignment();
@@ -69,7 +71,7 @@ namespace HSM {
                 if (info.IsName(currentClimbStateName)) {
                     hasEnteredTargetState = true;
                     float raw = info.normalizedTime;
-                    float exitTime = Mathf.Clamp(ctx.climbExitNormalizedTime, 0.7f, 0.99f);
+                    float exitTime = ResolveExitNormalizedTimeByTier();
                     // Only allow exit after we have actually entered the target state.
                     if (hasEnteredTargetState && raw >= exitTime) {
                         animationCompleted = true;
@@ -84,6 +86,7 @@ namespace HSM {
         protected override void OnExit() {
             ctx.isClimbing = false;
             ctx.wallActionAlignActive = false;
+            ctx.wallActionHeightOffsetRemainingY = 0f;
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
             ctx.verticalVelocity = 0f;
@@ -109,10 +112,18 @@ namespace HSM {
             switch (tier) {
                 case ClimbHeightTier.Climb05: return 0.6f;
                 case ClimbHeightTier.Climb10: return 0.8f;
-                case ClimbHeightTier.Climb17: return 1.2f;
+                case ClimbHeightTier.Climb17: return 1.35f;
                 case ClimbHeightTier.Climb20: return 1.5f;
                 default: return 1.0f;
             }
+        }
+
+        float ResolveExitNormalizedTimeByTier() {
+            if (ctx.detectedClimbTier == ClimbHeightTier.Climb17) {
+                return Mathf.Clamp(ctx.climb17ExitNormalizedTime, 0.8f, 0.995f);
+            }
+
+            return Mathf.Clamp(ctx.climbExitNormalizedTime, 0.7f, 0.99f);
         }
 
         void BeginWallActionAlignment() {

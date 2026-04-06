@@ -61,6 +61,12 @@ namespace HSM {
         [Tooltip("Vault 动画播放到该归一化时间后即可退出（减少完整播放占比）。")]
         [Range(0.6f, 0.99f)]
         public float vaultExitNormalizedTime = 0.9f;
+        [Tooltip("Vault 后段开始额外向下贴地的归一化时间（例如 0.7=后30%）。")]
+        [Range(0.5f, 0.98f)]
+        public float vaultLateDownStartNormalizedTime = 0.7f;
+        [Tooltip("Vault 后段额外向下速度（m/s），用于更快贴地。")]
+        [Range(0f, 8f)]
+        public float vaultLateDownSpeed = 3.2f;
         [Tooltip("走跑中触发翻越所需的最小水平速度。")]
         [Min(0f)]
         public float vaultMinMoveSpeed = 0.2f;
@@ -88,7 +94,7 @@ namespace HSM {
         [Range(3, 10)]
         public int vaultHeightSamples = 6;
         [Tooltip("输出翻越判定失败原因日志，调试用。")]
-        public bool vaultDebugLog = true;
+        public bool vaultDebugLog = false;
 
         [Header("Climb")]
         [Tooltip("攀爬墙体检测图层。为空时自动使用 Wall 图层。")]
@@ -117,8 +123,17 @@ namespace HSM {
         [Tooltip("攀爬动画播放到该归一化时间后即可退出。")]
         [Range(0.7f, 0.99f)]
         public float climbExitNormalizedTime = 0.92f;
+        [Tooltip("1.7m 档位专用退出时间；该档位常需要更晚退出避免差一点点爬上。")]
+        [Range(0.8f, 0.995f)]
+        public float climb17ExitNormalizedTime = 0.975f;
+        [Tooltip("1.7m 档位水平位移辅助速度（m/s）。仅在该档位根运动水平位移不足时补偿。")]
+        [Range(0f, 2f)]
+        public float climb17PlanarAssistSpeed = 0.45f;
+        [Tooltip("1.7m 档位每帧最小水平位移速度阈值（m/s）。低于该值才触发辅助。")]
+        [Range(0f, 1f)]
+        public float climb17MinPlanarSpeed = 0.08f;
         [Tooltip("输出攀爬判定失败原因日志，调试用。")]
-        public bool climbDebugLog = true;
+        public bool climbDebugLog = false;
         [HideInInspector]
         [Tooltip("攀爬执行中：屏蔽父状态的跳跃等中断转移。")]
         public bool isClimbing;
@@ -142,6 +157,41 @@ namespace HSM {
         [HideInInspector]
         [Tooltip("是否存在可用于 Vault/Climb 对齐的墙法线。")]
         public bool hasDetectedWallNormal;
+        [HideInInspector]
+        [Tooltip("最近一次墙体检测估算出的实际墙高（米）。")]
+        public float detectedWallHeight;
+
+        [Header("Wall Action Height Fit")]
+        [Tooltip("Vault 标准根运动对应墙高（米）。实际高度将相对此值做偏移补偿。")]
+        [Min(0f)]
+        public float vaultReferenceWallHeight = 1.0f;
+        [Tooltip("Climb05 标准根运动对应墙高（米）。")]
+        [Min(0f)]
+        public float climb05ReferenceWallHeight = 0.5f;
+        [Tooltip("Climb10 标准根运动对应墙高（米）。")]
+        [Min(0f)]
+        public float climb10ReferenceWallHeight = 1.0f;
+        [Tooltip("Climb17 标准根运动对应墙高（米）。")]
+        [Min(0f)]
+        public float climb17ReferenceWallHeight = 1.5f;
+        [Tooltip("Climb20 标准根运动对应墙高（米）。")]
+        [Min(0f)]
+        public float climb20ReferenceWallHeight = 2.0f;
+        [Tooltip("墙体动作每秒可注入的最大高度偏移速度（m/s）。")]
+        [Range(0.1f, 6f)]
+        public float wallActionHeightAdjustSpeed = 2.4f;
+        [Tooltip("向上补偿高度上限（米）。")]
+        [Range(0f, 1.2f)]
+        public float wallActionMaxUpOffset = 0.6f;
+        [Tooltip("向下补偿高度上限（米）。")]
+        [Range(0f, 1.2f)]
+        public float wallActionMaxDownOffset = 0.45f;
+        [HideInInspector]
+        [Tooltip("下一次 Vault/Climb 进入时要应用的高度偏移（米）。")]
+        public float pendingWallActionHeightOffsetY;
+        [HideInInspector]
+        [Tooltip("当前 Vault/Climb 尚未消费完的高度偏移（米）。")]
+        public float wallActionHeightOffsetRemainingY;
 
         [Header("Stop Tuning")]
         [Tooltip("急停状态最短停留时间（秒）；HSM 在此时间后才跟随 Animator 的 StopType->Locomotion 过渡切回 Move。")]

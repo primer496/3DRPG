@@ -45,6 +45,7 @@ namespace HSM {
             }
 
             ctx.hasDetectedWallNormal = false;
+            ctx.pendingWallActionHeightOffsetY = 0f;
 
             // 跳跃键按下 -> 先做墙体检测，决定攀爬/翻越/普通跳跃。
             if (ctx.jumpPressed) {
@@ -63,6 +64,7 @@ namespace HSM {
                     } else {
                         // 其他档位（或 1m 站立）-> 攀爬。
                         ctx.detectedClimbTier = tier;
+                        ctx.pendingWallActionHeightOffsetY = BuildClimbHeightOffsetY(tier, ctx.detectedWallHeight);
                         ctx.jumpPressed = false;
                         return Climb;
                     }
@@ -195,6 +197,8 @@ namespace HSM {
 
             ctx.detectedWallNormal = primaryHit.normal;
             ctx.hasDetectedWallNormal = true;
+            ctx.detectedWallHeight = estimatedWallHeight;
+            ctx.pendingWallActionHeightOffsetY = BuildVaultHeightOffsetY(estimatedWallHeight);
             return true;
         }
 
@@ -293,12 +297,9 @@ namespace HSM {
                 ? 0.5f * (highestHitHeight + nearestMissAboveHitHeight)
                 : highestHitHeight;
 
-            if (ctx.climbDebugLog) {
-                Debug.Log($"[ClimbCheck] estimatedHeight={estimatedWallHeight:F2}, topHit={highestHitHeight:F2}, missAbove={nearestMissAboveHitHeight:F2}, hitSamples={hitSamples}");
-            }
-
             ctx.detectedWallNormal = primaryHit.normal;
             ctx.hasDetectedWallNormal = true;
+            ctx.detectedWallHeight = estimatedWallHeight;
             return ClassifyHeight(estimatedWallHeight);
         }
 
@@ -309,6 +310,32 @@ namespace HSM {
             if (height <= 1.65f) return ClimbHeightTier.Climb17;
             if (height <= 2.2f) return ClimbHeightTier.Climb20;
             return ClimbHeightTier.None;
+        }
+
+        float BuildVaultHeightOffsetY(float detectedHeight) {
+            float reference = Mathf.Max(0f, ctx.vaultReferenceWallHeight);
+            return ClampWallActionOffset(detectedHeight - reference);
+        }
+
+        float BuildClimbHeightOffsetY(ClimbHeightTier tier, float detectedHeight) {
+            float reference = ResolveClimbReferenceHeight(tier);
+            return ClampWallActionOffset(detectedHeight - reference);
+        }
+
+        float ResolveClimbReferenceHeight(ClimbHeightTier tier) {
+            switch (tier) {
+                case ClimbHeightTier.Climb05: return Mathf.Max(0f, ctx.climb05ReferenceWallHeight);
+                case ClimbHeightTier.Climb10: return Mathf.Max(0f, ctx.climb10ReferenceWallHeight);
+                case ClimbHeightTier.Climb17: return Mathf.Max(0f, ctx.climb17ReferenceWallHeight);
+                case ClimbHeightTier.Climb20: return Mathf.Max(0f, ctx.climb20ReferenceWallHeight);
+                default: return Mathf.Max(0f, ctx.climb10ReferenceWallHeight);
+            }
+        }
+
+        float ClampWallActionOffset(float rawOffset) {
+            float maxUp = Mathf.Max(0f, ctx.wallActionMaxUpOffset);
+            float maxDown = Mathf.Max(0f, ctx.wallActionMaxDownOffset);
+            return Mathf.Clamp(rawOffset, -maxDown, maxUp);
         }
 
         int ResolveClimbWallMask() {

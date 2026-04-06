@@ -71,6 +71,7 @@ namespace HSM {
         void Update() {
             ReadInputIntoContext();
             UpdateGroundedState();
+            EnsureCombatRootMotionSafety();
             TickStateMachine();
             ApplyCharacterMotion();
             ApplyQueuedRotation();
@@ -90,6 +91,8 @@ namespace HSM {
             ctx.cc = cc;
             ctx.verticalVelocity = 0f;
             ctx.combatRootMotionActive = false;
+            ctx.pendingWallActionHeightOffsetY = 0f;
+            ctx.wallActionHeightOffsetRemainingY = 0f;
             ctx.anim = GetComponentInChildren<Animator>();
             if (ctx.anim != null) {
                 ctx.anim.applyRootMotion = false;
@@ -318,6 +321,14 @@ namespace HSM {
             Vector3 deltaPos = ctx.anim.deltaPosition;
             if (ctx.combatRootMotionActive) {
                 deltaPos = BuildCombatRootMotionDelta(deltaPos);
+            } else if (ctx.isClimbing) {
+                deltaPos = BuildClimbRootMotionDelta(deltaPos);
+            }
+            if (ctx.isVaulting || ctx.isClimbing) {
+                deltaPos = ApplyWallActionHeightOffset(deltaPos);
+            }
+            if (ctx.isVaulting) {
+                deltaPos = ApplyVaultLateDownwardBias(deltaPos);
             }
 
             cc.Move(deltaPos);
@@ -336,7 +347,31 @@ namespace HSM {
         }
 
         bool IsRootMotionTranslationActive() {
-            return ctx.isVaulting || ctx.isClimbing || ctx.combatRootMotionActive;
+            // Combat root motion currently targets grounded melee only.
+            // Once leaving ground, movement should immediately return to gravity-driven flow.
+            return ctx.isVaulting || ctx.isClimbing || (ctx.combatRootMotionActive && ctx.grounded);
+        }
+
+        void EnsureCombatRootMotionSafety() {
+            if (!ctx.combatRootMotionActive) {
+                return;
+            }
+
+            if (ctx.grounded) {
+                return;
+            }
+
+            // Safety guard for ledge/wall-top edge cases:
+            // if an attack starts grounded but becomes airborne mid-animation,
+            // force-disable combat root motion to prevent "fall pose frozen in air".
+            ctx.combatRootMotionActive = false;
+            if (ctx.anim != null && !ctx.isVaulting && !ctx.isClimbing) {
+                ctx.anim.applyRootMotion = false;
+            }
+            // Attack got interrupted by leaving ground; keep weapon visibility consistent.
+            if (ctx.swordObject != null) {
+                ctx.swordObject.SetActive(false);
+            }
         }
 
         Vector3 BuildCombatRootMotionDelta(Vector3 animatorDeltaPosition) {
@@ -349,6 +384,66 @@ namespace HSM {
                 animatorDeltaPosition.z * planarScale
             );
             return ResolveCombatRootMotionWithFutureHooks(proposedDelta);
+        }
+
+        Vector3 BuildClimbRootMotionDelta(Vector3 animatorDeltaPosition) {
+            // 1.7m clip can under-deliver planar displacement on some imports.
+            // Add a tiny forward assist only when planar delta is clearly too small.
+            if (ctx.detectedClimbTier != ClimbHeightTier.Climb17 || Time.deltaTime <= 0.0001f) {
+                return animatorDeltaPosition;
+            }
+
+            Vector3 planarDelta = new Vector3(animatorDeltaPosition.x, 0f, animatorDeltaPosition.z);
+            float planarSpeed = planarDelta.magnitude / Time.deltaTime;
+            float minPlanarSpeed = Mathf.Max(0f, ctx.climb17MinPlanarSpeed);
+            if (planarSpeed >= minPlanarSpeed) {
+                return animatorDeltaPosition;
+            }
+
+            Vector3 forward = transform.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude <= 0.0001f) {
+                return animatorDeltaPosition;
+            }
+
+            forward.Normalize();
+            float assistDistance = Mathf.Max(0f, ctx.climb17PlanarAssistSpeed) * Time.deltaTime;
+            return animatorDeltaPosition + forward * assistDistance;
+        }
+
+        Vector3 ApplyWallActionHeightOffset(Vector3 animatorDeltaPosition) {
+            float remaining = ctx.wallActionHeightOffsetRemainingY;
+            if (Mathf.Abs(remaining) <= 0.0001f || Time.deltaTime <= 0.0001f) {
+                return animatorDeltaPosition;
+            }
+
+            float maxSpeed = Mathf.Max(0.1f, ctx.wallActionHeightAdjustSpeed);
+            float maxStep = maxSpeed * Time.deltaTime;
+            float step = Mathf.Clamp(remaining, -maxStep, maxStep);
+            ctx.wallActionHeightOffsetRemainingY = remaining - step;
+            animatorDeltaPosition.y += step;
+            return animatorDeltaPosition;
+        }
+
+        Vector3 ApplyVaultLateDownwardBias(Vector3 animatorDeltaPosition) {
+            if (ctx.anim == null || Time.deltaTime <= 0.0001f) {
+                return animatorDeltaPosition;
+            }
+
+            var info = ctx.anim.GetCurrentAnimatorStateInfo(0);
+            if (!info.IsName(AnimatorKeys.States.Vault)) {
+                return animatorDeltaPosition;
+            }
+
+            float normalized = info.normalizedTime - Mathf.Floor(info.normalizedTime);
+            float start = Mathf.Clamp(ctx.vaultLateDownStartNormalizedTime, 0.5f, 0.98f);
+            if (normalized < start) {
+                return animatorDeltaPosition;
+            }
+
+            float downSpeed = Mathf.Max(0f, ctx.vaultLateDownSpeed);
+            animatorDeltaPosition.y -= downSpeed * Time.deltaTime;
+            return animatorDeltaPosition;
         }
 
         Vector3 ResolveCombatRootMotionWithFutureHooks(Vector3 proposedDelta) {

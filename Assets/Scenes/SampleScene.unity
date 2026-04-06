@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 71152091}
   - component: {fileID: 71152090}
   - component: {fileID: 71152089}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Ramp_Up_30
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -604,7 +604,7 @@ Transform:
   m_GameObject: {fileID: 244342236}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -8, y: 0.859, z: 6}
+  m_LocalPosition: {x: -8, y: 0.57, z: 6}
   m_LocalScale: {x: 2.5, y: 1.7, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1076,7 +1076,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.062000006, y: 1.11, z: -1.77}
+  m_LocalPosition: {x: -0.062000006, y: 1.11, z: -2.69}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4000,7 +4000,7 @@ MonoBehaviour:
   ShoulderOffset: {x: 0.5, y: -0.4, z: 0}
   VerticalArmLength: 0.46
   CameraSide: 0.468
-  CameraDistance: 1.77
+  CameraDistance: 2.69
   CameraCollisionFilter:
     serializedVersion: 2
     m_Bits: 0
@@ -4532,7 +4532,7 @@ GameObject:
   - component: {fileID: 836878989}
   - component: {fileID: 836878988}
   - component: {fileID: 836878987}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Ramp_Down_30
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23912,7 +23912,7 @@ Transform:
   m_GameObject: {fileID: 1233811551}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -12, y: 0.86, z: 6}
+  m_LocalPosition: {x: -12, y: 0.57, z: 6}
   m_LocalScale: {x: 2.5, y: 1.7, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -31812,7 +31812,7 @@ Transform:
   m_GameObject: {fileID: 1515954006}
   serializedVersion: 2
   m_LocalRotation: {x: 0.016938418, y: 0.009037145, z: -0.00015310316, w: 0.9998157}
-  m_LocalPosition: {x: -0.062000006, y: 1.11, z: -1.77}
+  m_LocalPosition: {x: -0.062000006, y: 1.11, z: -2.69}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -32269,6 +32269,25 @@ MonoBehaviour:
     vaultSampleMaxHeight: 1.6
     vaultHeightSamples: 6
     vaultDebugLog: 1
+    climbWallMask:
+      serializedVersion: 2
+      m_Bits: 128
+    climbDetectDistance: 0.75
+    climbMaxFacingAngle: 60
+    climbSampleMinHeight: 0.1
+    climbSampleMaxHeight: 2.6
+    climbHeightSamples: 16
+    climbEnterCrossFade: 0.1
+    climbExitCrossFade: 0.12
+    climbExitNormalizedTime: 0.92
+    climbDebugLog: 1
+    isClimbing: 0
+    exitedClimbThisFrame: 0
+    detectedClimbTier: 0
+    wallActionAlignDuration: 0.08
+    wallActionAlignMinAngle: 8
+    detectedWallNormal: {x: 0, y: 0, z: 0}
+    hasDetectedWallNormal: 0
     stopDuration: 1
     stopEnterSpeedThreshold: 0.2
     stopEnterCrossFade: 0.05
@@ -32282,8 +32301,11 @@ MonoBehaviour:
     exitedVaultThisFrame: 0
     isVaulting: 0
     jumpGroundDetachTimer: 0
+    combatRootMotionActive: 0
     comboResetTime: 0.6
     maxComboSteps: 4
+    useCombatRootMotion: 1
+    combatRootMotionPlanarScale: 1
     combo1WindowStart: 0.5
     combo1WindowEnd: 0.755
     combo2WindowStart: 0.378
@@ -32302,6 +32324,11 @@ MonoBehaviour:
     rotationTarget: {x: 0, y: 0, z: 0, w: 0}
     hasRotationTarget: 0
     rotationTurnSpeed: 0
+    wallActionAlignActive: 0
+    wallActionAlignElapsed: 0
+    wallActionAlignDurationRuntime: 0
+    wallActionAlignFrom: {x: 0, y: 0, z: 0, w: 0}
+    wallActionAlignTo: {x: 0, y: 0, z: 0, w: 0}
   groundCheck: {fileID: 1872078835}
   groundRadius: 0.2
   groundProbeDistance: 0.35
@@ -32943,6 +32970,33 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.7, z: 0}
+--- !u!114 &1666830543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1666830531}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 127a17b4bab25284ca7badcd1ff7a470, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  driver: {fileID: 1666830537}
+  rayStartHeight: 0.3
+  rayLength: 0.8
+  sphereRadius: 0.06
+  footOffset: 0.03
+  useSphereCast: 1
+  positionLerp: 14
+  rotationLerp: 14
+  weightLerp: 8
+  pelvisLerp: 10
+  maxPelvisOffset: 0.08
+  maxWeight: 1
+  minSlopeAngleForIK: 4
+  allowIKWhileRunning: 0
+  maxVerticalSpeedForIK: 0.2
 --- !u!4 &1683434734 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7995795421871430668, guid: 40a3a06067a726d479103b024070101b,
@@ -35552,6 +35606,10 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 688009301}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4004629843661236886, guid: 40a3a06067a726d479103b024070101b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1666830543}
     - targetCorrespondingSourceObject: {fileID: 4004629843661236886, guid: 40a3a06067a726d479103b024070101b,
         type: 3}
       insertIndex: -1
