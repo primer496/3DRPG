@@ -4,7 +4,6 @@ namespace HSM {
     public class Grounded : State {
         readonly PlayerContext ctx;
         readonly PlayerRoot rootState;
-        public readonly Idle Idle;
         public readonly Move Move;
         public readonly Stop Stop;
         public readonly Combat Combat;
@@ -16,7 +15,6 @@ namespace HSM {
         public Grounded(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
             rootState = parent as PlayerRoot;
-            Idle = new Idle(m, this, rootState, ctx);
             Move = new Move(m, this, rootState, ctx);
             Stop = new Stop(m, this, rootState, ctx);
             Combat = new Combat(m, this, rootState, ctx);
@@ -47,9 +45,17 @@ namespace HSM {
             ctx.hasDetectedWallNormal = false;
             ctx.pendingWallActionHeightOffsetY = 0f;
 
-            // 跳跃键按下 -> 先做墙体检测，决定攀爬/翻越/普通跳跃。
+            // 跳跃键按下 -> 先做能力门控，再决定攀爬/翻越/普通跳跃。
             if (ctx.jumpPressed) {
-                ClimbHeightTier tier = DetectWallHeightTier();
+                if (!ctx.enableJump) {
+                    ctx.jumpPressed = false;
+                    return null;
+                }
+
+                ClimbHeightTier tier = ClimbHeightTier.None;
+                if (ctx.enableTraversal) {
+                    tier = DetectWallHeightTier();
+                }
 
                 if (tier != ClimbHeightTier.None) {
                     bool isMoving = ctx.moveInput.sqrMagnitude > 0.01f;

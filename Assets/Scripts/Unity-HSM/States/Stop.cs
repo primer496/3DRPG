@@ -6,7 +6,6 @@ namespace HSM {
         readonly Grounded groundedState;
         readonly PlayerRoot rootState;
         float remainingTime;
-        float stopAnimSpeed;
         bool waitAnimatorExitOnDeactivate;
 
         public Stop(StateMachine m, State parent, PlayerRoot rootState, PlayerContext ctx) : base(m, parent) {
@@ -38,9 +37,11 @@ namespace HSM {
 
             if (ctx.attackPressed) {
                 ctx.attackPressed = false;
-                ctx.exitedStopThisFrame = false;
-                waitAnimatorExitOnDeactivate = false;
-                return groundedState.Combat;
+                if (ctx.enableCombat) {
+                    ctx.exitedStopThisFrame = false;
+                    waitAnimatorExitOnDeactivate = false;
+                    return groundedState.Combat;
+                }
             }
 
             // 最短停留时间到后申请切回 Move；离开 StopType 的等待由退出 Activity 处理。
@@ -68,12 +69,8 @@ namespace HSM {
                 // HH.controller 里对应状态名是 StopType
                 ctx.anim.CrossFade(AnimatorKeys.States.StopType, Mathf.Max(0f, ctx.stopEnterCrossFade));
 
-                // 与 Move/Dodge 一致：相机 yaw 来自 ThirdPersonCamera（与冲刺同一套空间）
-                float camYaw = ThirdPersonCamera.CurrentYawDeg;
-                if (float.IsNaN(camYaw)) {
-                    var cam = Camera.main;
-                    camYaw = cam != null ? cam.transform.eulerAngles.y : 0f;
-                }
+                // 与 Move/Dodge 一致：从 context 获取统一的朝向参考 yaw。
+                float camYaw = ctx.GetFacingReferenceYaw();
 
                 // 世界平面“急停方向”：优先水平速度；过小则用上一帧仍按住时的摇杆（相机空间 → 世界），避免松开当帧 input=0 抽方向
                 Vector3 worldStopDir = GetWorldStopDirection(camYaw);
@@ -90,7 +87,7 @@ namespace HSM {
                 // 进急停时固定一次 Speed，用于 StopType 在走停/跑停之间分流。
                 float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
                 float horizontalSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
-                stopAnimSpeed = Mathf.Clamp(horizontalSpeed / walkReal, 0f, 2f);
+                float stopAnimSpeed = Mathf.Clamp(horizontalSpeed / walkReal, 0f, 2f);
                 ctx.anim.SetFloat(AnimatorKeys.Params.Speed, stopAnimSpeed);
             }
         }
@@ -165,16 +162,6 @@ namespace HSM {
             ctx.velocity.x = nextHorizontal.x;
             ctx.velocity.z = nextHorizontal.z;
 
-            if (ctx.anim != null) {
-                // 指数衰减：比 SmoothDamp 在极小时间常数下更稳定，避免速度项突变。
-                // τ 与帧时间取 max，避免 τ→0 时单帧把 Speed 打成 0 造成跳变。
-                float tau = Mathf.Max(ctx.stopSpeedDecayTime, 3f * deltaTime);
-                stopAnimSpeed *= Mathf.Exp(-deltaTime / tau);
-                if (stopAnimSpeed < 1e-4f) {
-                    stopAnimSpeed = 0f;
-                }
-                ctx.anim.SetFloat(AnimatorKeys.Params.Speed, Mathf.Clamp(stopAnimSpeed, 0f, 2f));
-            }
         }
     }
 }

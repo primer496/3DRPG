@@ -2,9 +2,12 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-//using UnityUtils;
 
 namespace HSM {
+    public interface ICapabilityConfigApplier {
+        void ApplyTo(PlayerContext ctx);
+    }
+
     public class PlayerStateDriver : MonoBehaviour {
         const string VerticalSpeedParam = "VerticalSpeed";
         public PlayerContext ctx = new PlayerContext();
@@ -16,20 +19,15 @@ namespace HSM {
         [Range(0f, 30f)]
         public float minProjectSlopeAngle = 3f;
         public float groundedSnapDownVelocity = 2f;
-        [Tooltip("Ground probe miss grace time to avoid false airborne flicker on slope seams.")]
         public float groundUngroundedGraceTime = 0.08f;
         public LayerMask groundMask;
-        [Header("Air Wall Handling")]
-        [Tooltip("Air control forward wall detection mask. Leave empty to auto-use Wall layer.")]
+        // 空中贴墙处理
         public LayerMask airWallMask;
         [Range(0.05f, 0.6f)]
-        [Tooltip("Forward wall check distance for removing into-wall velocity while airborne.")]
         public float airWallBlockDistance = 0.22f;
         [Range(0f, 0.2f)]
-        [Tooltip("Keep last valid wall normal for this long to avoid frame-by-frame wall constraint flicker.")]
         public float airWallNormalHoldTime = 0.08f;
         [Range(0f, 2f)]
-        [Tooltip("Extra planar detach speed from wall near apex/fall to prevent top-edge sticking.")]
         public float airWallEdgeDetachSpeed = 0.8f;
         public bool drawGizmos = true;
         string lastPath;
@@ -42,22 +40,33 @@ namespace HSM {
         bool hasGroundHitThisFrame;
         Vector3 cachedAirWallNormalPlanar;
         float airWallNormalHoldTimer;
-        readonly InputReader inputReader = new InputReader();
+        bool stopSpeedDecayActive;
+        float stopSpeedParam;
         readonly GroundChecker groundProbe = new GroundChecker();
 
-        // Input System actions
         public InputAction moveAction;
         public InputAction jumpAction;
         public InputAction runAction;
         public InputAction dodgeAction;
         public InputAction attackAction;
 
+        // 意图来源：为空则默认读取玩家输入
+        public MonoBehaviour intentProviderOverride;
+        // 配置集入口：玩家配置优先于敌人配置
+        public ScriptableObject playerConfigSet;
+        public ScriptableObject enemyConfigSet;
+
+        IIntentProvider intentProvider;
+        PlayerInputProvider defaultInputProvider;
+
         void Awake() {
             InitializeCharacterController();
             InitializeContextReferences();
+            ApplyRoleConfigOverrides();
             BuildStateMachine();
             EnsureGroundCheck();
             InitializeSwordState();
+            InitializeIntentProvider();
         }
 
         void OnEnable() {
@@ -73,6 +82,7 @@ namespace HSM {
             UpdateGroundedState();
             EnsureCombatRootMotionSafety();
             TickStateMachine();
+            UpdateStopAnimatorSpeedDecay();
             ApplyCharacterMotion();
             ApplyQueuedRotation();
             SyncAirborneVerticalSpeed();
@@ -100,6 +110,37 @@ namespace HSM {
             ctx.renderer = GetComponent<Renderer>();
         }
 
+        void ApplyRoleConfigOverrides() {
+            if (playerConfigSet != null && enemyConfigSet != null) {
+                Debug.LogWarning(
+                    $"Both playerConfigSet and enemyConfigSet are assigned on {name}. playerConfigSet takes precedence."
+                );
+            }
+
+            if (TryApplyConfigSet(playerConfigSet, "playerConfigSet")) {
+                return;
+            }
+
+            TryApplyConfigSet(enemyConfigSet, "enemyConfigSet");
+        }
+
+        bool TryApplyConfigSet(ScriptableObject configSet, string fieldName) {
+            if (configSet == null) {
+                return false;
+            }
+
+            if (configSet is ICapabilityConfigApplier applier) {
+                applier.ApplyTo(ctx);
+                return true;
+            }
+
+            Debug.LogError(
+                $"{name}.{fieldName} ({configSet.GetType().Name}) must implement ICapabilityConfigApplier.",
+                configSet
+            );
+            return false;
+        }
+
         void BuildStateMachine() {
             root = new PlayerRoot(null, ctx);
             var builder = new StateMachineBuilder(root);
@@ -107,7 +148,6 @@ namespace HSM {
         }
 
         void EnsureGroundCheck() {
-            // fallback: create a groundCheck near CharacterController feet.
             if (groundCheck == null) {
                 var t = new GameObject("groundCheck").transform;
                 t.SetParent(transform, false);
@@ -145,19 +185,30 @@ namespace HSM {
         }
 
         void ReadInputIntoContext() {
-            var input = inputReader.Read(
-                moveAction,
-                jumpAction,
-                runAction,
-                dodgeAction,
-                attackAction
-            );
+            intentProvider?.WriteIntent(ctx);
+        }
 
-            ctx.moveInput = input.Move;
-            ctx.jumpPressed = input.JumpPressed;
-            ctx.runHeld = input.RunHeld;
-            ctx.dodgePressed = input.DodgePressed;
-            ctx.attackPressed = input.AttackPressed;
+        void InitializeIntentProvider() {
+            if (intentProviderOverride != null) {
+                if (intentProviderOverride is IIntentProvider overrideProvider) {
+                    intentProvider = overrideProvider;
+                    return;
+                }
+
+                Debug.LogError(
+                    $"Intent provider override on {name} must implement IIntentProvider.",
+                    intentProviderOverride
+                );
+            }
+
+            defaultInputProvider = new PlayerInputProvider {
+                moveAction = moveAction,
+                jumpAction = jumpAction,
+                runAction = runAction,
+                dodgeAction = dodgeAction,
+                attackAction = attackAction
+            };
+            intentProvider = defaultInputProvider;
         }
 
         void UpdateGroundedState() {
@@ -169,8 +220,6 @@ namespace HSM {
             }
 
             bool inAirborneState = IsInAirborneState();
-            // Allow a small near-apex window as "still airborne" to avoid immediate re-grounding
-            // right after jump transition (before vertical speed clearly becomes positive).
             bool risingInAir = inAirborneState && ctx.verticalVelocity > -0.1f;
             if (ctx.jumpGroundDetachTimer > 0f) {
                 ctx.jumpGroundDetachTimer = Mathf.Max(0f, ctx.jumpGroundDetachTimer - Time.deltaTime);
@@ -189,16 +238,12 @@ namespace HSM {
                 hitGround = true;
             }
 
-            // During jump ascent, feet probes can still overlap slope/collider briefly.
-            // Ignore those hits to prevent snapping back to grounded and killing the jump.
             if (risingInAir || ctx.jumpGroundDetachTimer > 0f) {
                 hitGround = false;
             }
             hasGroundHitThisFrame = hitGround;
 
             if (hitGround) {
-                // Keep previous stable normal when probe only confirms contact but cannot provide
-                // a reliable surface normal (common on slope seams / tiny ledges).
                 if (hasReliableNormal) {
                     ctx.groundNormal = normal;
                 }
@@ -208,8 +253,6 @@ namespace HSM {
                 return;
             }
 
-            // Safety: if probe missed and we're still moving upward, never keep grounded grace.
-            // This prevents rare "grounded while floating" cases after dash-jump land/touch sequences.
             bool movingUpWithoutGround = ctx.verticalVelocity > 0.2f;
             bool canUseGrace = ctx.verticalVelocity <= 0.5f && !movingUpWithoutGround;
             if (ctx.grounded && canUseGrace && ungroundedTimer < groundUngroundedGraceTime) {
@@ -225,8 +268,34 @@ namespace HSM {
             machine.Tick(Time.deltaTime);
         }
 
+        void UpdateStopAnimatorSpeedDecay() {
+            if (ctx.anim == null || machine == null || machine.Root == null) {
+                stopSpeedDecayActive = false;
+                return;
+            }
+
+            var leaf = machine.Root.Leaf();
+            bool isStopLeaf = leaf is Stop;
+            if (!isStopLeaf) {
+                stopSpeedDecayActive = false;
+                return;
+            }
+
+            if (!stopSpeedDecayActive) {
+                stopSpeedParam = Mathf.Clamp(ctx.anim.GetFloat(AnimatorKeys.Params.Speed), 0f, 2f);
+                stopSpeedDecayActive = true;
+            }
+
+            float tau = Mathf.Max(ctx.stopSpeedDecayTime, 3f * Time.deltaTime);
+            stopSpeedParam *= Mathf.Exp(-Time.deltaTime / tau);
+            if (stopSpeedParam < 1e-4f) {
+                stopSpeedParam = 0f;
+            }
+
+            ctx.anim.SetFloat(AnimatorKeys.Params.Speed, Mathf.Clamp(stopSpeedParam, 0f, 2f));
+        }
+
         void SyncAirborneVerticalSpeed() {
-            // 空中时在 Update 末尾更新 VerticalSpeed，保证每帧写入（避免状态机更新时机问题）
             var leaf = machine.Root.Leaf();
             float jumpTakeoffSpeed = ctx.GetJumpTakeoffSpeed();
             if (IsAirborneState(leaf) && ctx.anim != null && jumpTakeoffSpeed > 0.0001f) {
@@ -248,7 +317,6 @@ namespace HSM {
 
         void ApplyCharacterMotion() {
             if (IsRootMotionTranslationActive()) {
-                // Vault/Climb/Combat root motion translation is handled in OnAnimatorMove.
                 return;
             }
 
@@ -268,20 +336,16 @@ namespace HSM {
             lastAppliedPlanarVelocity = desiredPlanar;
 
             if (treatAsGrounded) {
-                // During grace frames (probe miss), never accumulate vertical climb from stale slope normal.
                 if (!reliableGround) {
                     desiredPlanar.y = 0f;
                     lastAppliedPlanarVelocity = desiredPlanar;
                 }
 
-                // Keep a mild downward bias only on temporary probe misses.
-                // Applying this continuously on slopes causes unwanted downhill sliding.
                 bool needsSnapDown = !hasGroundHitThisFrame;
                 if (needsSnapDown && ctx.verticalVelocity <= 0.5f && ctx.verticalVelocity > -groundedSnapDownVelocity) {
                     ctx.verticalVelocity = -groundedSnapDownVelocity;
                 }
             } else {
-                // Air control keeps velocity-driven planar motion and explicit gravity.
                 desiredPlanar = RemoveIntoWallComponentWhileAirborne(desiredPlanar);
                 ctx.verticalVelocity += Physics.gravity.y * Time.deltaTime;
             }
@@ -295,7 +359,6 @@ namespace HSM {
             }
 
             if ((treatAsGrounded || touchedGroundByMove) && ctx.verticalVelocity <= 0f) {
-                // Apply tiny down hold only after move resolution so jump takeoff won't be cancelled.
                 ctx.verticalVelocity = -Mathf.Max(0.05f, groundedSnapDownVelocity * 0.35f);
             }
 
@@ -332,11 +395,7 @@ namespace HSM {
             }
 
             cc.Move(deltaPos);
-            // Root-motion states use translation only. Rotation stays camera-driven to avoid camera jitter.
-
-            // Keep state velocity neutral while root motion controls displacement.
             if (ctx.combatRootMotionActive && Time.deltaTime > 0.0001f) {
-                // Preserve a meaningful planar speed sample so later combat-exit blending can reuse it.
                 ctx.velocity.x = deltaPos.x / Time.deltaTime;
                 ctx.velocity.z = deltaPos.z / Time.deltaTime;
             } else {
@@ -347,8 +406,6 @@ namespace HSM {
         }
 
         bool IsRootMotionTranslationActive() {
-            // Combat root motion currently targets grounded melee only.
-            // Once leaving ground, movement should immediately return to gravity-driven flow.
             return ctx.isVaulting || ctx.isClimbing || (ctx.combatRootMotionActive && ctx.grounded);
         }
 
@@ -361,14 +418,10 @@ namespace HSM {
                 return;
             }
 
-            // Safety guard for ledge/wall-top edge cases:
-            // if an attack starts grounded but becomes airborne mid-animation,
-            // force-disable combat root motion to prevent "fall pose frozen in air".
             ctx.combatRootMotionActive = false;
             if (ctx.anim != null && !ctx.isVaulting && !ctx.isClimbing) {
                 ctx.anim.applyRootMotion = false;
             }
-            // Attack got interrupted by leaving ground; keep weapon visibility consistent.
             if (ctx.swordObject != null) {
                 ctx.swordObject.SetActive(false);
             }
@@ -376,8 +429,6 @@ namespace HSM {
 
         Vector3 BuildCombatRootMotionDelta(Vector3 animatorDeltaPosition) {
             float planarScale = Mathf.Max(0f, ctx.combatRootMotionPlanarScale);
-            // For grounded melee, only keep planar displacement from animation.
-            // Vertical combat motion can be introduced later by specific skills (launcher, leap slash, etc.).
             var proposedDelta = new Vector3(
                 animatorDeltaPosition.x * planarScale,
                 0f,
@@ -387,8 +438,6 @@ namespace HSM {
         }
 
         Vector3 BuildClimbRootMotionDelta(Vector3 animatorDeltaPosition) {
-            // 1.7m clip can under-deliver planar displacement on some imports.
-            // Add a tiny forward assist only when planar delta is clearly too small.
             if (ctx.detectedClimbTier != ClimbHeightTier.Climb17 || Time.deltaTime <= 0.0001f) {
                 return animatorDeltaPosition;
             }
@@ -447,11 +496,6 @@ namespace HSM {
         }
 
         Vector3 ResolveCombatRootMotionWithFutureHooks(Vector3 proposedDelta) {
-            // Placeholder interface for future enemy interaction:
-            // 1) Stop-on-hit: block or reduce proposedDelta when colliding with target.
-            // 2) Push-target: keep forward delta while pushing enemy (requires enemy motor contract).
-            // 3) Pass-through skill: temporarily allow overlap by per-skill policy.
-            // Current implementation intentionally does not alter root motion.
             return proposedDelta;
         }
 
@@ -541,7 +585,6 @@ namespace HSM {
                 return desiredPlanar;
             }
 
-            // Strict rule: wall handling only changes planar motion (X/Z), never vertical speed (Y).
             var adjustedPlanar = desiredPlanar + wallNormalPlanar * intoWallSpeed;
             if (ctx.verticalVelocity <= 0.05f) {
                 adjustedPlanar += wallNormalPlanar * airWallEdgeDetachSpeed;
@@ -622,7 +665,6 @@ namespace HSM {
                     continue;
                 }
 
-                // Only treat near-vertical surfaces as walls.
                 if (candidate.normal.y > 0.35f) {
                     continue;
                 }
@@ -647,46 +689,6 @@ namespace HSM {
         /// </summary>
         public void OnFootPlant(int foot) {
             ctx.RegisterFootPlantFromAnimation(foot);
-        }
-
-        readonly struct InputSnapshot {
-            public readonly Vector2 Move;
-            public readonly bool JumpPressed;
-            public readonly bool RunHeld;
-            public readonly bool DodgePressed;
-            public readonly bool AttackPressed;
-
-            public InputSnapshot(
-                Vector2 move,
-                bool jumpPressed,
-                bool runHeld,
-                bool dodgePressed,
-                bool attackPressed
-            ) {
-                Move = move;
-                JumpPressed = jumpPressed;
-                RunHeld = runHeld;
-                DodgePressed = dodgePressed;
-                AttackPressed = attackPressed;
-            }
-        }
-
-        sealed class InputReader {
-            public InputSnapshot Read(
-                InputAction moveAction,
-                InputAction jumpAction,
-                InputAction runAction,
-                InputAction dodgeAction,
-                InputAction attackAction
-            ) {
-                var move = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
-                var jumpPressed = jumpAction != null && jumpAction.WasPressedThisFrame();
-                var runHeld = runAction != null && runAction.IsPressed();
-                var dodgePressed = dodgeAction != null && dodgeAction.WasPressedThisFrame();
-                var attackPressed = attackAction != null && attackAction.WasPressedThisFrame();
-
-                return new InputSnapshot(move, jumpPressed, runHeld, dodgePressed, attackPressed);
-            }
         }
 
         sealed class GroundChecker {
@@ -723,9 +725,6 @@ namespace HSM {
                     }
                 }
 
-                // Fallback for edge cases (ledge transitions / tiny gaps).
-                // Important: when Wall is included in groundMask, side walls can overlap the sphere.
-                // Only accept fallback as grounded if we can recover a walkable slope normal.
                 if (Physics.CheckSphere(groundCheck.position, groundRadius, groundMask, QueryTriggerInteraction.Ignore)) {
                     var fallbackOrigin = groundCheck.position + Vector3.up * 0.1f;
                     if (Physics.Raycast(

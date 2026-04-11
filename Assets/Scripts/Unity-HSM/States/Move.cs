@@ -36,11 +36,13 @@ namespace HSM {
 
             if (ctx.attackPressed) {
                 ctx.attackPressed = false;
-                return groundedState.Combat;
+                if (ctx.enableCombat) {
+                    return groundedState.Combat;
+                }
             }
 
             // 松开移动输入且当前仍有明显水平速度时，进入急停状态。
-            // 速度很小时继续留在 NormalMove（由混合树自然回到 Idle），避免低速抖动频繁切换。
+            // 速度很小时继续留在 NormalMove（由混合树自然回到站立），避免低速抖动频繁切换。
             var horizontalSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
             if (ctx.moveInput.magnitude <= inputDeadZone && horizontalSpeed > ctx.stopEnterSpeedThreshold) {
                 return groundedState.Stop;
@@ -108,13 +110,8 @@ namespace HSM {
                 }
             }
 
-            // 2) 朝向：仅在移动时（有输入时）由摄像机 + rawInput 决定
-            // 直接使用相机脚本维护的 yaw，避免读取 Camera.main 欧拉角导致“上一帧角度”抖动。
-            float camYaw = ThirdPersonCamera.CurrentYawDeg;
-            if (float.IsNaN(camYaw)) {
-                var cam = Camera.main;
-                camYaw = cam != null ? cam.transform.eulerAngles.y : 0f;
-            }
+            // 2) 朝向：仅在移动时（有输入时）由朝向参考 + rawInput 决定
+            float camYaw = ctx.GetFacingReferenceYaw();
 
             Vector3 worldMoveDir = Vector3.zero;
 
