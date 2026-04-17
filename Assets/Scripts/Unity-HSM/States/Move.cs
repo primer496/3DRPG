@@ -44,7 +44,7 @@ namespace HSM {
             // 松开移动输入且当前仍有明显水平速度时，进入急停状态。
             // 速度很小时继续留在 NormalMove（由混合树自然回到站立），避免低速抖动频繁切换。
             var horizontalSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
-            if (ctx.moveInput.magnitude <= inputDeadZone && horizontalSpeed > ctx.stopEnterSpeedThreshold) {
+            if (ctx.enableStopState && ctx.moveInput.magnitude <= inputDeadZone && horizontalSpeed > ctx.stopEnterSpeedThreshold) {
                 return groundedState.Stop;
             }
             // grounded 下始终留在 Move：由 NormalMove 混合树根据 Speed(0/1/2) 表示站立/走/跑
@@ -54,9 +54,9 @@ namespace HSM {
         protected override void OnEnter() {
             // 从 Stop/Landing 退出时 Animator 已由过渡切到 Locomotion，不再 CrossFade；承接 Animator 当前的 Speed。
             if ((ctx.exitedStopThisFrame || ctx.exitedLandingThisFrame || ctx.exitedVaultThisFrame || ctx.exitedClimbThisFrame) && ctx.anim != null) {
-                float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
                 float animSpeed = ctx.anim.GetFloat(AnimatorKeys.Params.Speed);
-                smoothMoveSpeed = animSpeed * walkReal;
+                float runReal = Mathf.Max(0.0001f, ctx.GetRunRealSpeed());
+                smoothMoveSpeed = animSpeed * runReal;
             } else {
                 smoothMoveSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
             }
@@ -66,8 +66,10 @@ namespace HSM {
                 ctx.anim.CrossFade(AnimatorKeys.States.NormalMove, 0.1f);
             }
             if (ctx.anim != null) {
-                float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
-                float animSpeed = Mathf.Clamp(smoothMoveSpeed / walkReal, 0f, 2f);
+                float runReal = Mathf.Max(0.0001f, ctx.GetRunRealSpeed());
+                float currentSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
+                // 按 NormalizedSpeed 比例映射 (0=Idle, 0.5=Walk, 1.0=Run)
+                float animSpeed = Mathf.Clamp01(currentSpeed / runReal);
                 ctx.anim.SetFloat(AnimatorKeys.Params.Speed, animSpeed);
 
                 if (ctx.moveInput.magnitude > inputDeadZone) {
@@ -158,10 +160,11 @@ namespace HSM {
             ctx.velocity.x = nextHorizontal.x;
             ctx.velocity.z = nextHorizontal.z;
 
-            // 5) 动画：Speed 映射为走=1 跑=2，并且不会突变
+            // 5) 动画：统一按 NormalizedSpeed 比例映射 (0=Idle, 0.5=Walk, 1.0=Run)
             if (ctx.anim != null) {
-                float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
-                float animSpeed = Mathf.Clamp(smoothMoveSpeed / walkReal, 0f, 2f);
+                float runReal = Mathf.Max(0.0001f, ctx.GetRunRealSpeed());
+                float currentSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
+                float animSpeed = Mathf.Clamp01(currentSpeed / runReal);
                 ctx.anim.SetFloat(AnimatorKeys.Params.Speed, animSpeed);
 
                 if (hasInput) {

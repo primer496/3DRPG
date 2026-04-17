@@ -85,9 +85,9 @@ namespace HSM {
                 ctx.anim.SetFloat(AnimatorKeys.Params.StopFoot, ComputeStopFoot());
 
                 // 进急停时固定一次 Speed，用于 StopType 在走停/跑停之间分流。
-                float walkReal = Mathf.Max(0.0001f, ctx.GetWalkRealSpeed());
+                float runReal = Mathf.Max(0.0001f, ctx.GetRunRealSpeed());
                 float horizontalSpeed = new Vector3(ctx.velocity.x, 0f, ctx.velocity.z).magnitude;
-                float stopAnimSpeed = Mathf.Clamp(horizontalSpeed / walkReal, 0f, 2f);
+                float stopAnimSpeed = Mathf.Clamp01(horizontalSpeed / runReal);
                 ctx.anim.SetFloat(AnimatorKeys.Params.Speed, stopAnimSpeed);
             }
         }

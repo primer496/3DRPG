@@ -52,6 +52,11 @@ namespace HSM {
             ResolveProgress(deltaTime);
             ctx.jumpPressed = false;
 
+            // 翻越动画后期给予向下的拉力，确保持续落地
+            if (elapsed > fallbackDuration * ctx.vaultLateDownStartNormalizedTime) {
+                ctx.verticalVelocity -= ctx.vaultLateDownSpeed * deltaTime;
+            }
+
             if (ctx.anim != null) {
                 ctx.anim.applyRootMotion = true;
                 ctx.anim.SetFloat(AnimatorKeys.Params.MoveX, 0f);

@@ -12,6 +12,7 @@ namespace HSM {
         public float runSpeedMultiplier = 2f;
 
         [Header("Stop")]
+        public bool enableStopState = true;
         public float stopDuration = 0.26f;
         public float stopEnterSpeedThreshold = 0.32f;
         public float stopEnterCrossFade = 0.06f;
@@ -22,13 +23,9 @@ namespace HSM {
                 return;
             }
 
+            ctx.enableStopState = enableStopState;
             ctx.moveSpeed = moveSpeed;
             ctx.accel = accel;
-            ctx.runSpeedMultiplier = runSpeedMultiplier;
-            ctx.stopDuration = stopDuration;
-            ctx.stopEnterSpeedThreshold = stopEnterSpeedThreshold;
-            ctx.stopEnterCrossFade = stopEnterCrossFade;
-            ctx.stopSpeedDecayTime = stopSpeedDecayTime;
         }
     }
 }

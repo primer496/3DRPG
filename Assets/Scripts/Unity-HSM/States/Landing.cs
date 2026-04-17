@@ -3,14 +3,15 @@ using UnityEngine;
 namespace HSM {
     public class Landing : State {
         readonly PlayerContext ctx;
-        readonly Grounded groundedState;
+        readonly PlayerRoot rootState;
         float elapsed;
         bool hasBeenInLandingState;
         bool waitAnimatorExitOnDeactivate;
 
         public Landing(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
-            groundedState = parent as Grounded;
+            // Now Landing is in Airborne, its parent's parent is PlayerRoot
+            rootState = parent.Parent as PlayerRoot;
             Add(new AnimatorStateExitActivity(
                 animatorProvider: () => this.ctx.anim,
                 stateName: AnimatorKeys.States.Landing,
@@ -30,13 +31,14 @@ namespace HSM {
                 var info = ctx.anim.GetCurrentAnimatorStateInfo(0);
                 if (info.IsName(AnimatorKeys.States.Landing)) hasBeenInLandingState = true;
             }
-
-            // 一旦确认进入过 Landing，就申请切回 Move；离开 Landing 的等待由退出 Activity 处理。
-            // 没有 Animator 时保留 2s 超时兜底，避免卡死。
-            if (hasBeenInLandingState || elapsed >= 2f) {
-                waitAnimatorExitOnDeactivate = hasBeenInLandingState && ctx.anim != null;
+            if ((hasBeenInLandingState && ctx.anim != null && !ctx.anim.GetCurrentAnimatorStateInfo(0).IsName(AnimatorKeys.States.Landing)) || elapsed >= 0.5f) {
+                waitAnimatorExitOnDeactivate = false;
                 ctx.exitedLandingThisFrame = true;
-                return groundedState.Move;
+                if (ctx.anim != null)
+                {
+                    ctx.anim.CrossFade(AnimatorKeys.States.NormalMove, 0.1f);
+                }
+                return rootState.Grounded;
             }
             return null;
         }
@@ -48,13 +50,19 @@ namespace HSM {
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
             if (ctx.anim != null) {
-                ctx.anim.CrossFade(AnimatorKeys.States.Landing, 0.1f);
+                ctx.anim.CrossFade(AnimatorKeys.States.Landing, 0.05f);
                 ctx.anim.SetFloat(AnimatorKeys.Params.Speed, 0f);
             }
         }
 
         protected override void OnUpdate(float deltaTime) {
             elapsed += deltaTime;
+            // 确保着陆阶段持续清零速度防止惯性滑动
+            ctx.velocity.x = 0f;
+            ctx.velocity.z = 0f;
+            if (ctx.anim != null) {
+                ctx.anim.SetFloat(AnimatorKeys.Params.Speed, 0f);
+            }
         }
     }
 }

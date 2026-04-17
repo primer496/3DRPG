@@ -8,8 +8,7 @@ namespace HSM {
         void ApplyTo(PlayerContext ctx);
     }
 
-    public class PlayerStateDriver : MonoBehaviour {
-        const string VerticalSpeedParam = "VerticalSpeed";
+    public class PlayerStateDriver : MonoBehaviour, IMove {
         public PlayerContext ctx = new PlayerContext();
         public Transform groundCheck;
         public float groundRadius = 0.2f;
@@ -78,6 +77,10 @@ namespace HSM {
         }
 
         void Update() {
+            if (ctx.hitSlowdownTimer > 0) {
+                ctx.hitSlowdownTimer -= Time.deltaTime;
+            }
+
             ReadInputIntoContext();
             UpdateGroundedState();
             EnsureCombatRootMotionSafety();
@@ -85,15 +88,59 @@ namespace HSM {
             UpdateStopAnimatorSpeedDecay();
             ApplyCharacterMotion();
             ApplyQueuedRotation();
-            SyncAirborneVerticalSpeed();
             LogStatePathIfChanged();
         }
 
+        public Vector3 Velocity => ctx.velocity;
+        public bool IsGrounded => ctx.grounded;
+
+        // --- 核心修复：用于接收 Animator 动画事件，并将其转发给剑上的 WeaponDetector ---
+        public void BeginAttack() {
+            if (ctx.swordObject != null) {
+                var wd = ctx.swordObject.GetComponent<WeaponDetector>();
+                if (wd != null) {
+                    wd.BeginAttack();
+                } else {
+                    Debug.LogWarning("PlayerStateDriver: [剑] 对象上未找到 WeaponDetector 组件！");
+                }
+            }
+        }
+
+        public void EndAttack() {
+            if (ctx.swordObject != null) {
+                var wd = ctx.swordObject.GetComponent<WeaponDetector>();
+                if (wd != null) wd.EndAttack();
+            }
+        }
+        // -------------------------------------------------------------------------
+
+        Vector3 IMove.Velocity { get => Velocity; set => throw new NotImplementedException(); }
+
+        public void Move(Vector3 moveDelta) {
+            if (cc != null && cc.enabled) {
+                cc.Move(moveDelta);
+            } else {
+                transform.position += moveDelta;
+            }
+        }
+
+        public void SetRotation(Quaternion rotation) {
+            transform.rotation = rotation;
+            ctx.rotationTarget = rotation;
+            ctx.hasRotationTarget = false;
+        }
+
         void InitializeCharacterController() {
-            cc = GetComponent<CharacterController>();
-            if (cc == null) {
-                Debug.LogError("PlayerStateDriver requires CharacterController on the same GameObject.");
-                enabled = false;
+            var customMover = GetComponents<IMove>().FirstOrDefault(m => m != (IMove)this);
+            if (customMover != null) {
+                ctx.moveDriver = customMover;
+            } else {
+                ctx.moveDriver = this;
+                cc = GetComponent<CharacterController>();
+                if (cc == null) {
+                    Debug.LogError("PlayerStateDriver requires CharacterController when acting as default Move driver.");
+                    enabled = false;
+                }
             }
         }
 
@@ -282,7 +329,7 @@ namespace HSM {
             }
 
             if (!stopSpeedDecayActive) {
-                stopSpeedParam = Mathf.Clamp(ctx.anim.GetFloat(AnimatorKeys.Params.Speed), 0f, 2f);
+                stopSpeedParam = Mathf.Clamp01(ctx.anim.GetFloat(AnimatorKeys.Params.Speed));
                 stopSpeedDecayActive = true;
             }
 
@@ -292,17 +339,7 @@ namespace HSM {
                 stopSpeedParam = 0f;
             }
 
-            ctx.anim.SetFloat(AnimatorKeys.Params.Speed, Mathf.Clamp(stopSpeedParam, 0f, 2f));
-        }
-
-        void SyncAirborneVerticalSpeed() {
-            var leaf = machine.Root.Leaf();
-            float jumpTakeoffSpeed = ctx.GetJumpTakeoffSpeed();
-            if (IsAirborneState(leaf) && ctx.anim != null && jumpTakeoffSpeed > 0.0001f) {
-                float vy = ctx.verticalVelocity;
-                float vSpeed = Mathf.Clamp(vy / jumpTakeoffSpeed, -1f, 1f);
-                ctx.anim.SetFloat(VerticalSpeedParam, vSpeed);
-            }
+            ctx.anim.SetFloat(AnimatorKeys.Params.Speed, Mathf.Clamp01(stopSpeedParam));
         }
 
         void LogStatePathIfChanged() {
@@ -351,19 +388,31 @@ namespace HSM {
             }
 
             var motion = desiredPlanar + Vector3.up * ctx.verticalVelocity;
-            CollisionFlags flags = cc != null ? cc.Move(motion * Time.deltaTime) : CollisionFlags.None;
-            bool touchedGroundByMove = (flags & CollisionFlags.Below) != 0;
+            if (ctx.moveDriver == (IMove)this) {
+                CollisionFlags flags = cc != null ? cc.Move(motion * Time.deltaTime) : CollisionFlags.None;
+                bool touchedGroundByMove = (flags & CollisionFlags.Below) != 0;
 
-            if ((flags & CollisionFlags.Above) != 0 && ctx.verticalVelocity > 0f) {
-                ctx.verticalVelocity = 0f;
-            }
+                if ((flags & CollisionFlags.Above) != 0 && ctx.verticalVelocity > 0f) {
+                    ctx.verticalVelocity = 0f;
+                }
 
-            if ((treatAsGrounded || touchedGroundByMove) && ctx.verticalVelocity <= 0f) {
-                ctx.verticalVelocity = -Mathf.Max(0.05f, groundedSnapDownVelocity * 0.35f);
-            }
+                if ((treatAsGrounded || touchedGroundByMove) && ctx.verticalVelocity <= 0f) {
+                    ctx.verticalVelocity = -Mathf.Max(0.05f, groundedSnapDownVelocity * 0.35f);
+                }
 
-            if (touchedGroundByMove) {
-                hasGroundHitThisFrame = true;
+                if (touchedGroundByMove) {
+                    hasGroundHitThisFrame = true;
+                }
+            } else if (ctx.moveDriver != null) {
+                ctx.moveDriver.Move(motion * Time.deltaTime);
+                // Non-CC controllers usually handle their own grounding flags
+                bool touchedGroundByMove = ctx.moveDriver.IsGrounded;
+                if ((treatAsGrounded || touchedGroundByMove) && ctx.verticalVelocity <= 0f) {
+                    ctx.verticalVelocity = -Mathf.Max(0.05f, groundedSnapDownVelocity * 0.35f);
+                }
+                if (touchedGroundByMove) {
+                    hasGroundHitThisFrame = true;
+                }
             }
 
             if (treatAsGrounded) {
@@ -377,7 +426,7 @@ namespace HSM {
         }
 
         void OnAnimatorMove() {
-            if (!IsRootMotionTranslationActive() || ctx.anim == null || cc == null) {
+            if (!IsRootMotionTranslationActive() || ctx.anim == null || ctx.moveDriver == null) {
                 return;
             }
 
@@ -394,10 +443,11 @@ namespace HSM {
                 deltaPos = ApplyVaultLateDownwardBias(deltaPos);
             }
 
-            cc.Move(deltaPos);
+            ctx.moveDriver.Move(deltaPos);
             if (ctx.combatRootMotionActive && Time.deltaTime > 0.0001f) {
-                ctx.velocity.x = deltaPos.x / Time.deltaTime;
-                ctx.velocity.z = deltaPos.z / Time.deltaTime;
+                // 不将RootMotion速度写回ctx.velocity，避免下一次非RootMotion计算帧拿着这个速度继续飘行
+                ctx.velocity.x = 0f;
+                ctx.velocity.z = 0f;
             } else {
                 ctx.velocity.x = 0f;
                 ctx.velocity.z = 0f;
@@ -429,6 +479,11 @@ namespace HSM {
 
         Vector3 BuildCombatRootMotionDelta(Vector3 animatorDeltaPosition) {
             float planarScale = Mathf.Max(0f, ctx.combatRootMotionPlanarScale);
+            // 【核心修复】如果在攻击滞帧期间（砍中敌人），则按照配置缩减运动位移
+            if (ctx.hitSlowdownTimer > 0) {
+                planarScale *= ctx.hitStopRootMotionScale;
+            }
+
             var proposedDelta = new Vector3(
                 animatorDeltaPosition.x * planarScale,
                 0f,

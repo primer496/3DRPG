@@ -13,14 +13,7 @@ namespace HSM {
                 return;
             }
 
-            const int baseLayerIndex = 0;
-            int airborneFallHash = Animator.StringToHash(AnimatorKeys.States.AirborneHang);
-            if (ctx.anim.HasState(baseLayerIndex, airborneFallHash)) {
-                ctx.anim.CrossFade(AnimatorKeys.States.AirborneHang, 0.1f);
-                return;
-            }
-
-            ctx.anim.CrossFade(AnimatorKeys.States.Airborne, 0.1f);
+            ctx.anim.CrossFade(AnimatorKeys.States.AirborneFall, 0.1f);
         }
     }
 }

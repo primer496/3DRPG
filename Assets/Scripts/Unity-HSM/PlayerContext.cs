@@ -25,6 +25,8 @@ namespace HSM {
 
         // 基础移动参数（由配置资产覆盖）
         [HideInInspector]
+        public bool enableStopState = true;
+        [HideInInspector]
         public float moveSpeed = 6f;
         [HideInInspector]
         public float accel = 40f;
@@ -255,6 +257,12 @@ namespace HSM {
 
         // 状态切换标记
         [HideInInspector]
+        public bool isHit;
+        [HideInInspector]
+        public Vector3 currentHitSource; // 受到攻击的作用点，用于计算背面击推方向
+        [HideInInspector]
+        public float hitSlowdownTimer; // 攻击命中后产生的根运动减速(防止玩家穿模)
+        [HideInInspector]
         public bool exitedStopThisFrame;
 
         [HideInInspector]
@@ -273,6 +281,8 @@ namespace HSM {
 
         // 战斗参数（由配置资产覆盖）
         [HideInInspector]
+        public float attackRange = 1.5f;
+        [HideInInspector]
         public float comboResetTime = 0.6f;
         [Min(1)]
         [HideInInspector]
@@ -282,6 +292,28 @@ namespace HSM {
         [Range(0f, 2f)]
         [HideInInspector]
         public float combatRootMotionPlanarScale = 1f;
+
+        [Range(0.5f, 1.2f)]
+        [HideInInspector]
+        public float comboExitNormalizedTime = 0.95f;
+
+        [Range(0.1f, 1.0f)]
+        [HideInInspector]
+        public float hitReactionExitNormalizedTime = 0.6f;
+
+        // 战斗手感参数（由配置资产覆盖）
+        [HideInInspector]
+        public float hitKnockbackSpeed = 4f;
+        [HideInInspector]
+        public float hitKnockbackDecay = 15f;
+        [HideInInspector]
+        public float hitStopDuration = 0.15f;
+        [HideInInspector]
+        public float hitStopRootMotionScale = 0.1f;
+        [HideInInspector]
+        public float aimAssistRadius = 6.0f;
+        [HideInInspector]
+        public float aimAssistAngle = 180f;
 
         // 连段窗口参数（由配置资产覆盖）
         [Range(0f, 1f)]
@@ -312,17 +344,15 @@ namespace HSM {
         [HideInInspector]
         public float combo4WindowEnd = 0.60f;
 
-        [Range(0.5f, 1.2f)]
-        [HideInInspector]
-        public float comboExitNormalizedTime = 0.95f;
-
         // 运行时引用
         [HideInInspector]
         public GameObject swordObject;
         [HideInInspector]
         public Animator anim;
         [HideInInspector]
-        public CharacterController cc;
+        public CharacterController cc; // 保留供兼容
+        [HideInInspector]
+        public IMove moveDriver;
         [HideInInspector]
         public float verticalVelocity;
         [HideInInspector]

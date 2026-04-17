@@ -3,14 +3,13 @@ using UnityEngine;
 namespace HSM {
     public class Grounded : State {
         readonly PlayerContext ctx;
-        readonly PlayerRoot rootState;
         public readonly Move Move;
         public readonly Stop Stop;
         public readonly Combat Combat;
         public readonly Dodge Dodge;
         public readonly Vault Vault;
-        public readonly Landing Landing;
         public readonly Climb Climb;
+        readonly PlayerRoot rootState;
 
         public Grounded(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
@@ -20,18 +19,16 @@ namespace HSM {
             Combat = new Combat(m, this, rootState, ctx);
             Dodge = new Dodge(m, this, rootState, ctx);
             Vault = new Vault(m, this, ctx);
-            Landing = new Landing(m, this, ctx);
             Climb = new Climb(m, this, ctx);
             Add(new ColorPhaseActivity(ctx.renderer){
-                enterColor = Color.yellow,  // runs while Grounded is activating
+                enterColor = Color.green, // runs while Grounded is activating
             });
         }
-        
-        // 从空中落地时先进入 Landing，否则进入 Move
+
+        // 从空中落地时先切给 Move，实际的 Landing 交给了 Airborne 管理，Grounded 只管地面位移和行动
         protected override State GetInitialState() {
             if (ctx.justLanded) {
                 ctx.justLanded = false;
-                return Landing;
             }
             return Move;
         }

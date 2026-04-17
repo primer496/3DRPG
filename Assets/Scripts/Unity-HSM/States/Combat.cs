@@ -41,7 +41,8 @@ namespace HSM {
             if (ctx.swordObject != null) {
                 ctx.swordObject.SetActive(true);
             }
-            PlayCurrentComboAnimation();
+            AimAssist(); // 先触发开局辅瞄转身
+            PlayCurrentComboAnimation(); // 再播动画
         }
 
         protected override void OnExit() {
@@ -73,7 +74,8 @@ namespace HSM {
             if (queuedNextAttack && inWindow) {
                 queuedNextAttack = false;
                 currentComboStep++;
-                PlayCurrentComboAnimation();
+                AimAssist(); // 先触发辅瞄瞬间转身
+                PlayCurrentComboAnimation(); // 再播动画
                 return;
             }
 
@@ -142,13 +144,60 @@ namespace HSM {
         void StopHorizontalMotion() {
             ctx.velocity.x = 0f;
             ctx.velocity.z = 0f;
-            ctx.hasRotationTarget = false;
+            // 移除了 ctx.hasRotationTarget = false; 防止干扰动画里的旋转过渡
         }
 
         void EnableCombatRootMotionIfNeeded() {
             ctx.combatRootMotionActive = ctx.useCombatRootMotion;
             if (ctx.anim != null) {
                 ctx.anim.applyRootMotion = ctx.combatRootMotionActive;
+            }
+        }
+
+        void AimAssist() {
+            if (ctx.anim == null) return;
+            Transform origin = ctx.anim.transform;
+            if (origin.parent != null) {
+                origin = origin.parent;
+            }
+            
+            // 【核心修复】防止敌人在共用的 Combat 状态下乱吸附！只允许打上 Player 标签的主角使用辅助瞄准
+            if (!origin.CompareTag("Player")) return;
+
+            float detectRadius = ctx.aimAssistRadius; // 辅助瞄准范围
+            Collider[] hits = Physics.OverlapSphere(origin.position, detectRadius);
+
+            Transform bestTarget = null;
+            float minDistance = float.MaxValue;
+
+            foreach (var hit in hits) {
+                if (!hit.CompareTag("Enemy")) continue; 
+
+                Vector3 dir = hit.transform.position - origin.position;
+                dir.y = 0;
+                if (dir.sqrMagnitude < 0.001f) continue;
+
+                float angle = Vector3.Angle(origin.forward, dir.normalized);
+                float dist = dir.magnitude;
+
+                // 限定在前方一定角度内优先吸附（比如面前 90度 内最近的敌人）
+                if (angle < ctx.aimAssistAngle) {
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        bestTarget = hit.transform;
+                    }
+                }
+            }
+            
+            if (bestTarget != null) {
+                Vector3 dirToBest = bestTarget.position - origin.position;
+                dirToBest.y = 0;
+                if (dirToBest.sqrMagnitude > 0.001f) {
+                    Quaternion lookRot = Quaternion.LookRotation(dirToBest.normalized, Vector3.up);
+                    origin.rotation = lookRot; // 直接刚性转向平滑
+                    ctx.rotationTarget = lookRot;
+                    ctx.hasRotationTarget = true;
+                }
             }
         }
 
