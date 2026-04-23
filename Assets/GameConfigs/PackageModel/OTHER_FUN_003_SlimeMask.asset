@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: OTHER_FUN_003_SlimeMask
+  m_EditorClassIdentifier:
+  itemID: "OTHER_FUN_003"
+  _itemName: "恶搞史莱姆面具"
+  _description: "用史莱姆凝胶制作的趣味面具，佩戴后角色外观会变成史莱姆，仅作娱乐使用，无任何属性加成。"
+  iconPath: "PackageIcon/Other/OTHER_FUN_003"
+  category: 5
+  rarity: 1
+  isStackable: 0
+  maxStack: 1

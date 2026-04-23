@@ -1,0 +1,370 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!1 &910437688940573616
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 7
+  m_Component:
+  - component: {fileID: 132335573818529244}
+  m_Layer: 0
+  m_HasEditorInfo: 1
+  m_Name: groundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &132335573818529244
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910437688940573616}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.083, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9099875942981947000}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &8774130868121938323
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.79
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.54
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_Name
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 9483cfab3f359be458c32476ac0d0e16, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 132335573818529244}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1199645921498879267}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3019688538993531662}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 798b9ef1a31839940b35fb1ad160202f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1504581529292374431}
+  m_SourcePrefab: {fileID: 100100000, guid: 798b9ef1a31839940b35fb1ad160202f, type: 3}
+--- !u!1 &8431460161687622850 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 798b9ef1a31839940b35fb1ad160202f,
+    type: 3}
+  m_PrefabInstance: {fileID: 8774130868121938323}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1199645921498879267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8431460161687622850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbd12aa311d04bd394a0b6e112d2466f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ctx:
+    moveInput: {x: 0, y: 0}
+    velocity: {x: 0, y: 0, z: 0}
+    grounded: 0
+    groundNormal: {x: 0, y: 1, z: 0}
+    enableStopState: 1
+    moveSpeed: 6
+    accel: 40
+    jumpHeight: 2.5
+    jumpSpeed: 7
+    jumpGroundDetachTime: 0.12
+    jumpPressed: 0
+    runHeld: 0
+    dodgePressed: 0
+    attackPressed: 0
+    runSpeedMultiplier: 2
+    enableLocomotion: 1
+    enableCombat: 1
+    enableJump: 0
+    enableTraversal: 0
+    dodgeSpeed: 10
+    dodgeDuration: 0.25
+    vaultDuration: 0.42
+    vaultEnterCrossFade: 0.08
+    vaultExitCrossFade: 0.1
+    vaultExitNormalizedTime: 0.9
+    vaultLateDownStartNormalizedTime: 0.7
+    vaultLateDownSpeed: 3.2
+    vaultMinMoveSpeed: 0.2
+    vaultWallMask:
+      serializedVersion: 2
+      m_Bits: 0
+    vaultDetectDistance: 0.75
+    vaultMaxFacingAngle: 45
+    vaultMinHeight: 0.75
+    vaultMaxHeight: 1.2
+    vaultSampleMinHeight: 0.2
+    vaultSampleMaxHeight: 1.6
+    vaultHeightSamples: 6
+    vaultDebugLog: 0
+    climbWallMask:
+      serializedVersion: 2
+      m_Bits: 128
+    climbDetectDistance: 0.75
+    climbMaxFacingAngle: 45
+    climbSampleMinHeight: 0.1
+    climbSampleMaxHeight: 2.4
+    climbHeightSamples: 10
+    climbEnterCrossFade: 0.1
+    climbExitCrossFade: 0.12
+    climbExitNormalizedTime: 0.92
+    climb17ExitNormalizedTime: 0.975
+    climb17PlanarAssistSpeed: 0.45
+    climb17MinPlanarSpeed: 0.08
+    climbDebugLog: 0
+    isClimbing: 0
+    exitedClimbThisFrame: 0
+    detectedClimbTier: 0
+    wallActionAlignDuration: 0.08
+    wallActionAlignMinAngle: 8
+    detectedWallNormal: {x: 0, y: 0, z: 0}
+    hasDetectedWallNormal: 0
+    detectedWallHeight: 0
+    vaultReferenceWallHeight: 1
+    climb05ReferenceWallHeight: 0.5
+    climb10ReferenceWallHeight: 1
+    climb17ReferenceWallHeight: 1.5
+    climb20ReferenceWallHeight: 2
+    wallActionHeightAdjustSpeed: 2.4
+    wallActionMaxUpOffset: 0.6
+    wallActionMaxDownOffset: 0.45
+    pendingWallActionHeightOffsetY: 0
+    wallActionHeightOffsetRemainingY: 0
+    stopDuration: 0.26
+    stopEnterSpeedThreshold: 0.32
+    stopEnterCrossFade: 0.06
+    stopSpeedDecayTime: 0.12
+    lastStickWhileMoving: {x: 0, y: 0}
+    hasFootPlantData: 0
+    lastPlantedFootIsRight: 0
+    exitedStopThisFrame: 0
+    justLanded: 0
+    exitedLandingThisFrame: 0
+    exitedVaultThisFrame: 0
+    isVaulting: 0
+    jumpGroundDetachTimer: 0
+    combatRootMotionActive: 0
+    attackRange: 1.5
+    comboResetTime: 0.6
+    maxComboSteps: 4
+    useCombatRootMotion: 1
+    combatRootMotionPlanarScale: 1
+    combo1WindowStart: 0.38
+    combo1WindowEnd: 0.7
+    combo2WindowStart: 0.22
+    combo2WindowEnd: 0.68
+    combo3WindowStart: 0.2
+    combo3WindowEnd: 0.66
+    combo4WindowStart: 0.18
+    combo4WindowEnd: 0.6
+    comboExitNormalizedTime: 0.95
+    swordObject: {fileID: 0}
+    anim: {fileID: 0}
+    cc: {fileID: 0}
+    verticalVelocity: 0
+    renderer: {fileID: 0}
+    lookInput: {x: 0, y: 0}
+    rotationTarget: {x: 0, y: 0, z: 0, w: 0}
+    hasRotationTarget: 0
+    rotationTurnSpeed: 0
+    wallActionAlignActive: 0
+    wallActionAlignElapsed: 0
+    wallActionAlignDurationRuntime: 0
+    wallActionAlignFrom: {x: 0, y: 0, z: 0, w: 0}
+    wallActionAlignTo: {x: 0, y: 0, z: 0, w: 0}
+  groundCheck: {fileID: 132335573818529244}
+  groundRadius: 0.2
+  groundProbeDistance: 0.3
+  maxGroundAngle: 55
+  minProjectSlopeAngle: 3
+  groundedSnapDownVelocity: 2
+  groundUngroundedGraceTime: 0.08
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  airWallMask:
+    serializedVersion: 2
+    m_Bits: 0
+  airWallBlockDistance: 0.22
+  airWallNormalHoldTime: 0.08
+  airWallEdgeDetachSpeed: 0.8
+  drawGizmos: 1
+  moveAction:
+    m_Name: Move
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: cea92084-2aab-4b0c-894e-cdf853b06eb2
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  jumpAction:
+    m_Name: Jump
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 450824f8-6219-419b-8758-b15142e81381
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  runAction:
+    m_Name: Run
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 4d8b54b4-95e5-47af-bedc-537553671604
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  dodgeAction:
+    m_Name: Dodge
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 8696f07f-4a21-4901-9796-2153dfd085ac
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  attackAction:
+    m_Name: Attack
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: e7e08495-0f60-413f-b85a-69b2fa623519
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  intentProviderOverride: {fileID: 3019688538993531662}
+  playerConfigSet: {fileID: 0}
+  enemyConfigSet: {fileID: 11400000, guid: 4d66f0b7f5319cb4cb3f5c7eff46d86b, type: 2}
+--- !u!114 &3019688538993531662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8431460161687622850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a4e39de1b201f24e9ab00d28e5d74b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectRange: 10
+  turnSpeed: 12
+  attackCooldown: 0.7
+  patrolPoint1: {fileID: 0}
+  patrolPoint2: {fileID: 0}
+  patrolPoint3: {fileID: 0}
+  patrolReachDistance: 0.4
+  patrolIdleDuration: 2
+  drawDebugGizmos: 1
+--- !u!195 &1504581529292374431
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8431460161687622850}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.24
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 1.54
+  m_BaseOffset: -0.13
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!4 &9099875942981947000 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 798b9ef1a31839940b35fb1ad160202f,
+    type: 3}
+  m_PrefabInstance: {fileID: 8774130868121938323}
+  m_PrefabAsset: {fileID: 0}

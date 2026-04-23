@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: ITEM_TP_002_TeleportScroll
+  m_EditorClassIdentifier:
+  itemID: "ITEM_TP_002"
+  _itemName: "主城传送卷轴"
+  _description: "附魔师制作的传送卷轴，使用后立即传送回主城安全区，是野外遇险的绝佳逃生道具。"
+  iconPath: "PackageIcon/Item/ITEM_TP_002"
+  category: 0
+  rarity: 1
+  isStackable: 1
+  maxStack: 20

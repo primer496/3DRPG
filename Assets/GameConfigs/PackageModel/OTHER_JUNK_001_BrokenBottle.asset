@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: OTHER_JUNK_001_BrokenBottle
+  m_EditorClassIdentifier:
+  itemID: "OTHER_JUNK_001"
+  _itemName: "破损的空酒瓶"
+  _description: "冒险者丢弃的空酒瓶，无任何实际用途，只能卖给商人换取少量金币。"
+  iconPath: "PackageIcon/Other/OTHER_JUNK_001"
+  category: 5
+  rarity: 0
+  isStackable: 1
+  maxStack: 99

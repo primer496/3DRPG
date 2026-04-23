@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: MAT_ORE_001_IronOre
+  m_EditorClassIdentifier:
+  itemID: "MAT_ORE_001"
+  _itemName: "铁矿石"
+  _description: "最常见的金属矿石，锻造基础武器与护甲的核心材料，野外矿脉随处可采集。"
+  iconPath: "PackageIcon/Material/MAT_ORE_001"
+  category: 4
+  rarity: 0
+  isStackable: 1
+  maxStack: 999

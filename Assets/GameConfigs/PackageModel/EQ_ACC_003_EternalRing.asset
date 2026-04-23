@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: EQ_ACC_003_EternalRing
+  m_EditorClassIdentifier:
+  itemID: "EQ_ACC_003"
+  _itemName: "永燃之戒"
+  _description: "镶嵌火焰核心的传奇戒指，佩戴后永久提升15%火焰法术伤害，攻击时有概率触发范围火焰爆炸。"
+  iconPath: "PackageIcon/Equipment/EQ_ACC_003"
+  category: 1
+  rarity: 4
+  isStackable: 0
+  maxStack: 1

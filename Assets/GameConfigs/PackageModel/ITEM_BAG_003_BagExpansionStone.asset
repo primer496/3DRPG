@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: ITEM_BAG_003_BagExpansionStone
+  m_EditorClassIdentifier:
+  itemID: "ITEM_BAG_003"
+  _itemName: "背包扩容石"
+  _description: "蕴含空间魔法的稀有晶石，使用后永久解锁8个背包格子，每个角色最多可使用10次。"
+  iconPath: "PackageIcon/Item/ITEM_BAG_003"
+  category: 0
+  rarity: 3
+  isStackable: 1
+  maxStack: 10

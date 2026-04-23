@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c4e6b3e9b5c0ee489894f0949bbcdfb, type: 3}
+  m_Name: ActorTraversalConfig
+  m_EditorClassIdentifier: 
+  vaultDuration: 0.42
+  vaultEnterCrossFade: 0.08
+  vaultExitCrossFade: 0.1
+  vaultExitNormalizedTime: 0.9
+  vaultLateDownStartNormalizedTime: 0.27
+  vaultLateDownSpeed: 3.22
+  vaultMinMoveSpeed: 0.2
+  vaultWallMask:
+    serializedVersion: 2
+    m_Bits: 128
+  vaultDetectDistance: 0.75
+  vaultMaxFacingAngle: 45
+  vaultMinHeight: 0.75
+  vaultMaxHeight: 1.2
+  vaultSampleMinHeight: 0.2
+  vaultSampleMaxHeight: 1.6
+  vaultHeightSamples: 6
+  vaultDebugLog: 0
+  climbWallMask:
+    serializedVersion: 2
+    m_Bits: 128
+  climbDetectDistance: 0.75
+  climbMaxFacingAngle: 45
+  climbSampleMinHeight: 0.1
+  climbSampleMaxHeight: 2.4
+  climbHeightSamples: 10
+  climbEnterCrossFade: 0.1
+  climbExitCrossFade: 0.12
+  climbExitNormalizedTime: 0.92
+  climb17ExitNormalizedTime: 0.975
+  climb17PlanarAssistSpeed: 0.45
+  climb17MinPlanarSpeed: 0.08
+  climbDebugLog: 0
+  wallActionAlignDuration: 0.08
+  wallActionAlignMinAngle: 8
+  vaultReferenceWallHeight: 1
+  climb05ReferenceWallHeight: 0.5
+  climb10ReferenceWallHeight: 1
+  climb17ReferenceWallHeight: 1.5
+  climb20ReferenceWallHeight: 2
+  wallActionHeightAdjustSpeed: 2.4
+  wallActionMaxUpOffset: 0.6
+  wallActionMaxDownOffset: 0.45
