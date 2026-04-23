@@ -97,8 +97,8 @@ def download_image(url, output_path):
         return False
 
 if __name__ == "__main__":
-    access_key = 'AKLTOWMxMWZiOTQxNzVkNGQ2ZGEyNWY5NGZhZTAzYjVkMmY'
-    secret_key = 'WWpGbE9EVXpNVE5pTUdGaE5HUmhaamd4T0RJMk9URTNNR0UzTWpFNFpUZw=='
+    access_key = 'YOUR_VOLCENGINE_ACCESS_KEY'
+    secret_key = 'YOUR_VOLCENGINE_SECRET_KEY'
 
     query_params = {
         'Action': 'CVProcess',

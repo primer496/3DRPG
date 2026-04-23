@@ -3,8 +3,8 @@ import json
 import os
 import base64
 
-AK = "AKLTOWMxMWZiOTQxNzVkNGQ2ZGEyNWY5NGZhZTAzYjVkMmY"
-SK = "WWpGbE9EVXpNVE5pTUdGaE5HUmhaamd4T0RJMk9URTNNR0UzTWpFNFpUZw=="
+AK = "YOUR_VOLCENGINE_ACCESS_KEY"
+SK = "YOUR_VOLCENGINE_SECRET_KEY"
 MODEL = "doubao-seedream-4-0-250828"
 API_URL = "https://ark.cn-beijing.volces.com/api/v3/images/generations"
 
