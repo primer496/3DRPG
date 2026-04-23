@@ -1,0 +1,225 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="Inventory.uss" />
+    <ui:VisualElement name="InventoryRoot" class="inventory-root">
+        <!-- 顶部导航栏 -->
+        <ui:VisualElement name="TopNavigationBar" class="top-nav-bar">
+            <ui:Button name="BackButton" class="back-btn exit-btn" tooltip="退出背包">
+                <ui:Image name="BackIcon" class="icon-48 back-icon" />
+            </ui:Button>
+            <ui:Label text="游戏背包" name="InventoryTitle" class="inventory-title" />
+            <ui:VisualElement name="RightFunctionGroup" class="right-func-group">
+                <ui:Button name="ResetButton" class="func-btn" tooltip="重置物品排序">
+                    <ui:Image name="ResetIcon" class="icon-48 reset-icon" />
+                    <ui:Label text="重置" name="ResetLabel" class="func-btn-label" />
+                </ui:Button>
+                <ui:Button name="DisplayButton" class="func-btn" tooltip="显示设置">
+                    <ui:Image name="LockIcon" class="icon-48 lock-icon" />
+                    <ui:Label text="显示" name="DisplayLabel" class="func-btn-label" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <!-- 主内容区 -->
+        <ui:VisualElement name="MainContentContainer" class="main-content">
+            <!-- 左侧分类栏 -->
+            <ui:VisualElement name="SideCategoryBar" class="side-bar">
+                <ui:Button name="CategoryTab1" class="side-tab active-tab">
+                    <ui:Label text="物品背包" class="side-tab-label" />
+                </ui:Button>
+                <ui:Button name="CategoryTab2" class="side-tab">
+                    <ui:Label text="装备背包" class="side-tab-label" />
+                </ui:Button>
+                <ui:Button name="CategoryTab3" class="side-tab">
+                    <ui:Label text="任务物品" class="side-tab-label" />
+                </ui:Button>
+                <ui:Button name="CategoryTab4" class="side-tab">
+                    <ui:Label text="消耗品" class="side-tab-label" />
+                </ui:Button>
+                <ui:Button name="CategoryTab5" class="side-tab">
+                    <ui:Label text="材料" class="side-tab-label" />
+                </ui:Button>
+                <ui:Button name="CategoryTab6" class="side-tab">
+                    <ui:Label text="其他" class="side-tab-label" />
+                </ui:Button>
+            </ui:VisualElement>
+            
+            <!-- 右侧主面板 -->
+            <ui:VisualElement name="InventoryMainPanel" class="main-panel">
+                <!-- 顶部排序标签栏 - 移出ScrollView，固定显示 -->
+                <ui:VisualElement name="TopTabBar" class="top-tab-bar">
+                    <ui:Button name="SortByRarity" class="inventory-tab active-inventory-tab">
+                        <ui:Label text="按稀有度排序" class="inventory-tab-label" />
+                    </ui:Button>
+                    <ui:Button name="SortByRecent" class="inventory-tab">
+                        <ui:Label text="按最近使用排序" class="inventory-tab-label" />
+                    </ui:Button>
+                    <ui:Button name="UISwitchButton" class="ui-switch-btn" tooltip="界面设置">
+                        <ui:Label text="界面设置" name="UISwitchLabel" class="ui-switch-label" />
+                    </ui:Button>
+                </ui:VisualElement>
+                
+                <!-- 滚动内容 -->
+                <ui:ScrollView name="ItemScrollView" class="item-scroll-view">
+                    <!-- 物品网格 - 7行6列 -->
+                    <ui:VisualElement name="ItemGridContainer" class="item-grid">
+                    <!-- 第一行 -->
+                    <ui:VisualElement name="ItemSlot0" class="item-slot">
+                        <ui:Label name="ItemCount0" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot1" class="item-slot">
+                        <ui:Label name="ItemCount1" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot2" class="item-slot">
+                        <ui:Label name="ItemCount2" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot3" class="item-slot">
+                        <ui:Label name="ItemCount3" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot4" class="item-slot">
+                        <ui:Label name="ItemCount4" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot5" class="item-slot">
+                        <ui:Label name="ItemCount5" class="item-count" />
+                    </ui:VisualElement>
+
+                    <!-- 第二行 -->
+                    <ui:VisualElement name="ItemSlot6" class="item-slot">
+                        <ui:Label name="ItemCount6" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot7" class="item-slot">
+                        <ui:Label name="ItemCount7" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot8" class="item-slot">
+                        <ui:Label name="ItemCount8" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot9" class="item-slot">
+                        <ui:Label name="ItemCount9" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot10" class="item-slot">
+                        <ui:Label name="ItemCount10" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot11" class="item-slot">
+                        <ui:Label name="ItemCount11" class="item-count" />
+                    </ui:VisualElement>
+
+                    <!-- 第三行 -->
+                    <ui:VisualElement name="ItemSlot12" class="item-slot">
+                        <ui:Label name="ItemCount12" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot13" class="item-slot">
+                        <ui:Label name="ItemCount13" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot14" class="item-slot">
+                        <ui:Label name="ItemCount14" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot15" class="item-slot">
+                        <ui:Label name="ItemCount15" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot16" class="item-slot">
+                        <ui:Label name="ItemCount16" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot17" class="item-slot">
+                        <ui:Label name="ItemCount17" class="item-count" />
+                    </ui:VisualElement>
+
+                    <!-- 第四行 -->
+                    <ui:VisualElement name="ItemSlot18" class="item-slot">
+                        <ui:Label name="ItemCount18" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot19" class="item-slot">
+                        <ui:Label name="ItemCount19" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot20" class="item-slot">
+                        <ui:Label name="ItemCount20" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot21" class="item-slot">
+                        <ui:Label name="ItemCount21" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot22" class="item-slot">
+                        <ui:Label name="ItemCount22" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot23" class="item-slot">
+                        <ui:Label name="ItemCount23" class="item-count" />
+                    </ui:VisualElement>
+
+                    <!-- 第五行 -->
+                    <ui:VisualElement name="ItemSlot24" class="item-slot">
+                        <ui:Label name="ItemCount24" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot25" class="item-slot">
+                        <ui:Label name="ItemCount25" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot26" class="item-slot">
+                        <ui:Label name="ItemCount26" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot27" class="item-slot">
+                        <ui:Label name="ItemCount27" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot28" class="item-slot">
+                        <ui:Label name="ItemCount28" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot29" class="item-slot">
+                        <ui:Label name="ItemCount29" class="item-count" />
+                    </ui:VisualElement>
+
+                    <!-- 第六行 -->
+                    <ui:VisualElement name="ItemSlot30" class="item-slot">
+                        <ui:Label name="ItemCount30" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot31" class="item-slot">
+                        <ui:Label name="ItemCount31" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot32" class="item-slot">
+                        <ui:Label name="ItemCount32" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot33" class="item-slot">
+                        <ui:Label name="ItemCount33" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot34" class="item-slot">
+                        <ui:Label name="ItemCount34" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot35" class="item-slot">
+                        <ui:Label name="ItemCount35" class="item-count" />
+                    </ui:VisualElement>
+
+                    <!-- 第七行 -->
+                    <ui:VisualElement name="ItemSlot36" class="item-slot">
+                        <ui:Label name="ItemCount36" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot37" class="item-slot">
+                        <ui:Label name="ItemCount37" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot38" class="item-slot">
+                        <ui:Label name="ItemCount38" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot39" class="item-slot">
+                        <ui:Label name="ItemCount39" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot40" class="item-slot">
+                        <ui:Label name="ItemCount40" class="item-count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ItemSlot41" class="item-slot">
+                        <ui:Label name="ItemCount41" class="item-count" />
+                    </ui:VisualElement>
+                    </ui:VisualElement>
+                    
+                    <!-- 底部空间，确保滚动时有足够空间 -->
+                    <ui:VisualElement class="bottom-space" />
+                </ui:ScrollView>
+                
+                <!-- 操作按钮区 - 固定在右下角，位置调整 -->
+                <ui:VisualElement name="ActionButtons" class="action-buttons">
+                    <ui:Button name="DeleteItemButton" text="删除" class="delete-btn" tooltip="删除选中物品" />
+                    <ui:Button name="SortButton" text="整理" class="sort-btn" tooltip="整理背包" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <!-- 物品预览面板 - 数据绑定 -->
+        <ui:VisualElement name="ItemPreviewPanel" class="item-preview">
+            <ui:Label name="PreviewTitle" class="preview-title" />
+            <ui:Label name="PreviewDescription" class="preview-description" />
+            <ui:Button name="UseItemButton" text="使用" class="use-btn" tooltip="使用选中物品" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

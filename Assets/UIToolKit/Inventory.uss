@@ -1,0 +1,460 @@
+.inventory-root {
+    width: 100%;
+    height: 100%;
+    background-image: url("Bg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.top-nav-bar {
+    width: 100%;
+    height: 88px;
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 32px;
+    background-color: rgba(18, 18, 18, 0.8);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 42, 42);
+}
+
+.back-btn {
+    width: 72px;
+    height: 72px;
+    background-color: transparent;
+    border-width: 0;
+    margin-right: 20px;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.exit-btn {
+    cursor: pointer;
+}
+
+.exit-btn:hover {
+    background-color: rgba(255, 59, 48, 0.2);
+    border-radius: 8px;
+}
+
+.icon-48 {
+    width: 48px;
+    height: 48px;
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
+}
+
+.icon-24 {
+    width: 24px;
+    height: 24px;
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
+}
+
+.back-icon {
+    background-image: url("arrow.png");
+}
+
+.reset-icon {
+    background-image: url("cycle_reversed.png");
+}
+
+.lock-icon {
+    background-image: url("lock.png");
+}
+
+.dropdown-icon {
+    background-image: url("trigle_reversed.png");
+}
+
+.inventory-title {
+    font-size: 36px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+    flex-grow: 1;
+    unity-text-align: middle-left;
+}
+
+.right-func-group {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.func-btn {
+    flex-direction: row;
+    align-items: center;
+    background-color: transparent;
+    border-width: 0;
+    padding: 8px 12px;
+    height: 40px;
+    flex-shrink: 0;
+    margin-right: 16px;
+}
+
+.func-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+.func-btn:active {
+    background-color: rgba(230, 194, 110, 0.3);
+    border-radius: 2px;
+}
+
+.func-btn-label {
+    font-size: 18px;
+    color: rgb(224, 224, 224);
+    unity-text-align: middle-center;
+    margin-left: 8px;
+}
+
+.main-content {
+    flex-direction: row;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.side-bar {
+    width: 220px;
+    flex-shrink: 0;
+    background-color: rgba(21, 21, 21, 0.8);
+    flex-direction: column;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+.side-tab {
+    width: 100%;
+    height: 56px;
+    background-color: transparent;
+    border-width: 0;
+    padding-left: 32px;
+    padding-right: 32px;
+    text-align: left;
+    justify-content: flex-start;
+    align-items: center;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.side-tab:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.side-tab:active {
+    background-color: rgba(230, 194, 110, 0.2);
+}
+
+.side-tab-label {
+    font-size: 18px;
+    color: rgb(176, 176, 176);
+}
+
+.active-tab {
+    background-color: rgba(42, 42, 42, 0.8);
+    border-right-width: 4px;
+    border-right-color: rgb(230, 194, 110);
+}
+
+.active-tab > .side-tab-label {
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+}
+
+.main-panel {
+    flex-grow: 1;
+    background-color: rgba(26, 26, 26, 0.8);
+    position: relative;
+    flex-direction: column;
+}
+
+/* 顶部排序标签栏 - 固定显示 */
+.top-tab-bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 32px;
+    padding-top: 24px;
+    padding-bottom: 16px;
+    flex-shrink: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(42, 42, 42, 0.8);
+}
+
+.inventory-tab {
+    flex-direction: row;
+    align-items: center;
+    background-color: transparent;
+    border-width: 0;
+    height: 40px;
+    padding: 8px 16px;
+    flex-shrink: 0;
+    margin-right: 12px;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.inventory-tab:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.inventory-tab:active {
+    background-color: rgba(230, 194, 110, 0.2);
+}
+
+.active-inventory-tab {
+    background-color: rgba(230, 194, 110, 0.2);
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(230, 194, 110);
+}
+
+.inventory-tab-label {
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+}
+
+.active-inventory-tab > .inventory-tab-label {
+    color: rgb(230, 194, 110);
+    -unity-font-style: bold;
+}
+
+.ui-switch-btn {
+    margin-left: auto;
+    background-color: rgb(51, 51, 51);
+    border-width: 1px;
+    border-color: rgb(74, 74, 74);
+    border-radius: 2px;
+    padding-left: 28px;
+    padding-right: 28px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    height: 44px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.ui-switch-btn:hover {
+    background-color: rgb(68, 68, 68);
+    border-color: rgb(102, 102, 102);
+}
+
+.ui-switch-btn:active {
+    background-color: rgba(230, 194, 110, 0.3);
+    border-color: rgb(230, 194, 110);
+}
+
+.ui-switch-label {
+    font-size: 18px;
+    color: rgb(224, 224, 224);
+    unity-text-align: middle-center;
+}
+
+.item-scroll-view {
+    flex-grow: 1;
+    padding-left: 32px;
+    padding-right: 32px;
+    padding-top: 24px;
+    padding-bottom: 32px;
+}
+
+.item-scroll-view > .unity-scroll-view__content-container {
+    flex-direction: column;
+}
+
+.item-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+    width: 100%;
+    flex-shrink: 0;
+    margin-bottom: 24px;
+}
+
+.item-slot {
+    width: 100px;
+    height: 100px;
+    background-color: rgba(30, 30, 30, 0.6);
+    border-width: 1px;
+    border-color: rgba(200, 200, 200, 0.3);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin: 8px;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.item-slot:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(40, 40, 40, 0.7);
+}
+
+.item-slot:active {
+    border-color: rgb(230, 194, 110);
+    background-color: rgba(230, 194, 110, 0.1);
+}
+
+.item-count {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    font-size: 14px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 10px;
+    min-width: 20px;
+    unity-text-align: middle-center;
+}
+
+/* 操作按钮区 - 固定在右下角，位置调整到底部 */
+.action-buttons {
+    position: absolute;
+    bottom: 16px;
+    right: 32px;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.delete-btn {
+    width: 120px;
+    height: 40px;
+    background-color: rgba(58, 26, 26, 0.8);
+    border-width: 1px;
+    border-color: rgb(119, 51, 51);
+    border-radius: 2px;
+    color: rgb(255, 170, 170);
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-left: 12px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background-color: rgba(75, 33, 33, 0.8);
+    border-color: rgb(143, 61, 61);
+}
+
+.delete-btn:active {
+    background-color: rgba(90, 40, 40, 0.9);
+    border-color: rgb(170, 70, 70);
+}
+
+.sort-btn {
+    width: 120px;
+    height: 40px;
+    background-color: rgba(30, 58, 26, 0.8);
+    border-width: 1px;
+    border-color: rgb(61, 119, 51);
+    border-radius: 2px;
+    color: rgb(170, 255, 170);
+    font-size: 16px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.sort-btn:hover {
+    background-color: rgba(39, 75, 33, 0.8);
+    border-color: rgb(73, 143, 61);
+}
+
+.sort-btn:active {
+    background-color: rgba(48, 93, 41, 0.9);
+    border-color: rgb(87, 170, 73);
+}
+
+.item-preview {
+    position: absolute;
+    bottom: 32px;
+    left: 280px;
+    width: 300px;
+    background-color: rgba(18, 18, 18, 0.9);
+    border-width: 1px;
+    border-color: rgb(42, 42, 42);
+    border-radius: 4px;
+    padding: 16px;
+    flex-direction: column;
+    visibility: hidden;
+}
+
+.item-preview.visible {
+    visibility: visible;
+}
+
+.preview-title {
+    font-size: 18px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+.preview-description {
+    font-size: 14px;
+    color: rgb(176, 176, 176);
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.use-btn {
+    width: 100%;
+    height: 40px;
+    background-color: rgba(26, 58, 38, 0.8);
+    border-width: 1px;
+    border-color: rgb(51, 119, 85);
+    border-radius: 2px;
+    color: rgb(170, 255, 204);
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 12px;
+    cursor: pointer;
+}
+
+.use-btn:hover {
+    background-color: rgba(33, 75, 49, 0.8);
+    border-color: rgb(61, 143, 102);
+}
+
+.use-btn:active {
+    background-color: rgba(41, 93, 61, 0.9);
+    border-color: rgb(73, 170, 122);
+}
+
+.use-btn:disabled {
+    background-color: rgba(26, 26, 26, 0.8);
+    border-color: rgb(42, 42, 42);
+    color: rgb(102, 102, 102);
+    cursor: not-allowed;
+}
+
+/* 底部空间，确保滚动时有足够空间 */
+.bottom-space {
+    height: 100px;
+    flex-shrink: 0;
+}
+
+/* 滚动条样式 */
+.item-scroll-view > .unity-scroll-view__vertical-scroller {
+    width: 8px;
+}
+
+.item-scroll-view > .unity-scroll-view__vertical-scroller > .unity-scroll-view__slider {
+    background-color: rgba(100, 100, 100, 0.6);
+    width: 8px;
+}
+
+.item-scroll-view > .unity-scroll-view__vertical-scroller > .unity-scroll-view__slider:hover {
+    background-color: rgba(150, 150, 150, 0.6);
+}
