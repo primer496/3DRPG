@@ -18,9 +18,9 @@ namespace HSM {
         [Header("Impact & Feel")]
         public float hitKnockbackSpeed = 4f;
         public float hitKnockbackDecay = 15f;
-        [Tooltip("¹¥»÷¿¨Èâ³ÙÖÍÊ±³¤")]
+        [Tooltip("æ”»å‡»å¡è‚‰è¿Ÿæ»æ—¶é•¿")]
         public float hitStopDuration = 0.15f;
-        [Tooltip("¿¨ÈâÆÚ¼äÓÉÓÚ¸ùÔË¶¯´ò¶Ïµ¼ÖÂµÄ¼ÌĞøÇ°³å±ÈÀı£¨Ä¬ÈÏ0.1´ú±í»ù±¾Í£×¡£©")]
+        [Tooltip("å¡è‚‰æœŸé—´ç”±äºæ ¹è¿åŠ¨æ‰“æ–­å¯¼è‡´çš„ç»§ç»­å‰å†²æ¯”ä¾‹ï¼ˆé»˜è®¤0.1ä»£è¡¨åŸºæœ¬åœä½ï¼‰")]
         public float hitStopRootMotionScale = 0.1f;
 
         [Header("Aim Assist")]

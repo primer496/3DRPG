@@ -17,7 +17,7 @@ namespace HSM {
         }
 
         public static class States {
-            // ¶¨Òå×´Ì¬»ú²ã¼¶Â·¾¶£¬·½±ãºóĞøÎ¬»¤ºÍ±ÜÃâÆ´Ğ´´íÎó
+            // å®šä¹‰çŠ¶æ€æœºå±‚çº§è·¯å¾„ï¼Œæ–¹ä¾¿åç»­ç»´æŠ¤å’Œé¿å…æ‹¼å†™é”™è¯¯
             public const string Alive = Layers.Base + ".Alive";
             public const string AirbornePath = Alive + ".Airborne";
             public const string GroundedPath = Alive + ".Grounded";
@@ -25,17 +25,17 @@ namespace HSM {
             public const string Action = GroundedPath + ".Action";
             public const string ClimbPath = Action + ".Climb";
 
-            // ==== Locomotion (Î»ÒÆ×´Ì¬) ====
+            // ==== Locomotion (ä½ç§»çŠ¶æ€) ====
             public const string NormalMove = Locomotion + ".NormalMove";
             public const string StopType = Locomotion + ".StopType";
 
-            // ==== Airborne (¿ÕÖĞ×´Ì¬) ====
-            // ±¸×¢£º×ÅÂ½ÔÚ´Ë½á¹¹ÖĞÊôÓÚ¿ÕÖĞ½áÊøµÄË²¼ä¹ı¶É
+            // ==== Airborne (ç©ºä¸­çŠ¶æ€) ====
+            // å¤‡æ³¨ï¼šç€é™†åœ¨æ­¤ç»“æ„ä¸­å±äºç©ºä¸­ç»“æŸçš„ç¬é—´è¿‡æ¸¡
             public const string Airborne = AirbornePath;
             public const string AirborneFall = AirbornePath + ".AirborneFall";
             public const string Landing = AirbornePath + ".Landing";
 
-            // ==== Action (Ö÷¶¯ĞĞÎª×´Ì¬) ====
+            // ==== Action (ä¸»åŠ¨è¡Œä¸ºçŠ¶æ€) ====
             public const string Dodge = Action + ".Dodge";
             public const string Vault = Action + ".Vault";
 

@@ -1,11 +1,11 @@
 using System.ComponentModel;
-using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using InventorySystem.ViewModel;
 using InventorySystem.Model;
 using InventorySystem.Utils;
+using TaskManager;
 
 public class InventoryUIController : MonoBehaviour
 {
@@ -77,10 +77,13 @@ public class InventoryUIController : MonoBehaviour
             bindableData = viewModel.bindableData;
             if (bindableData != null)
             {
-                // 我们使用更安全、逻辑可控的 C# 事件驱动机制，无需 UXML 引擎层面的 dataSource 绑定
+                // 鎴戜滑浣跨敤鏇村畨鍏ㄣ€侀€昏緫鍙帶鐨� C# 浜嬩欢椹卞姩鏈哄埗锛屾棤闇€ UXML 寮曟搸灞傞潰鐨� dataSource 缁戝畾
                 SubscribeBindableChanges();
             }
         }
+
+        // 鍒濆闅愯棌锛歎I Toolkit 鐢� display:none 浠ｆ浛 SetActive(false)
+        root.style.display = DisplayStyle.None;
     }
 
     private void RegisterEvents()
@@ -103,7 +106,7 @@ public class InventoryUIController : MonoBehaviour
         sortButton.clicked += OnSortButtonClicked;
         useItemButton.clicked += OnUseItemButtonClicked;
 
-        // 为每个物品槽添加点击事件
+        // 涓烘瘡涓墿鍝佹Ы娣诲姞鐐瑰嚮浜嬩欢
         for (int i = 0; i < 42; i++)
         {
             if (itemSlots[i] != null)
@@ -111,13 +114,13 @@ public class InventoryUIController : MonoBehaviour
                 int index = i;
                 itemSlots[i].RegisterCallback<ClickEvent>(evt => {
                     OnItemSlotClicked(index);
-                    // 阻止事件冒泡，避免触发根容器的点击事件
+                    // 闃绘浜嬩欢鍐掓场锛岄伩鍏嶈Е鍙戞牴瀹瑰櫒鐨勭偣鍑讳簨浠�
                     evt.StopPropagation();
                 });
             }
         }
 
-        // 为预览面板添加点击事件，阻止事件冒泡
+        // 涓洪瑙堥潰鏉挎坊鍔犵偣鍑讳簨浠讹紝闃绘浜嬩欢鍐掓场
         if (itemPreviewPanel != null)
         {
             itemPreviewPanel.RegisterCallback<ClickEvent>(evt => {
@@ -125,7 +128,7 @@ public class InventoryUIController : MonoBehaviour
             });
         }
 
-        // 为根容器添加点击事件，点击其他区域关闭预览
+        // 涓烘牴瀹瑰櫒娣诲姞鐐瑰嚮浜嬩欢锛岀偣鍑诲叾浠栧尯鍩熷叧闂瑙�
         root.RegisterCallback<ClickEvent>(evt => {
             if (bindableData != null && bindableData.isPreviewVisible)
             {
@@ -141,7 +144,7 @@ public class InventoryUIController : MonoBehaviour
     {
         if (bindableData == null) return;
 
-        // 2. 对于控制样式的、无法被组件原生直接容纳的控制量，采用C#事件监听
+        // 2. 瀵逛簬鎺у埗鏍峰紡鐨勩€佹棤娉曡缁勪欢鍘熺敓鐩存帴瀹圭撼鐨勬帶鍒堕噺锛岄噰鐢–#浜嬩欢鐩戝惉
         bindableData.OnCategoryChanged += RefreshUI;
         bindableData.OnPreviewStateChanged += UpdatePreviewPanel;
         bindableData.OnTabChanged += () =>
@@ -159,7 +162,7 @@ public class InventoryUIController : MonoBehaviour
         {
             bindableData.OnCategoryChanged -= RefreshUI;
             bindableData.OnPreviewStateChanged -= UpdatePreviewPanel;
-            // 匿名 delegate 将在 OnDisable 中随对象销毁而回收
+            // 鍖垮悕 delegate 灏嗗湪 OnDisable 涓殢瀵硅薄閿€姣佽€屽洖鏀�
         }
     }
 
@@ -170,6 +173,9 @@ public class InventoryUIController : MonoBehaviour
             viewModel.inventoryModel.OnInventoryChanged += RefreshUI;
             RefreshUI();
         }
+
+        EventBus.Instance.Subscribe("ToggleInventory", ToggleInventory);
+        EventBus.Instance.Subscribe("CloseInventory", CloseInventory);
     }
 
     private void OnDisable()
@@ -178,6 +184,16 @@ public class InventoryUIController : MonoBehaviour
             viewModel.inventoryModel.OnInventoryChanged -= RefreshUI;
 
         UnsubscribeBindableChanges();
+
+        EventBus.Instance.Unsubscribe("ToggleInventory", ToggleInventory);
+        EventBus.Instance.Unsubscribe("CloseInventory", CloseInventory);
+    }
+
+    /// <summary>由 QuestUIController 互斥关闭背包时调用，不触发再次锁/解锁</summary>
+    private void CloseInventory()
+    {
+        if (root != null && root.style.display != DisplayStyle.None)
+            root.style.display = DisplayStyle.None;
     }
 
     private void RefreshUI()
@@ -200,7 +216,7 @@ public class InventoryUIController : MonoBehaviour
                 itemSlots[i].style.backgroundImage = null;
             }
 
-            // 根据是否选中删除应用遮罩颜色
+            // 鏍规嵁鏄惁閫変腑鍒犻櫎搴旂敤閬僵棰滆壊
             itemSlots[i].style.unityBackgroundImageTintColor = (isDeleteMode && itemsToDelete.Contains(i)) ? new Color(1f, 0.3f, 0.3f) : Color.white;
         }
     }
@@ -209,11 +225,11 @@ public class InventoryUIController : MonoBehaviour
     {
         if (bindableData == null) return;
 
-        // 更新UI文本渲染
+        // 鏇存柊UI鏂囨湰娓叉煋
         previewTitle.text = bindableData.previewTitle;
         previewDescription.text = bindableData.previewDescription;
 
-        // 根据状态绑定 USS class 样式，文本数据已被 SetBinding 自动接管，不再需要手动赋值！
+        // 鏍规嵁鐘舵€佺粦瀹� USS class 鏍峰紡锛屼粠鑰屾帶鍒舵樉闅愬拰瑙嗚鏁堟灉
         if (bindableData.isPreviewVisible)
         {
             itemPreviewPanel.AddToClassList("visible");
@@ -250,34 +266,56 @@ public class InventoryUIController : MonoBehaviour
         if (!isDeleteMode) return;
         isDeleteMode = false;
         if (deleteItemButton != null)
-            deleteItemButton.style.backgroundColor = new StyleColor(StyleKeyword.Null); // 恢复初始样式
+            deleteItemButton.style.backgroundColor = new StyleColor(StyleKeyword.Null); // 鎭㈠鍒濆鏍峰紡
         itemsToDelete.Clear();
-        RefreshUI(); // 取消变红遮罩
+        RefreshUI(); // 鍙栨秷鍙樼孩閬僵
     }
 
     private void OnBackButtonClicked() 
     {
         CancelDeleteMode();
-        // 游戏背包退出：隐藏主UI或直接禁用物体
         if (root != null)
         {
             root.style.display = DisplayStyle.None;
+            EventBus.Instance.RaiseInputLock(false);
         }
-        // gameObject.SetActive(false); // 取决于你的系统如何管理弹窗页面
+    }
+
+    /// <summary>
+    /// 澶栭儴璋冪敤姝ゆ柟娉曞垏鎹㈣儗鍖呯姸鎬侊紙鎵撳紑鎴栧叧闂級
+    /// </summary>
+    public void ToggleInventory()
+    {
+        if (root != null)
+        {
+            if (root.style.display == DisplayStyle.None)
+            {
+                // 互斥：先关闭任务面板
+                EventBus.Instance.Raise("CloseQuestLog");
+                root.style.display = DisplayStyle.Flex;
+                EventBus.Instance.RaiseInputLock(true);
+                RefreshUI();
+            }
+            else
+            {
+                root.style.display = DisplayStyle.None;
+                EventBus.Instance.RaiseInputLock(false);
+            }
+        }
     }
 
     private void OnResetButtonClicked() 
     {
         CancelDeleteMode();
-        Debug.Log("执行背包重置");
+        Debug.Log("鎵ц鑳屽寘閲嶇疆");
         if (viewModel != null)
             viewModel.ResetInventory();
     }
 
     private void OnDisplayButtonClicked() 
     {
-        Debug.Log("显示设定 - 此处可以加入控制物品模型隐藏/显示的逻辑");
-        // 如果有额外的面板，可以在此处 Toggle
+        Debug.Log("鏄剧ず璁惧畾 - 姝ゅ鍙互鍔犲叆鎺у埗鐗╁搧妯″瀷闅愯棌/鏄剧ず鐨勯€昏緫");
+        // 濡傛灉鏈夐澶栫殑闈㈡澘锛屽彲浠ュ湪姝ゅ Toggle
     }
 
     private void OnCategoryTabClicked(int categoryIndex)
@@ -303,21 +341,21 @@ public class InventoryUIController : MonoBehaviour
 
     private void OnUISwitchButtonClicked() 
     {
-        Debug.Log("界面设置被点击 - 呼出游戏系统菜单");
+        Debug.Log("鐣岄潰璁剧疆琚偣鍑� - 鍛煎嚭娓告垙绯荤粺鑿滃崟");
     }
 
     private void OnDeleteItemButtonClicked()
     {
         if (!isDeleteMode)
         {
-            // 第一次点击：进入删除模式
+            // 绗竴娆＄偣鍑伙細杩涘叆鍒犻櫎妯″紡
             isDeleteMode = true;
-            deleteItemButton.style.backgroundColor = new StyleColor(new Color(0.8f, 0.2f, 0.2f, 1f)); // 按钮变红高亮
+            deleteItemButton.style.backgroundColor = new StyleColor(new Color(0.8f, 0.2f, 0.2f, 1f)); // 鎸夐挳鍙樼孩楂樹寒
             itemsToDelete.Clear();
         }
         else
         {
-            // 第二次点击：执行真实删除并退出删除模式
+            // 绗簩娆＄偣鍑伙細鎵ц鐪熷疄鍒犻櫎骞堕€€鍑哄垹闄ゆā寮�
             if (viewModel != null && itemsToDelete.Count > 0)
             {
                 viewModel.DeleteItems(itemsToDelete);
@@ -342,32 +380,32 @@ public class InventoryUIController : MonoBehaviour
         }
     }
 
-    // 移除悬停相关方法，因为不再使用
+    // 绉婚櫎鎮仠鐩稿叧鏂规硶锛屽洜涓轰笉鍐嶄娇鐢�
 
 
     private void OnItemSlotClicked(int index)
     {
         if (isDeleteMode)
         {
-            // 删除模式：负责选中与反选变红
+            // 鍒犻櫎妯″紡锛氳礋璐ｉ€変腑涓庡弽閫夊彉绾�
             if (viewModel == null) return;
             var slot = viewModel.GetSlotAt(index);
-            if (slot.IsEmpty) return; // 不选择空格子
+            if (slot.IsEmpty) return; // 涓嶉€夋嫨绌烘牸瀛�
 
             if (itemsToDelete.Contains(index))
             {
                 itemsToDelete.Remove(index);
-                itemSlots[index].style.unityBackgroundImageTintColor = Color.white; // 恢复原样
+                itemSlots[index].style.unityBackgroundImageTintColor = Color.white; // 鎭㈠鍘熸牱
             }
             else
             {
                 itemsToDelete.Add(index);
-                itemSlots[index].style.unityBackgroundImageTintColor = new Color(1f, 0.3f, 0.3f); // 图片变红
+                itemSlots[index].style.unityBackgroundImageTintColor = new Color(1f, 0.3f, 0.3f); // 鍥剧墖鍙樼孩
             }
         }
         else
         {
-            // 正常模式：负责正常展示物品
+            // 姝ｅ父妯″紡锛氳礋璐ｆ甯稿睍绀虹墿鍝�
             if (viewModel != null)
                 viewModel.SelectItem(index);
         }

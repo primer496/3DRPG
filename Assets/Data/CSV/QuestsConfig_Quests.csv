@@ -1,0 +1,5 @@
+﻿assetName,id,title,description,isOrdered
+ClearBlackForest_Phase1_Investigate,ClearBlackForest_Phase1_Investigate,调查魔物真相,村子西边的黑风林出现了神秘魔物，村民无法砸柴，存粮即将耗尽。需要调查真相并决定对策。,1
+ClearBlackForest_Phase2_Kill,ClearBlackForest_Phase2_Kill,终结黑风林危机,村长决定以武力解决黑风林的魔物威胁。再次前往黑风林，消灭狂怒的魔物。,1
+ClearBlackForest_Phase2_Peace,ClearBlackForest_Phase2_Peace,治愈黑风林之主,村长决定尝试和平解决。使用收集到的草药安抚狂暴的魔物，化解危机。,1
+"# isOrdered: 1=ordered, 0=unordered",,,,

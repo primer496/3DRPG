@@ -1,5 +1,4 @@
 using System;
-using Unity.Properties;
 using UnityEngine;
 
 namespace InventorySystem.ViewModel
@@ -14,8 +13,7 @@ namespace InventorySystem.ViewModel
         private string _previewTitle = "";
         private string _previewDescription = "";
 
-        // ¹©UI Toolkit½øÐÐÊý¾Ý°ó¶¨£¨SetBinding£©µÄÊôÐÔ£¬ÒýÇæ½«×Ô¶¯Éú³É±ä¸üÍ¨Öª
-        [CreateProperty]
+        // UIè§†å›¾çš„çŠ¶æ€æ•°æ®ä¸­å¿ƒï¼Œçº¯C#äº‹ä»¶é©±åŠ¨
         public string previewTitle 
         { 
             get => _previewTitle; 
@@ -27,7 +25,6 @@ namespace InventorySystem.ViewModel
             }
         }
 
-        [CreateProperty]
         public string previewDescription 
         { 
             get => _previewDescription; 
@@ -39,16 +36,14 @@ namespace InventorySystem.ViewModel
             }
         }
 
-        [CreateProperty]
         public int selectedSlotIndex { get; set; } = -1;
 
-        // ¶Ô¿ØÖÆÆ÷²ã¼¶µÄ½çÃæÖØ»æÊÂ¼þÍ¨Öª
+        // å¯¹æŽ§åˆ¶å™¨å±‚çº§çš„ç•Œé¢é‡ç»˜äº‹ä»¶é€šçŸ¥
         public event Action OnCategoryChanged;
         public event Action OnPreviewStateChanged;
         public event Action OnTabChanged;
 
-        // Éæ¼°¸´ÔÓÃæ°å²ã¼¶ÓëCSSÇÐ»»µÄÊôÐÔ£¬ÒÀÈ»±£³Ö×Ô¶¨ÒåÊÂ¼þµÄ»Øµ÷
-        [CreateProperty]
+        // ä»¥ä¸‹å±žæ€§æ¶‰åŠå¤æ‚é¢æ¿å±‚çº§ä¸ŽCSSåˆ‡æ¢ï¼Œé€šè¿‡äº‹ä»¶å¹¿æ’­é€šçŸ¥Viewå±‚
         public int currentCategoryIndex
         {
             get => _currentCategoryIndex;
@@ -60,7 +55,6 @@ namespace InventorySystem.ViewModel
             }
         }
 
-        [CreateProperty]
         public bool isPreviewVisible
         {
             get => _isPreviewVisible;
@@ -72,7 +66,6 @@ namespace InventorySystem.ViewModel
             }
         }
 
-        [CreateProperty]
         public int activeSortTab
         {
             get => _activeSortTab;
@@ -84,7 +77,6 @@ namespace InventorySystem.ViewModel
             }
         }
 
-        [CreateProperty]
         public int activeCategoryTab
         {
             get => _activeCategoryTab;

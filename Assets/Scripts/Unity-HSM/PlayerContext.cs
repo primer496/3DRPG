@@ -25,6 +25,8 @@ namespace HSM {
 
         // 基础移动参数（由配置资产覆盖）
         [HideInInspector]
+        public bool inputLocked = false;
+        [HideInInspector]
         public bool enableStopState = true;
         [HideInInspector]
         public float moveSpeed = 6f;

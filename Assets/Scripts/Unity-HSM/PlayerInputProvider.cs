@@ -13,6 +13,15 @@ namespace HSM {
         public InputAction attackAction;
 
         public void WriteIntent(PlayerContext ctx) {
+            if (ctx.inputLocked) {
+                ctx.moveInput = Vector2.zero;
+                ctx.jumpPressed = false;
+                ctx.runHeld = false;
+                ctx.dodgePressed = false;
+                ctx.attackPressed = false;
+                return;
+            }
+
             ctx.moveInput = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
             ctx.jumpPressed = jumpAction != null && jumpAction.WasPressedThisFrame();
             ctx.runHeld = runAction != null && runAction.IsPressed();

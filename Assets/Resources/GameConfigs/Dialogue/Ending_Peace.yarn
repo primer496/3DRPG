@@ -1,0 +1,14 @@
+title: Ending_Peace
+tags: 缁撳眬鍒嗘敮
+---
+
+锛堜綘甯︾潃瀹夌鑽夎嵂鍘讳簡榛戦鏋楋紝鎴愬姛瀹夋姎浜嗙伒楣匡紝鎶婂畠寮曞埌浜嗘灄瀛愭繁澶勶級
+鏃呰鑰咃紝浣犲お鍘夊浜嗭紒涓嶄粎瑙ｅ喅浜嗘潙瀛愮殑闂锛岃繕淇濅綇浜嗙伒楣跨殑鎬у懡锛�
+鍏ㄦ潙浜洪兘浼氭劅璋綘鐨勶紒浠ュ悗浣犲氨鏄垜浠潙瀛愮殑璐靛锛�
+<<set $QuestCompleted = true>>
+<<set $QuestAccepted = false>>
+<<set $Phase2Accepted = false>>
+<<CompleteQuest ClearBlackForest_Phase2_Peace>>
+<<jump DailyDialogueEnd>>
+===
+

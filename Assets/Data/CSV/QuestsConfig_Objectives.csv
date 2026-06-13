@@ -1,0 +1,10 @@
+﻿assetName,idx,targetType,targetId,requiredAmount,uiDescription
+ClearBlackForest_Phase1_Investigate,1,Communicate,VillageChief,1,与村长交谈，了解黑风林情况
+ClearBlackForest_Phase1_Investigate,2,Collect,Clue_Footprint,1,前往黑风林外围，寻找脚印等线索
+ClearBlackForest_Phase1_Investigate,3,Collect,Clue_Herb,1,深入林中，收集被某种生物啃食的草药
+ClearBlackForest_Phase1_Investigate,4,Communicate,VillageChief,1,带回证据向村长报告，并决定对策
+ClearBlackForest_Phase2_Kill,1,Kill,ForestMonster,1,再次前往黑风林，消灭狂怒的魔物
+ClearBlackForest_Phase2_Kill,2,Communicate,VillageChief,1,向村长报告魔物已被消灭
+ClearBlackForest_Phase2_Peace,1,Communicate,Monster_BlackForestBoss,1,靠近魔物，使用草药安抚它
+ClearBlackForest_Phase2_Peace,2,Communicate,VillageChief,1,向村长报告事情已和平解决
+# targetType: Kill / Collect / Communicate,,,,,

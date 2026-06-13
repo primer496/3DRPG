@@ -1,4 +1,6 @@
 {
+    "files.encoding": "utf8",
+    "files.autoGuessEncoding": false,
     "files.exclude": {
         "**/.DS_Store": true,
         "**/.git": true,
@@ -56,5 +58,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "FinalRPG.sln"
+    "dotnet.defaultSolution": "FinalRPG.slnx",
+    "dotnet.preferCSharpExtension": true
 }

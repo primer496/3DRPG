@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="QuestSystem.uss" />
+    <ui:VisualElement name="quest-log-container" class="quest-view-root">
+        <ui:VisualElement name="header-bar" class="header-bar">
+            <ui:Label text="[ 任务日志 ]" class="header-title" />
+            <ui:Button name="btn-close-quest" text="关闭" class="btn-close" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="quest-detail-panel" class="detail-panel">
+            <ui:VisualElement class="quest-info-header">
+                <ui:VisualElement name="quest-icon" class="quest-icon" />
+                <ui:VisualElement class="quest-title-container">
+                    <ui:Label name="quest-title-label" text="清除黑风林魔物" class="text-title" />
+                    <ui:VisualElement class="tag-container">
+                        <ui:Label text="主线" class="tag-main" />
+                        <ui:Label text="Lv.15" class="tag-level" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Label name="quest-desc-label" text="村子西边的黑风林出现了神秘魔物，村民无法砍柴，存粮即将耗尽。调查真相并解决问题。" class="text-description" />
+            <ui:Label text="任务目标" class="text-subtitle" />
+
+            <ui:VisualElement name="objectives-list-container" class="objective-list">
+            </ui:VisualElement>
+
+            <ui:VisualElement class="progress-section">
+                <ui:ProgressBar name="quest-progress-bar" value="25" title="1/4 (25%)" class="custom-progress" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="action-section">
+                <ui:Button name="btn-track-quest" text="追踪任务" class="btn-primary" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <ui:VisualElement name="footer-bar" class="footer-bar">
+            <ui:Label name="footer-hint-label" text="下一步: 前往黑风林" class="text-footer" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

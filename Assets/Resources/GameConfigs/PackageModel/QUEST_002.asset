@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: QUEST_002
+  m_EditorClassIdentifier: 
+  itemID: QUEST_002
+  _itemName: "\u7834\u635F\u7684\u53E4\u4EE3\u77F3\u677F"
+  _description: "\u53E4\u4EE3\u9057\u8403\u4E2D\u51FA\u571F\u7684\u77F3\u677F\uFF0C\u523B\u6709\u65E0\u4EBA\u80FD\u61C2\u7684\u53E4\u6587\u5B57\uFF0C\u8003\u53E4\u5B66\u5BB6\u6B63\u5728\u5BFB\u627E\u5B8C\u6574\u77F3\u677F\u89E3\u8BFB\u79D8\u5BC6\u3002"
+  iconPath: PackageIcon/QuestItem/QUEST_002
+  category: 2
+  rarity: 1
+  isStackable: 0
+  maxStack: 1

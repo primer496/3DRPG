@@ -1,0 +1,4 @@
+﻿assetPath,soType,enableLocomotion,enableCombat,enableJump,enableTraversal
+Resources/GameConfigs/Character/Sets/Player/PlayerCapabilityConfigSet,Player,TRUE,TRUE,TRUE,TRUE
+Resources/GameConfigs/Character/Sets/Enemy/EnemyCapabilityConfigSet,Enemy,TRUE,TRUE,FALSE,FALSE
+# soType: Player or Enemy  |  enable*: TRUE/FALSE  |  SO references (movement/combat/jump/traversal) are NOT managed here,,,,,

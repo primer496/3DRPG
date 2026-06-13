@@ -1,0 +1,12 @@
+title: Quest_Accepted
+tags: 任务引导
+---
+
+这是我们村子的一点心意，你先收下！
+<<GivePlayerItem Gold 100>>
+<<GivePlayerItem HealthPotion 3>>
+黑风林里很危险，你可以先在村子周围问问村民，说不定能找到关于魔物的线索。
+等你找到线索，随时可以回来找我。
+<<jump DialogueEnd>>
+===
+

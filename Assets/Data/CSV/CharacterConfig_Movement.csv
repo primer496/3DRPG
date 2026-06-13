@@ -1,0 +1,4 @@
+﻿assetPath,moveSpeed,accel,runSpeedMultiplier,enableStopState,stopDuration,stopEnterSpeedThreshold,stopEnterCrossFade,stopSpeedDecayTime
+Resources/GameConfigs/Character/Modules/Player/ActorMovementConfig,1,40,2,TRUE,0.74,0.63,0.11,0.23
+Resources/GameConfigs/Character/Modules/Enemy/ActorMovementConfig,1,40,2,TRUE,0.26,0.32,0.06,0.12
+# enableStopState: TRUE/FALSE  |  assetPath relative to Assets/ without .asset,,,,,,,,

@@ -2,70 +2,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace InventorySystem.Model
 {
-    public class InventoryModel : MonoBehaviour
+    public class InventoryModel
     {
-        [SerializeField] private int maxSlots = 42; // UXMLÓĞ42¸ö¸ñ×Ó(ItemSlot0 - ItemSlot41)
-        
-        [Header("Runtime Info")]
+        private int maxSlots;
+
         public List<InventorySlot> slots = new List<InventorySlot>();
-
-        [Header("Test Items")]
-        public List<ItemData> initialTestItems = new List<ItemData>();
-        public int testItemAmount = 5;
-        public bool autoLoadFromPath = true; // ÊÇ·ñ×Ô¶¯°´Â·¾¶¼ÓÔØ
-
         public event Action OnInventoryChanged;
 
-        private void Awake()
+        public InventoryModel(int maxSlots = 42)
         {
-            // ³õÊ¼»¯¿Õ²ÛÎ»
+            this.maxSlots = maxSlots;
+            InitEmptySlots();
+        }
+
+        private void InitEmptySlots()
+        {
             for (int i = 0; i < maxSlots; i++)
             {
                 slots.Add(new InventorySlot());
             }
         }
 
-        private void Start()
-        {
-#if UNITY_EDITOR
-            if (autoLoadFromPath)
-            {
-                string path = "Assets/GameConfigs/PackageModel";
-                string[] guids = AssetDatabase.FindAssets("t:ItemData", new[] { path });
-                foreach (string guid in guids)
-                {
-                    string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                    ItemData item = AssetDatabase.LoadAssetAtPath<ItemData>(assetPath);
-                    // ¹ıÂËµôÎ´ÅäÖÃÍêÕû£¨ÀıÈçÃ»ÓĞID»òÃû×Ö£©µÄÄ¬ÈÏ»ò¿ÕÎïÆ·Êı¾İ
-                    if (item != null && !string.IsNullOrEmpty(item.itemID) && !initialTestItems.Contains(item))
-                    {
-                        initialTestItems.Add(item);
-                    }
-                }
-            }
-#endif
-            // Ìí¼Ó²âÊÔÎïÆ·
-            foreach (var item in initialTestItems)
-            {
-                if (item != null)
-                {
-                    AddItem(item, testItemAmount);
-                }
-            }
-        }
-
-        // Ìí¼ÓÎïÆ·
+        // æ·»åŠ ç‰©å“
         public bool AddItem(ItemData item, int amount)
         {
             if (item == null || amount <= 0) return false;
 
-            // Èç¹ûÎïÆ·¿ÉÒÔ¶Ñµş£¬´¦ÀíÏàÍ¬ÎïÆ·µÄÏÖÓĞÕ»
+            // å¦‚æœç‰©å“å¯ä»¥å †å ï¼Œå¤„ç†ç›¸åŒç‰©å“çš„ç°æœ‰æ ˆ
             if (item.isStackable)
             {
                 foreach (var slot in slots)
@@ -75,6 +41,7 @@ namespace InventorySystem.Model
                         int spaceLeft = item.maxStack - slot.amount;
                         int addAmount = Mathf.Min(spaceLeft, amount);
                         slot.amount += addAmount;
+                        slot.lastUsedTime = UnityEngine.Time.time; // æ›´æ–°æœ€è¿‘è·å–æ—¶é—´
                         amount -= addAmount;
 
                         if (amount <= 0)
@@ -86,7 +53,7 @@ namespace InventorySystem.Model
                 }
             }
 
-            // Èç¹û»¹ÓĞÊ£ÓàÎïÆ·£¬³¢ÊÔÑ°ÕÒĞÂ¿Õ¸ñ×Ó´æ·Å
+            // å¦‚æœè¿˜æœ‰å‰©ä½™ç‰©å“ï¼Œå°è¯•å¯»æ‰¾æ–°ç©ºæ ¼å­å­˜æ”¾
             foreach (var slot in slots)
             {
                 if (slot.IsEmpty)
@@ -94,6 +61,7 @@ namespace InventorySystem.Model
                     slot.itemData = item;
                     int addAmount = item.isStackable ? Mathf.Min(item.maxStack, amount) : 1;
                     slot.amount = addAmount;
+                    slot.lastUsedTime = UnityEngine.Time.time; // è®°å½•è·å¾—æ—¶é—´
                     amount -= addAmount;
 
                     if (amount <= 0)
@@ -104,12 +72,12 @@ namespace InventorySystem.Model
                 }
             }
 
-            // ·µ»ØfalseÒâÎ¶×Å±³°üÒÑ¾­ÂúÁË£¬´æ²»ÏÂÈ«²¿ÄÚÈİ
+            // è¿”å›falseæ„å‘³ç€èƒŒåŒ…å·²ç»æ»¡äº†ï¼Œå­˜ä¸ä¸‹å…¨éƒ¨å†…å®¹
             OnInventoryChanged?.Invoke();
             return false;
         }
 
-        // ÒÆ³ı»òÏûºÄÎïÆ·
+        // ç§»é™¤æˆ–æ¶ˆè€—ç‰©å“
         public void RemoveItem(int index, int amount)
         {
             if (index < 0 || index >= slots.Count) return;
@@ -126,7 +94,7 @@ namespace InventorySystem.Model
             OnInventoryChanged?.Invoke();
         }
 
-        // ½»»»¸ñ×ÓµÄÎ»ÖÃ
+        // äº¤æ¢æ ¼å­çš„ä½ç½®
         public void SwapItems(int fromIndex, int toIndex)
         {
             if (fromIndex < 0 || fromIndex >= slots.Count) return;
@@ -136,59 +104,122 @@ namespace InventorySystem.Model
             var fromSlot = slots[fromIndex];
             var toSlot = slots[toIndex];
 
-            // ´æ³ÉÁÙÊ±±äÁ¿½»»»
+            // å­˜æˆä¸´æ—¶å˜é‡äº¤æ¢
             var tempItem = fromSlot.itemData;
             var tempAmount = fromSlot.amount;
+            var tempLastUsedTime = fromSlot.lastUsedTime;
 
             fromSlot.itemData = toSlot.itemData;
             fromSlot.amount = toSlot.amount;
+            fromSlot.lastUsedTime = toSlot.lastUsedTime;
 
             toSlot.itemData = tempItem;
             toSlot.amount = tempAmount;
+            toSlot.lastUsedTime = tempLastUsedTime;
 
             OnInventoryChanged?.Invoke();
         }
 
-        // ÕûÀí±³°ü (0: Ï¡ÓĞ¶È, 1: ÊıÁ¿/½üÆÚ)
+        // ========== å­˜æ¡£æ¥å£ ==========
+
+        /// <summary>
+        /// å¯¼å‡ºå½“å‰èƒŒåŒ…å†…å®¹ä¸ºå­˜æ¡£æ•°æ®åˆ—è¡¨ï¼ˆä»…ä¿å­˜éç©ºæ ¼å­ï¼‰ã€‚
+        /// </summary>
+        public List<InventorySlotSaveData> GetSaveData()
+        {
+            var result = new List<InventorySlotSaveData>();
+            foreach (var slot in slots)
+            {
+                if (!slot.IsEmpty)
+                {
+                    result.Add(new InventorySlotSaveData
+                    {
+                        itemId = slot.itemData.itemID,
+                        amount = slot.amount,
+                        lastUsedTime = slot.lastUsedTime
+                    });
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// ä»å­˜æ¡£æ•°æ®æ¢å¤èƒŒåŒ…å†…å®¹ã€‚
+        /// å…ˆæ¸…ç©ºæ‰€æœ‰æ§½ä½ï¼Œç„¶åæ ¹æ® itemId ä» Resources åŠ è½½ ItemData è¿˜åŸã€‚
+        /// </summary>
+        public void LoadFromSave(List<InventorySlotSaveData> data)
+        {
+            // é‡ç½®æ‰€æœ‰æ§½ä½
+            foreach (var slot in slots)
+            {
+                slot.Clear();
+            }
+
+            if (data == null || data.Count == 0)
+            {
+                OnInventoryChanged?.Invoke();
+                return;
+            }
+
+            int slotIndex = 0;
+            foreach (var saved in data)
+            {
+                if (slotIndex >= slots.Count) break;
+                if (string.IsNullOrEmpty(saved.itemId))
+                {
+                    Debug.LogWarning("[InventoryModel] Load: å­˜æ¡£ä¸­å­˜åœ¨ç©º itemIdï¼Œå·²è·³è¿‡");
+                    continue;
+                }
+
+                var itemData = Resources.Load<ItemData>($"GameConfigs/PackageModel/{saved.itemId}");
+                if (itemData != null)
+                {
+                    slots[slotIndex].itemData = itemData;
+                    slots[slotIndex].amount = saved.amount;
+                    slots[slotIndex].lastUsedTime = saved.lastUsedTime;
+                    slotIndex++;
+                }
+                else
+                {
+                    Debug.LogWarning($"[InventoryModel] Load: æ— æ³•æ‰¾åˆ° ItemData: {saved.itemId}ï¼Œå·²è·³è¿‡");
+                }
+            }
+
+            OnInventoryChanged?.Invoke();
+        }
+
+        // æ•´ç†èƒŒåŒ… (0: ç¨€æœ‰åº¦, 1: æ•°é‡/è¿‘æœŸ)
         public void SortInventory(int mode)
         {
-            var validItems = slots.Where(s => !s.IsEmpty).ToList();
+            // ä½¿ç”¨å€¼å…ƒç»„åˆ›å»ºæ•°æ®å¿«ç…§ï¼Œé¿å…åŸåœ°æ’åºæ—¶å¼•ç”¨è¢«è¦†ç›–å¯¼è‡´æ•°æ®æŸå
+            var validSnapshots = slots
+                .Where(s => !s.IsEmpty)
+                .Select(s => (itemData: s.itemData, amount: s.amount, lastUsedTime: s.lastUsedTime))
+                .ToList();
 
-            if (mode == 0) // °´Ï¡ÓĞ¶È½µĞò
+            if (mode == 0) // æŒ‰ç¨€æœ‰åº¦é™åº
             {
-                validItems = validItems.OrderByDescending(s => s.itemData.rarity)
-                                         .ThenBy(s => s.itemData.itemID).ToList();
+                validSnapshots = validSnapshots.OrderByDescending(s => s.itemData.rarity)
+                                                 .ThenBy(s => s.itemData.itemID).ToList();
             }
-            else // °´ÊıÁ¿½µĞò£¨»òÕßÊÇÄ¬ÈÏµÄ»ñÈ¡½üÆÚËã·¨£©
+            else // æŒ‰æœ€è¿‘ä½¿ç”¨é™åºï¼ˆæœ€è¿‘ä½¿ç”¨çš„æ’å‰é¢ï¼‰
             {
-                validItems = validItems.OrderByDescending(s => s.amount)
-                                         .ThenBy(s => s.itemData.itemID).ToList();
+                validSnapshots = validSnapshots.OrderByDescending(s => s.lastUsedTime)
+                                                 .ThenBy(s => s.itemData.itemID).ToList();
             }
 
             for (int i = 0; i < slots.Count; i++)
             {
-                if (i < validItems.Count)
+                if (i < validSnapshots.Count)
                 {
-                    slots[i].itemData = validItems[i].itemData;
-                    slots[i].amount = validItems[i].amount;
+                    slots[i].itemData = validSnapshots[i].itemData;
+                    slots[i].amount = validSnapshots[i].amount;
+                    slots[i].lastUsedTime = validSnapshots[i].lastUsedTime;
                 }
                 else
                 {
                     slots[i].Clear();
                 }
-            }
-            OnInventoryChanged?.Invoke();
-        }
-
-        // ÖØĞÂ¼ÓÔØ²âÊÔÊı¾İ (¶ÔÓ¦ÖØÖÃ¹¦ÄÜ)
-        public void ReloadInitialItems()
-        {
-            foreach (var slot in slots) 
-                slot.Clear();
-
-            foreach (var item in initialTestItems)
-            {
-                if (item != null) AddItem(item, testItemAmount);
             }
             OnInventoryChanged?.Invoke();
         }

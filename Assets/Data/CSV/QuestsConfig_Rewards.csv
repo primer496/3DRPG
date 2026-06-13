@@ -1,0 +1,8 @@
+﻿assetName,idx,rewardType,rewardId,amount
+ClearBlackForest_Phase2_Kill,1,Currency,,200
+ClearBlackForest_Phase2_Kill,2,Experience,,200
+ClearBlackForest_Phase2_Kill,3,Item,EQ_ARMOR_002,1
+ClearBlackForest_Phase2_Peace,1,Currency,,500
+ClearBlackForest_Phase2_Peace,2,Experience,,150
+ClearBlackForest_Phase2_Peace,3,Item,ITEM_TP_002,3
+# rewardType: Item / Currency / Experience,,,,

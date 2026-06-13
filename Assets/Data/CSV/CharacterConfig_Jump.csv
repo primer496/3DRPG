@@ -1,0 +1,3 @@
+﻿assetPath,jumpHeight,jumpSpeed,jumpGroundDetachTime
+Resources/GameConfigs/Character/Modules/Player/ActorJumpConfig,1,7,0.12
+# Player only - no Enemy jump config,,,

@@ -15,7 +15,7 @@ namespace HSM {
             if (started) return;
             
             started = true;
-            //´Ó¸ù½øÈë£¬ÒÀ´Î°ó¶¨×´Ì¬Óë×´Ì¬
+            //ä»æ ¹è¿›å…¥ï¼Œä¾æ¬¡ç»‘å®šçŠ¶æ€ä¸çŠ¶æ€
             Root.Enter();
         }
 

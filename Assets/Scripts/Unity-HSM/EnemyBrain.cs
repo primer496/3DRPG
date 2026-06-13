@@ -63,7 +63,7 @@ namespace HSM {
             }
         }
 
-        // ´¦Àí CharacterController Óë NavMeshAgent µÄ³åÍ»ºÍ´ò¼ÜÎÊÌâ
+        // å¤„ç† CharacterController ä¸ NavMeshAgent çš„å†²çªå’Œæ‰“æ¶é—®é¢˜
         public Vector3 Velocity {
             get => agent != null ? agent.velocity : Vector3.zero;
             set {
@@ -74,11 +74,11 @@ namespace HSM {
 
         public void Move(Vector3 moveDelta) {
             if (agent != null && agent.isOnNavMesh) {
-                // ºËĞÄĞŞ¸´£ºÓÉÓÚAgentÄÚ²¿ÔÚ²»Í£×Ô·¢Ä£ÄâÒÆ¶¯£¬ÕâÀï±ØĞëÇ¿ĞĞÓÃµ±Ç°ÕæÊµÎ»ÖÃÄ¨³ıËüµÄÕâ²¿·ÖÔöÁ¿
-                // ÕâÑù²ÅÄÜÈ·±£½ÓÏÂÀ´µÄ´úÀíÎ»ÒÆ½ö½öÊÇÓÉ StateMachine Î¨Ò»¾ö¶¨µÄ£¬Ã»ÓĞÈÎºÎ¶îÍâÏà¼Ó
+                // æ ¸å¿ƒä¿®å¤ï¼šç”±äºAgentå†…éƒ¨åœ¨ä¸åœè‡ªå‘æ¨¡æ‹Ÿç§»åŠ¨ï¼Œè¿™é‡Œå¿…é¡»å¼ºè¡Œç”¨å½“å‰çœŸå®ä½ç½®æŠ¹é™¤å®ƒçš„è¿™éƒ¨åˆ†å¢é‡
+                // è¿™æ ·æ‰èƒ½ç¡®ä¿æ¥ä¸‹æ¥çš„ä»£ç†ä½ç§»ä»…ä»…æ˜¯ç”± StateMachine å”¯ä¸€å†³å®šçš„ï¼Œæ²¡æœ‰ä»»ä½•é¢å¤–ç›¸åŠ 
                 agent.nextPosition = transform.position;
 
-                // Èç¹ûÍâ²¿ÒªÇóÍ£ÏÂ£¨±ÈÈç½øÈëÁË¹¥»÷µÈ¶³½áÒÆ¶¯µÄ×´Ì¬£©ÇÒ´«ÈëÁ¿Îª0£¬Ö÷¶¯¹éÁã
+                // å¦‚æœå¤–éƒ¨è¦æ±‚åœä¸‹ï¼ˆæ¯”å¦‚è¿›å…¥äº†æ”»å‡»ç­‰å†»ç»“ç§»åŠ¨çš„çŠ¶æ€ï¼‰ä¸”ä¼ å…¥é‡ä¸º0ï¼Œä¸»åŠ¨å½’é›¶
                 if (moveDelta.sqrMagnitude < 0.00001f) {
                     agent.velocity = Vector3.zero;
                 } else {
@@ -107,8 +107,8 @@ namespace HSM {
         void Awake() {
             agent = GetComponent<NavMeshAgent>();
             if (agent != null) {
-                agent.updatePosition = false; // ÒÀ¿¿ agent.Move() ÄÜ¹»Í¬Ê±¸üĞÂ Transform ºÍ Agent ÄÚ²¿×ø±ê
-                agent.updateRotation = false; // ÓÉµ×²ãÇı¶¯Ğı×ª
+                agent.updatePosition = false; // ä¾é  agent.Move() èƒ½å¤ŸåŒæ—¶æ›´æ–° Transform å’Œ Agent å†…éƒ¨åæ ‡
+                agent.updateRotation = false; // ç”±åº•å±‚é©±åŠ¨æ—‹è½¬
             }
             BuildBehaviorTree();
         }
@@ -118,10 +118,10 @@ namespace HSM {
                 return;
             }
 
-            // µĞÈË²»ĞèÒª¼±Í£¶¯×÷£¬Ò²²»ĞèÒªÑ°ÕÒ StopFoot ²ÎÊı
+            // æ•Œäººä¸éœ€è¦æ€¥åœåŠ¨ä½œï¼Œä¹Ÿä¸éœ€è¦å¯»æ‰¾ StopFoot å‚æ•°
             ctx.enableStopState = false;
 
-            // ¶¯Ì¬¶ÔÆë NavMeshAgent µÄÍ£Ö¹¾àÀë£¬È·±£ËüÒ»¶¨ÄÜ×ßµ½´¥·¢¹¥»÷µÄÉä³ÌÄÚ£¬¶ø²»»áÕ¾ÔÚ¹¥»÷·¶Î§Íâ¿´Ï·
+            // åŠ¨æ€å¯¹é½ NavMeshAgent çš„åœæ­¢è·ç¦»ï¼Œç¡®ä¿å®ƒä¸€å®šèƒ½èµ°åˆ°è§¦å‘æ”»å‡»çš„å°„ç¨‹å†…ï¼Œè€Œä¸ä¼šç«™åœ¨æ”»å‡»èŒƒå›´å¤–çœ‹æˆ
             if (agent != null) {
                 agent.stoppingDistance = Mathf.Max(0.1f, ctx.attackRange * 0.8f);
             }
@@ -149,10 +149,10 @@ namespace HSM {
                     new SelectorNode(
                         new SequenceNode(
                             new ConditionNode((brain, ctx, bb) => brain.IsAttackReady(bb)),
-                            // ĞŞÕı£ºµ÷ÓÃÒ»´Î¹¥»÷¼´³É¹¦£¨ÒÑ°üº¬ÏòÄ¿±ê³¯ÏòµÄIntent£©£¬´¦ÓÚCDÊ±²»ÔÙ³ÖĞø¸ø³¯Ïò
+                            // ä¿®æ­£ï¼šè°ƒç”¨ä¸€æ¬¡æ”»å‡»å³æˆåŠŸï¼ˆå·²åŒ…å«å‘ç›®æ ‡æœå‘çš„Intentï¼‰ï¼Œå¤„äºCDæ—¶ä¸å†æŒç»­ç»™æœå‘
                             new ActionNode((brain, ctx, bb, _) => brain.AttackMeleeOnce(ctx, bb))
                         ),
-                        // AttackCooldownHold²»ÔÙÖ÷¶¯¸øĞı×ª³¯Ïò£¬ÈÃ½ÇÉ«¿ÉÒÔÍ£ÔÚÔ­µØ»òÖ´ĞĞ±ğµÄ¶¯»­
+                        // AttackCooldownHoldä¸å†ä¸»åŠ¨ç»™æ—‹è½¬æœå‘ï¼Œè®©è§’è‰²å¯ä»¥åœåœ¨åŸåœ°æˆ–æ‰§è¡Œåˆ«çš„åŠ¨ç”»
                         new ActionNode((brain, ctx, bb, _) => brain.AttackCooldownHold(ctx))
                     )
                 ),
@@ -176,7 +176,7 @@ namespace HSM {
                 return false;
             }
 
-            // Ê¹ÓÃÆ½Ãæ(Planar)¾àÀë½øĞĞ¼ì²â£¡±ÜÃâÒòÎªÍæ¼ÒÔÚĞ±ÆÂ½Ï¸ß´¦£¬µ¼ÖÂ3D¾àÀë±»À­³¤Ê¹µÃµĞÈËÓÀÔ¶ÈÏÎª´ï²»µ½¹¥»÷·¶Î§¡£
+            // ä½¿ç”¨å¹³é¢(Planar)è·ç¦»è¿›è¡Œæ£€æµ‹ï¼é¿å…å› ä¸ºç©å®¶åœ¨æ–œå¡è¾ƒé«˜å¤„ï¼Œå¯¼è‡´3Dè·ç¦»è¢«æ‹‰é•¿ä½¿å¾—æ•Œäººæ°¸è¿œè®¤ä¸ºè¾¾ä¸åˆ°æ”»å‡»èŒƒå›´ã€‚
             Vector3 toTarget = detectedPlayer.position - transform.position;
             toTarget.y = 0f;
             distance = toTarget.magnitude;
@@ -227,8 +227,8 @@ namespace HSM {
                 agent.velocity = Vector3.zero;
             }
 
-            // Ö®Ç°ÔÚÕâÀïÃ¿Ö¡Ö´ĞĞ³¯Ïò»áµ¼ÖÂµĞÈËÔ­µØ´ò×ª
-            // Ô­±¾×¢ÊÍ¡°Ö»ÔÚ½øÈë¹¥»÷×´Ì¬µÄÄÇÒ»¿Ì×öÒ»´Î³¯Ïò¡±Ó¦ÓÉ AttackMeleeOnce ¸ºÔğÍê³É
+            // ä¹‹å‰åœ¨è¿™é‡Œæ¯å¸§æ‰§è¡Œæœå‘ä¼šå¯¼è‡´æ•ŒäººåŸåœ°æ‰“è½¬
+            // åŸæœ¬æ³¨é‡Šâ€œåªåœ¨è¿›å…¥æ”»å‡»çŠ¶æ€çš„é‚£ä¸€åˆ»åšä¸€æ¬¡æœå‘â€åº”ç”± AttackMeleeOnce è´Ÿè´£å®Œæˆ
             ctx.moveInput = Vector2.zero;
             ctx.runHeld = false;
 
@@ -244,13 +244,13 @@ namespace HSM {
                 agent.isStopped = false;
             }
 
-            // Çå³ıÖ®Ç°µÄÑ²ÂßÄ¿±ê»º´æ£¬ÒÔ·ÀÍÑÕ½ºó¼ÌĞøÍùÍæ¼ÒÖ®Ç°µÄÎ»ÖÃ×ß
+            // æ¸…é™¤ä¹‹å‰çš„å·¡é€»ç›®æ ‡ç¼“å­˜ï¼Œä»¥é˜²è„±æˆ˜åç»§ç»­å¾€ç©å®¶ä¹‹å‰çš„ä½ç½®èµ°
             board.hasPatrolDestination = false; 
 
             agent.SetDestination(detectedPlayer.position);
 
-            // ¶µµ×Éè¼Æ£ºÈç¹ûÔÚĞ±ÆÂµÈ²»¿ÉÑ°Â·ÇøÓò£¬Agent »á¸ø³ö¾Ö²¿Â·¾¶(PathPartial)»òÍ£Ö¹(Velocity=0)
-            // ´ËÊ±Èç¹ûÍæ¼ÒÒÀÈ»²»ÔÚ¹¥»÷·¶Î§ÄÚ£¬Ó¦¸ÃÖ±½ÓÓÃ·½ÏòÅÌ²Ù¿ØÇ¿ĞĞÍÆÏòÍæ¼Ò¡£
+            // å…œåº•è®¾è®¡ï¼šå¦‚æœåœ¨æ–œå¡ç­‰ä¸å¯å¯»è·¯åŒºåŸŸï¼ŒAgent ä¼šç»™å‡ºå±€éƒ¨è·¯å¾„(PathPartial)æˆ–åœæ­¢(Velocity=0)
+            // æ­¤æ—¶å¦‚æœç©å®¶ä¾ç„¶ä¸åœ¨æ”»å‡»èŒƒå›´å†…ï¼Œåº”è¯¥ç›´æ¥ç”¨æ–¹å‘ç›˜æ“æ§å¼ºè¡Œæ¨å‘ç©å®¶ã€‚
             Vector3 desiredDir = agent.desiredVelocity;
             if (desiredDir.sqrMagnitude < 0.001f || agent.pathStatus == NavMeshPathStatus.PathPartial) {
                 Vector3 toTarget = detectedPlayer.position - transform.position;
@@ -287,7 +287,7 @@ namespace HSM {
             if (!board.hasPatrolDestination) {
                 board.patrolDestination = ResolveNextPatrolDestination(board);
                 board.hasPatrolDestination = true;
-                agent.SetDestination(board.patrolDestination); // Ê¹ÓÃNavMeshAgent×Ô¶¯Ñ°Â·
+                agent.SetDestination(board.patrolDestination); // ä½¿ç”¨NavMeshAgentè‡ªåŠ¨å¯»è·¯
             }
 
             if (!agent.pathPending && agent.remainingDistance <= patrolReachDistance) {
@@ -306,7 +306,7 @@ namespace HSM {
         void SimulatePathMovement(PlayerContext ctx, bool run, Vector3 desiredDir) {
             if (agent == null) return;
 
-            // ¸ù¾İ×´Ì¬»ú¸ø¶¨µÄĞĞ×ß/ÅÜËÙ¶È¶¯Ì¬¸üĞÂÕæÊµAgentµÄÑ°Â·ËÙ¶ÈÉÏÏŞ
+            // æ ¹æ®çŠ¶æ€æœºç»™å®šçš„è¡Œèµ°/è·‘é€Ÿåº¦åŠ¨æ€æ›´æ–°çœŸå®Agentçš„å¯»è·¯é€Ÿåº¦ä¸Šé™
             agent.speed = run ? ctx.GetRunRealSpeed() : ctx.GetWalkRealSpeed();
 
             desiredDir.y = 0f;
@@ -315,7 +315,7 @@ namespace HSM {
                 desiredDir.Normalize();
                 UpdateRotationIntent(ctx, desiredDir);
 
-                // ÈÃ×´Ì¬»úÖ±½Ó¸ù¾İÊÀ½ç·½Ïò¼ÆËãÊäÈë£¬¾ÍÏñÒ¡¸ËÒ»Ñù
+                // è®©çŠ¶æ€æœºç›´æ¥æ ¹æ®ä¸–ç•Œæ–¹å‘è®¡ç®—è¾“å…¥ï¼Œå°±åƒæ‘‡æ†ä¸€æ ·
                 Vector2 globalInput = new Vector2(desiredDir.x, desiredDir.z).normalized;
                 ctx.moveInput = globalInput;
                 ctx.runHeld = run;

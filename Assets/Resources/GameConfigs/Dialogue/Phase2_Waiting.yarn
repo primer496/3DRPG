@@ -1,0 +1,15 @@
+﻿title: Phase2_Waiting
+tags: 等待回报
+---
+<<if $MonsterKilled == true>>
+    旅行者，你回来了！你真的把它解决了？！
+    太厉害了！村子终于安全了，谢谢你！
+    <<set $QuestCompleted = true>>
+    <<set $QuestAccepted = false>>
+    <<set $Phase2Accepted = false>>
+    <<CompleteQuest ClearBlackForest_Phase2_Kill>>
+    <<jump DailyDialogueEnd>>
+<<endif>>
+去吧，我们在村里等你的消息，注意安全！
+<<jump DialogueEnd>>
+===

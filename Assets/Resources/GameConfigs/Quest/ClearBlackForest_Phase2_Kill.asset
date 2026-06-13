@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3050e1b5a83c9b47837796fa86b670e, type: 3}
+  m_Name: ClearBlackForest_Phase2_Kill
+  m_EditorClassIdentifier: 
+  id: ClearBlackForest_Phase2_Kill
+  title: "\u7EC8\u7ED3\u9ED1\u98CE\u6797\u5371\u673A"
+  description: "\u6751\u957F\u51B3\u5B9A\u4EE5\u6B66\u529B\u89E3\u51B3\u9ED1\u98CE\u6797\u7684\u9B54\u7269\u5A01\u80C1\u3002\u518D\u6B21\u524D\u5F80\u9ED1\u98CE\u6797\uFF0C\u6D88\u706D\u72C2\u6012\u7684\u9B54\u7269\u3002"
+  isOrdered: 1
+  objectives:
+  - targetType: 0
+    targetId: ForestMonster
+    requiredAmount: 1
+    uiDescription: "\u518D\u6B21\u524D\u5F80\u9ED1\u98CE\u6797\uFF0C\u6D88\u706D\u72C2\u6012\u7684\u9B54\u7269"
+  - targetType: 2
+    targetId: VillageChief
+    requiredAmount: 1
+    uiDescription: "\u5411\u6751\u957F\u62A5\u544A\u9B54\u7269\u5DF2\u88AB\u6D88\u706D"
+  rewards:
+  - rewardType: 1
+    rewardId: 
+    amount: 200
+  - rewardType: 2
+    rewardId: 
+    amount: 200
+  - rewardType: 0
+    rewardId: EQ_ARMOR_002
+    amount: 1

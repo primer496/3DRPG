@@ -1,0 +1,93 @@
+﻿title: Start
+tags: 村长, 任务入口
+---
+
+// 任务完成后，永久触发日常对话回环
+<<if $QuestCompleted == true>>
+    旅行者，多亏了你，村子终于恢复平静了！
+    以后要是有什么需要帮忙的，尽管来找我。
+    <<jump DailyDialogueEnd>>
+<<endif>>
+
+// 已接委托，根据调查进度触发对应回环对话
+<<if $QuestAccepted == true>>
+    <<if $InvestigationProgress == 0>>
+        旅行者，你回来了？找到关于魔物的线索了吗？
+        -> 还没，我再去看看
+            一定要小心，黑风林最近很危险！
+            <<jump DialogueEnd>>
+        -> 我找到第一个线索了！（玩家提交线索）
+            <<GivePlayerItem QUEST_001 1>>
+            <<AdvanceQuestObjective ClearBlackForest_Phase1_Investigate>>
+            <<set $InvestigationProgress = 1>>
+            <<jump Progress_1>>
+    <<elseif $InvestigationProgress == 1>>
+        你找到新的线索了？
+        -> 还没，我再去调查
+            村里的老人说，那片林子以前是鹿群的栖息地，你可以往这个方向找找
+            <<jump DialogueEnd>>
+        -> 我找齐所有线索了！（玩家提交第二个线索）
+            <<GivePlayerItem CONS_HP_001 1>>
+            <<AdvanceQuestObjective ClearBlackForest_Phase1_Investigate>>
+            <<set $InvestigationProgress = 2>>
+            <<jump Progress_2>>
+    <<elseif $InvestigationProgress == 2>>
+        // 已选择完成方式，等待完成中
+        <<if $Phase2Accepted == true>>
+            <<jump Phase2_Waiting>>
+        <<endif>>
+        <<TriggerCommunicateEvent VillageChief>>
+        旅行者，线索都找齐了，你打算怎么处理这件事？
+        -> 我直接去黑风林把它解决掉！
+            一定要注意安全！我们等你回来！
+            <<CompleteQuest ClearBlackForest_Phase1_Investigate>>
+            <<set $Phase2Accepted = true>>
+            <<GivePlayerItem Gold 200>>
+            <<AcceptQuest ClearBlackForest_Phase2_Kill>>
+            <<jump DialogueEnd>>
+        -> 我打算用找到的草药安抚它，化解冲突
+            太聪明了！这样既不用伤人，也能解决村子的问题！
+            <<CompleteQuest ClearBlackForest_Phase1_Investigate>>
+            <<set $Phase2Accepted = true>>
+            <<GivePlayerItem Gold 500>>
+            <<GivePlayerItem MAT_ENCHANT_002 3>>
+            <<SetReputation Village 20>>
+            <<AcceptQuest ClearBlackForest_Phase2_Peace>>
+            <<jump DialogueEnd>>
+    <<endif>>
+    <<jump DialogueEnd>>
+<<endif>>
+
+// 首次对话：未接委托、未拒绝过
+<<if $QuestRejected == false>>
+    旅行者，你终于来了！
+    我是这个村子的村长，大家都叫我王村长。
+    最近村子西边的黑风林里，出现了一只"魔物"！
+    村里的年轻人去砍柴，都被它吓得跑了回来，我们的存粮快不够了。
+    你能帮帮我们吗？
+    -> 没问题，包在我身上！
+        太好了！你真是村子的救星！
+        <<set $QuestAccepted = true>>
+        <<AcceptQuest ClearBlackForest_Phase1_Investigate>>
+        <<TriggerCommunicateEvent VillageChief>>
+        <<jump Quest_Accepted>>
+    -> 我还有事，先考虑一下
+        唉...好吧，希望你能尽快决定，村子快撑不住了。
+        <<set $QuestRejected = true>>
+        <<jump DialogueEnd>>
+<<else>>
+    // 拒绝后回环：玩家再次点击NPC，触发二次邀请
+    旅行者，你回来了！考虑得怎么样了？
+    村子的情况越来越糟了，我们真的很需要你的帮助。
+    -> 行，我帮你们
+        太好了！我就知道你是个可靠的人！
+        <<set $QuestAccepted = true>>
+        <<set $QuestRejected = false>>
+        <<AcceptQuest ClearBlackForest_Phase1_Investigate>>
+        <<TriggerCommunicateEvent VillageChief>>
+        <<jump Quest_Accepted>>
+    -> 我再想想
+        好吧...希望你能尽快下定决心。
+        <<jump DialogueEnd>>
+<<endif>>
+===

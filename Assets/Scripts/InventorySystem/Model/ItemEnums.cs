@@ -2,20 +2,20 @@ namespace InventorySystem.Model
 {
     public enum ItemCategory
     {
-        Item,       // ÎïÆ·±³°ü
-        Equipment,  // ×°±¸±³°ü
-        QuestItem,  // ÈÎÎñÎïÆ·
-        Consumable, // ÏûºÄÆ·
-        Material,   // ²ÄÁÏ
-        Other       // ÆäËû
+        Item,       // ç‰©å“èƒŒåŒ…
+        Equipment,  // è£…å¤‡èƒŒåŒ…
+        QuestItem,  // ä»»åŠ¡ç‰©å“
+        Consumable, // æ¶ˆè€—å“
+        Material,   // ææ–™
+        Other       // å…¶ä»–
     }
 
     public enum ItemRarity
     {
-        Common,     // ÆÕÍ¨
-        Uncommon,   // ÓÅĞã
-        Rare,       // Ï¡ÓĞ
-        Epic,       // Ê·Ê«
-        Legendary   // ´«Ëµ
+        Common,     // æ™®é€š
+        Uncommon,   // ä¼˜ç§€
+        Rare,       // ç¨€æœ‰
+        Epic,       // å²è¯—
+        Legendary   // ä¼ è¯´
     }
 }

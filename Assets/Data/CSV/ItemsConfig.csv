@@ -1,0 +1,20 @@
+﻿assetName,itemID,itemName,description,iconPath,category,rarity,isStackable,maxStack
+CONS_BUFF_002,CONS_BUFF_002,高级力量药剂,炼金师调配的强效增益药剂，饮用后30分钟内提升20%物理攻击力，死亡后效果不消失。,PackageIcon/Consumable/CONS_BUFF_002,Consumable,Uncommon,TRUE,99
+CONS_BUFF_003,CONS_BUFF_003,全属性增幅秘药,史诗级炼金秘药，饮用后1小时内全属性提升15%，获得10%伤害减免，仅可在非战斗状态使用。,PackageIcon/Consumable/CONS_BUFF_003,Consumable,Epic,TRUE,20
+CONS_HP_001,CONS_HP_001,小型治疗药水,冒险者出门必备的基础药水，饮用后立即恢复200点生命值。,PackageIcon/Consumable/CONS_HP_001,Consumable,Common,TRUE,99
+EQ_ACC_003,EQ_ACC_003,永燃之戒,镶嵌火焰核心的传奇戒指，佩戴后永久提升15%火焰法术伤害，攻击时有概率触发范围火焰爆炸。,PackageIcon/Equipment/EQ_ACC_003,Equipment,Legendary,FALSE,1
+EQ_ARMOR_002,EQ_ARMOR_002,守护之板甲胸甲,矮人铁匠打造的重型板甲，表面刻有防御符文，大幅提升物理抗性，降低锄器与鬧器伤害。,PackageIcon/Equipment/EQ_ARMOR_002,Equipment,Rare,FALSE,1
+EQ_WEAP_001,EQ_WEAP_001,铁制长剑,冒险者入门标配单手剑，熟铁锻造，平衡性尚可，能应对野外多数低阶魔物。,PackageIcon/Equipment/EQ_WEAP_001,Equipment,Common,FALSE,1
+ITEM_BAG_003,ITEM_BAG_003,背包扩容石,蕴含空间魔法的稀有晶石，使用后永久解锁8个背包格子，每个角色最多可使用10次。,PackageIcon/Item/ITEM_BAG_003,Item,Epic,TRUE,10
+ITEM_KEY_001,ITEM_KEY_001,铜制宝箱鑰匙,用于开启野外常见铜制宝箱的鑰匙，宝箱内藏有冒险者留下的物资与装备。,PackageIcon/Item/ITEM_KEY_001,Item,Common,TRUE,99
+ITEM_TP_002,ITEM_TP_002,主城传送卷轴,附魔师制作的传送卷轴，使用后立即传送回主城安全区，是野外遇险的绝佳逃生道具。,,Item,Uncommon,TRUE,20
+MAT_ENCHANT_002,MAT_ENCHANT_002,附魔水晶,蕴含纯净魔法能量的稀有水晶，装备附魔、符文铭刻的必备材料，品质越高附魔成功率越高。,PackageIcon/Material/MAT_ENCHANT_002,Material,Rare,TRUE,99
+MAT_LEGEND_003,MAT_LEGEND_003,龙鳞碎片,远古巨龙脱落的鳞片碎片，蕴含极强的巨龙之力，打造传说级装备的核心材料，极为稀有。,PackageIcon/Material/MAT_LEGEND_003,Material,Legendary,TRUE,50
+MAT_ORE_001,MAT_ORE_001,铁矿石,最常见的金属矿石，锻造基础武器与护甲的核心材料，野外矿脉随处可采集。,PackageIcon/Material/MAT_ORE_001,Material,Common,TRUE,999
+OTHER_COLLECT_002,OTHER_COLLECT_002,冒险者周年纪念币,主城冒险者协会发行的限量纪念币，无实际功能，是资深冒险者的身份象征，极具收藏价値。,PackageIcon/Other/OTHER_COLLECT_002,Other,Rare,FALSE,1
+OTHER_FUN_003,OTHER_FUN_003,恶搞史莱姆面具,用史莱姆凝胶制作的趣味面具，佩戴后角色外观会变成史莱姆，仅作娱乐使用，无任何属性加成。,PackageIcon/Other/OTHER_FUN_003,Other,Uncommon,FALSE,1
+OTHER_JUNK_001,OTHER_JUNK_001,破损的空酒瓶,冒险者丢弃的空酒瓶，无任何实际用途，只能卖给商人换取少量金币。,PackageIcon/Other/OTHER_JUNK_001,Other,Common,TRUE,99
+QUEST_001,QUEST_001,村长的家书,新手村村长托付的家书，需转交给主城驻守的村长儿子，盖有新手村专属印章。,PackageIcon/QuestItem/QUEST_001,QuestItem,Common,FALSE,1
+QUEST_002,QUEST_002,破损的古代石板,古代遗萃中出土的石板，刻有无人能懂的古文字，考古学家正在寻找完整石板解读秘密。,PackageIcon/QuestItem/QUEST_002,QuestItem,Uncommon,FALSE,1
+QUEST_003,QUEST_003,魔王的心脏碎片,击败魔王分身掉落的核心碎片，蕴含微弱深渊之力，是封印魔王的关键道具，绝不能落入恶人手中。,PackageIcon/QuestItem/QUEST_003,QuestItem,Legendary,FALSE,1
+# category: Item/Equipment/QuestItem/Consumable/Material/Other  |  rarity: Common/Uncommon/Rare/Epic/Legendary  |  isStackable: TRUE/FALSE,,,,,,,,

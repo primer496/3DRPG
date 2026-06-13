@@ -15,32 +15,32 @@ namespace HSM {
             return m;
         }
         /// <summary>
-        /// Á¬½Ó×´Ì¬ºÍ×´Ì¬»ú£¬²»°üÀ¨×´Ì¬¼ä
+        /// è¿æ¥çŠ¶æ€å’ŒçŠ¶æ€æœºï¼Œä¸åŒ…æ‹¬çŠ¶æ€é—´
         /// </summary>
         /// <param name="s"></param>
         /// <param name="m"></param>
         /// <param name="visited"></param>
         void Wire(State s, StateMachine m, HashSet<State> visited) {
             if (s == null) return;
-            //×´Ì¬»úÒÑÁ¬½Ó
+            //çŠ¶æ€æœºå·²è¿æ¥
             if (!visited.Add(s)) return; 
-            //ÕÒÊµÀı×Ö¶Î/¹«¹²×Ö¶Î/·Ç¹«¹²×Ö¶Î/¼Ì³ĞÁ´ÏòÉÏÕÒ¡£
+            //æ‰¾å®ä¾‹å­—æ®µ/å…¬å…±å­—æ®µ/éå…¬å…±å­—æ®µ/ç»§æ‰¿é“¾å‘ä¸Šæ‰¾ã€‚
             var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
-            //½«flagÖĞËùÓĞStateµÄMachineÉèÖÃÎªm£¬¼´×´Ì¬°ó¶¨×´Ì¬»ú
+            //å°†flagä¸­æ‰€æœ‰Stateçš„Machineè®¾ç½®ä¸ºmï¼Œå³çŠ¶æ€ç»‘å®šçŠ¶æ€æœº
             var machineField = typeof(State).GetField("Machine", flags);
             if (machineField != null) machineField.SetValue(s, m);
 
             foreach (var fld in s.GetType().GetFields(flags)) {
-                //Ö»¿¼ÂÇÀàĞÍÎªStateµÄ
+                //åªè€ƒè™‘ç±»å‹ä¸ºStateçš„
                 if (!typeof(State).IsAssignableFrom(fld.FieldType)) continue;
-                //Ìø¹ı¸¸×Ö¶Î£¬±ÜÃâÑ­»·ÒıÓÃ
+                //è·³è¿‡çˆ¶å­—æ®µï¼Œé¿å…å¾ªç¯å¼•ç”¨
                 if (fld.Name == "Parent") continue;
-                //State×Ö¶Î³ıÁË¸¸Ç×¾ÍÖ»Ê£º¢×ÓÁË
+                //Stateå­—æ®µé™¤äº†çˆ¶äº²å°±åªå‰©å­©å­äº†
                 var child = (State)fld.GetValue(s);
                 if (child == null) continue;
-                //È·±£Õâº¢×ÓÊÇsµÄÖ±½Óº¢×Ó
+                //ç¡®ä¿è¿™å­©å­æ˜¯sçš„ç›´æ¥å­©å­
                 if (!ReferenceEquals(child.Parent, s)) continue; 
-                //µİ¹é½øÈëº¢×Ó¼ÌĞøÁ¬½Ó
+                //é€’å½’è¿›å…¥å­©å­ç»§ç»­è¿æ¥
                 Wire(child, m, visited); 
             }
         }

@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="PlayerHUD.uss" />
+    <ui:VisualElement name="player-hud-root" class="hud-root">
+        <ui:VisualElement name="hp-section" class="hud-section">
+            <ui:Label text="HP" class="hud-label" />
+            <ui:ProgressBar name="hp-bar" value="100" title="100/100" class="hud-progress hp-bar" />
+        </ui:VisualElement>
+        <ui:VisualElement name="exp-section" class="hud-section">
+            <ui:Label text="EXP" class="hud-label" />
+            <ui:ProgressBar name="exp-bar" value="0" title="0/100" class="hud-progress exp-bar" />
+            <ui:Label name="level-label" text="Lv.1" class="hud-level" />
+        </ui:VisualElement>
+        <ui:VisualElement name="gold-section" class="hud-section">
+            <ui:Label text="Gold" class="hud-label" />
+            <ui:Label name="gold-label" text="0" class="hud-gold" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

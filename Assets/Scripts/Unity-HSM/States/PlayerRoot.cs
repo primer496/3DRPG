@@ -17,8 +17,8 @@ namespace HSM {
             if (ctx.isHit && Machine.Root.Leaf() != HitReaction) {
                 return HitReaction;
             }
-            // ÒÑÔÚ Grounded.cs ÖĞÍ¨¹ı !ctx.grounded ´¦ÀíÏò Airborne µÄ¹ı¶É¡£
-            // ²»ÒªÔÚ Root ÖØ¸´¼ì²é£¬·ñÔò»áµ¼ÖÂ¿ÕÖĞÊ±Ã¿Ö¡ÖØÖÃ ActiveChild Òı·¢ÎŞÏŞÖØĞÂÆğÌø¶¯×÷¡£
+            // å·²åœ¨ Grounded.cs ä¸­é€šè¿‡ !ctx.grounded å¤„ç†å‘ Airborne çš„è¿‡æ¸¡ã€‚
+            // ä¸è¦åœ¨ Root é‡å¤æ£€æŸ¥ï¼Œå¦åˆ™ä¼šå¯¼è‡´ç©ºä¸­æ—¶æ¯å¸§é‡ç½® ActiveChild å¼•å‘æ— é™é‡æ–°èµ·è·³åŠ¨ä½œã€‚
             return null;
         }
     }

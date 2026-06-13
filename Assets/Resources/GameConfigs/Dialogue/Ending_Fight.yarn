@@ -1,0 +1,14 @@
+title: Ending_Fight
+tags: 缁撳眬鍒嗘敮
+---
+
+锛堝嚑涓皬鏃跺悗锛屼綘鎷栫潃鐤叉儷鐨勮韩浣撳洖鍒颁簡鏉戝瓙锛�
+浣犵湡鐨勬妸瀹冭В鍐充簡锛佸お濂戒簡锛�
+铏界劧鏈夌偣鍙儨锛屼絾鏉戝瓙缁堜簬瀹夊叏浜嗭紝璋㈣阿浣狅紝鏃呰鑰咃紒
+<<set $QuestCompleted = true>>
+<<set $QuestAccepted = false>>
+<<set $Phase2Accepted = false>>
+<<CompleteQuest ClearBlackForest_Phase2_Kill>>
+<<jump DailyDialogueEnd>>
+===
+

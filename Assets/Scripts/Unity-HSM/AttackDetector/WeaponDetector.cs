@@ -9,25 +9,25 @@ public class WeaponDetector : MonoBehaviour
     public Transform weaponTip;
     
     [Header("Detection Settings")]
-    public float attackRadius = 1.0f; // »Ó½£É±ÉË°ë½²¹Õı£¬´ú±í½£ÈĞµÄÅĞ¶¨´ÖÏ¸
-    public LayerMask targetLayer;     // Ö¸¶¨Òª¼ì²âµÄ²ã¼¶£¨Èç Enemy²ã£©
+    public float attackRadius = 1.0f; // æŒ¥å‰‘æ€ä¼¤åŠå¾‘è¡¥æ­£ï¼Œä»£è¡¨å‰‘åˆƒçš„åˆ¤å®šç²—ç»†
+    public LayerMask targetLayer;     // æŒ‡å®šè¦æ£€æµ‹çš„å±‚çº§ï¼ˆå¦‚ Enemyå±‚ï¼‰
     public int raycastSegments = 5;
 
     private bool isAttacking = false;
     private Vector3[] previousPoints;
     private HashSet<PlayerStateDriver> hitDrivers = new HashSet<PlayerStateDriver>();
     
-    // ÓÉ»Ó½£¶¯»­µÄ¿ªÍ·ÊÂ¼şµ÷ÓÃ£¨Animation Event£©
+    // ç”±æŒ¥å‰‘åŠ¨ç”»çš„å¼€å¤´äº‹ä»¶è°ƒç”¨ï¼ˆAnimation Eventï¼‰
     public void BeginAttack()
     {
         if (weaponBase == null || weaponTip == null) return;
-        Debug.Log("WeaponDetector: ¡¾¿ªÆôÎäÆ÷´ò»÷ÅĞ¶¨¡¿");
+        Debug.Log("WeaponDetector: ã€å¼€å¯æ­¦å™¨æ‰“å‡»åˆ¤å®šã€‘");
         isAttacking = true;
         hitDrivers.Clear();
         SaveControlPoints();
     }
 
-    // ÓÉ»Ó½£¶¯»­µÄ½áÊøÊÂ¼şµ÷ÓÃ£¨Animation Event£©
+    // ç”±æŒ¥å‰‘åŠ¨ç”»çš„ç»“æŸäº‹ä»¶è°ƒç”¨ï¼ˆAnimation Eventï¼‰
     public void EndAttack()
     {
         isAttacking = false;
@@ -48,7 +48,7 @@ public class WeaponDetector : MonoBehaviour
 
             if (dist > 0.001f)
             {
-                // Ê¹ÓÃ SphereCastAll Ìæ´ú±éÀúÈ¥Ñ°ÕÒÓĞ Collider µÄÊµÌå
+                // ä½¿ç”¨ SphereCastAll æ›¿ä»£éå†å»å¯»æ‰¾æœ‰ Collider çš„å®ä½“
                 RaycastHit[] hits = Physics.SphereCastAll(prev, attackRadius, dir.normalized, dist, targetLayer);
                 foreach (var hit in hits)
                 {
@@ -57,7 +57,7 @@ public class WeaponDetector : MonoBehaviour
             }
             else
             {
-                // Ã»ÏÔÖøÒÆ¶¯Ê±£¬ÓÃÔ­µØµÄ OverlapSphere
+                // æ²¡æ˜¾è‘—ç§»åŠ¨æ—¶ï¼Œç”¨åŸåœ°çš„ OverlapSphere
                 Collider[] hits = Physics.OverlapSphere(curr, attackRadius, targetLayer);
                 foreach (var col in hits)
                 {
@@ -71,17 +71,22 @@ public class WeaponDetector : MonoBehaviour
 
     private void ProcessHit(Collider col)
     {
-        // ±ÜÃâ´òÖĞ×Ô¼º
+        // é¿å…æ‰“ä¸­è‡ªå·±
         if (col.transform.root == this.transform.root) return;
 
-        Debug.Log("WeaponDetector: ÎäÆ÷Åö×²É¨Ãèµ½¶ÔÏó -> " + col.name);
+        Debug.Log("WeaponDetector: æ­¦å™¨ç¢°æ’æ‰«æåˆ°å¯¹è±¡ -> " + col.name);
 
         PlayerStateDriver driver = col.GetComponentInParent<PlayerStateDriver>();
         if (driver != null && !hitDrivers.Contains(driver))
         {
-            Debug.Log("¡¾Íæ¼Ò»Ó½£ÃüÖĞµĞÈË³É¹¦¡¿´¥·¢µĞÈËÊÜ»÷Ó²Ö±£¡¶ÔÏó -> " + driver.gameObject.name);
+            Debug.Log("ã€ç©å®¶æŒ¥å‰‘å‘½ä¸­æ•ŒäººæˆåŠŸã€‘è§¦å‘æ•Œäººå—å‡»ç¡¬ç›´ï¼å¯¹è±¡ -> " + driver.gameObject.name);
             hitDrivers.Add(driver);
             ApplyHit(driver);
+
+            // æ‰£è¡€
+            EnemyHealth health = driver.GetComponentInParent<EnemyHealth>();
+            if (health != null)
+                health.TakeDamage(1);
         }
     }
 
@@ -105,12 +110,12 @@ public class WeaponDetector : MonoBehaviour
     {
         if (driver != null)
         {
-            // ¼ÇÂ¼ÊÇ±»Ë­´òµÄ£¬°Ñ×Ô¼ºµÄ¸ù×ø±ê´«¹ıÈ¥ÓÃÓÚµĞÈË»÷ÍÆºóÍË
+            // è®°å½•æ˜¯è¢«è°æ‰“çš„ï¼ŒæŠŠè‡ªå·±çš„æ ¹åæ ‡ä¼ è¿‡å»ç”¨äºæ•Œäººå‡»æ¨åé€€
             driver.ctx.currentHitSource = this.transform.root.position;
-            // ´¥·¢µĞÈË HitReaction
+            // è§¦å‘æ•Œäºº HitReaction
             driver.ctx.isHit = true;
 
-            // ÎªÍæ¼Ò×Ô¼º¹ÒÉÏ¹¥»÷ÖÍÖ¡£¬·ÀÖ¹ÒòÎªÕĞÊ½ Root Motion ³å¹ıÍ·´©Ä£
+            // ä¸ºç©å®¶è‡ªå·±æŒ‚ä¸Šæ”»å‡»æ»å¸§ï¼Œé˜²æ­¢å› ä¸ºæ‹›å¼ Root Motion å†²è¿‡å¤´ç©¿æ¨¡
             PlayerStateDriver attackerDriver = this.transform.root.GetComponent<PlayerStateDriver>();
             if (attackerDriver != null) {
                 attackerDriver.ctx.hitSlowdownTimer = attackerDriver.ctx.hitStopDuration;

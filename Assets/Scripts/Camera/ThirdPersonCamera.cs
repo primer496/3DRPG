@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TaskManager;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
@@ -13,12 +14,13 @@ public class ThirdPersonCamera : MonoBehaviour
     public float verticalsensitivity;
     [Header("Look Input")]
     public float lookDeadZone = 0.01f;
-    // 如果你的 Look 是摇杆轴值（非鼠标delta），建议开启；鼠标一般建议关闭
+    // 濡傛灉浣犵殑 Look 鏄憞鏉嗚酱鍊硷紙闈為紶鏍嘾elta锛夛紝寤鸿寮€鍚紱榧犳爣涓€鑸缓璁叧闂�
     public bool multiplyByDeltaTime = false;
     private float _cinemachineTargetYaw;
     private float _cinemachineTargetPitch;
+    private bool _lookLocked;
 
-    // 给角色移动逻辑（Move state）使用，避免它读取到上一帧的相机欧拉角导致抖动。
+    // 缁欒鑹茬Щ鍔ㄩ€昏緫锛圡ove state锛変娇鐢紝閬垮厤瀹冭鍙栧埌涓婁竴甯х殑鐩告満娆ф媺瑙掑鑷存姈鍔ㄣ€�
     public static float CurrentYawDeg = float.NaN;
     private bool _initialized;
     private Transform _followTarget;
@@ -38,6 +40,21 @@ public class ThirdPersonCamera : MonoBehaviour
         CurrentYawDeg = _cinemachineTargetYaw;
         _initialized = true;
     }
+
+    private void OnEnable()
+    {
+        EventBus.Instance.OnInputLockStateChanged += OnInputLockChanged;
+    }
+
+    private void OnDisable()
+    {
+        EventBus.Instance.OnInputLockStateChanged -= OnInputLockChanged;
+    }
+
+    private void OnInputLockChanged(bool locked)
+    {
+        _lookLocked = locked;
+    }
     private void Start()
     {
         if (_mainCamera == null)
@@ -45,8 +62,8 @@ public class ThirdPersonCamera : MonoBehaviour
             _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         }
 
-        // 初始化 yaw/pitch（使用世界旋转），避免启用后第一帧发生跳变
-        // 使用世界旋转可以确保“角色转向不会带动相机额外旋转”。
+        // 鍒濆鍖� yaw/pitch锛堜娇鐢ㄤ笘鐣屾棆杞級锛岄伩鍏嶅惎鐢ㄥ悗绗竴甯у彂鐢熻烦鍙�
+        // 浣跨敤涓栫晫鏃嬭浆鍙互纭繚鈥滆鑹茶浆鍚戜笉浼氬甫鍔ㄧ浉鏈洪澶栨棆杞€濄€�
         if (!_initialized && CameraTarget != null)
         {
             var euler = CameraTarget.transform.rotation.eulerAngles;
@@ -60,18 +77,18 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         if (CameraTarget == null) return;
 
-        // yaw 环绕到 [-360, 360]，避免 0/360 边界出现表示跳变
+        // yaw 鐜粫鍒� [-360, 360]锛岄伩鍏� 0/360 杈圭晫鍑虹幇琛ㄧず璺冲彉
         if (_cinemachineTargetYaw < -360f) _cinemachineTargetYaw += 720f;
         if (_cinemachineTargetYaw >  360f) _cinemachineTargetYaw -= 720f;
 
-        // pitch 需要 clamp（保持和原始逻辑一致：每帧都 clamp，避免首帧/无输入时跳变）
+        // pitch 闇€瑕� clamp锛堜繚鎸佸拰鍘熷閫昏緫涓€鑷达細姣忓抚閮� clamp锛岄伩鍏嶉甯�/鏃犺緭鍏ユ椂璺冲彉锛�
         _cinemachineTargetPitch = Mathf.Clamp(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
         CurrentYawDeg = _cinemachineTargetYaw;
     }
 
-    // 在 LateUpdate 写入 CameraTarget 世界位置和旋转：晚于本帧 PlayerStateDriver 对角色的旋转，
-    // 避免 LookRoot 作为子物体在 Update 内被父节点旋转“带偏”，进而让 Cinemachine 抖动。
+    // 鍦� LateUpdate 鍐欏叆 CameraTarget 涓栫晫浣嶇疆鍜屾棆杞細鏅氫簬鏈抚 PlayerStateDriver 瀵硅鑹茬殑鏃嬭浆锛�
+    // 閬垮厤 LookRoot 浣滀负瀛愮墿浣撳湪 Update 鍐呰鐖惰妭鐐规棆杞€滃甫鍋忊€濓紝杩涜€岃 Cinemachine 鎶栧姩銆�
     private void LateUpdate()
     {
         if (CameraTarget == null) return;
@@ -86,9 +103,10 @@ public class ThirdPersonCamera : MonoBehaviour
     public void OnLook(InputValue value)
     {
         if (CameraTarget == null) return;
+        if (_lookLocked) return;
 
-        // 鼠标的 InputValue 通常是“delta”，直接叠加到 yaw/pitch。
-        // 这样 Move state 在 Update 里读取 CurrentYawDeg 时不会落后一帧。
+        // 榧犳爣鐨� InputValue 閫氬父鏄€渄elta鈥濓紝鐩存帴鍙犲姞鍒� yaw/pitch銆�
+        // 杩欐牱 Move state 鍦� Update 閲岃鍙� CurrentYawDeg 鏃朵笉浼氳惤鍚庝竴甯с€�
         var look = value.Get<Vector2>();
         if (look.sqrMagnitude < lookDeadZone * lookDeadZone) return;
 
@@ -97,11 +115,11 @@ public class ThirdPersonCamera : MonoBehaviour
         _cinemachineTargetPitch += look.y * verticalsensitivity * dt;
         _cinemachineTargetYaw += look.x * horizontalsensitivity * dt;
 
-        // yaw 环绕到 [-360, 360]，避免 0/360 边界出现表示跳变
+        // yaw 鐜粫鍒� [-360, 360]锛岄伩鍏� 0/360 杈圭晫鍑虹幇琛ㄧず璺冲彉
         if (_cinemachineTargetYaw < -360f) _cinemachineTargetYaw += 720f;
         if (_cinemachineTargetYaw >  360f) _cinemachineTargetYaw -= 720f;
 
-        // pitch 需要 clamp
+        // pitch 闇€瑕� clamp
         _cinemachineTargetPitch = Mathf.Clamp(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
         CurrentYawDeg = _cinemachineTargetYaw;

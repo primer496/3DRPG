@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using InventorySystem.Model;
+using TaskManager;
 
 namespace InventorySystem.ViewModel
 {
     public class InventoryViewModel : MonoBehaviour
     {
-        [Header("Model Reference")]
+        // 核心数据模型由ViewModel直接创建并管理，不再挂载在GameObject上
         public InventoryModel inventoryModel;
 
         [Header("Bindable Data Source (for UI Data Binding)")]
@@ -17,12 +18,18 @@ namespace InventorySystem.ViewModel
         private ItemCategory currentCategory = ItemCategory.Item;
         private int selectedSlotIndex = -1;
 
+        private void Awake()
+        {
+            inventoryModel = new InventoryModel();
+        }
+
         private void OnEnable()
         {
             if (inventoryModel != null)
             {
                 inventoryModel.OnInventoryChanged += HandleModelChanged;
             }
+            EventBus.Instance.OnItemRewarded += HandleItemReward;
         }
 
         private void OnDisable()
@@ -30,6 +37,24 @@ namespace InventorySystem.ViewModel
             if (inventoryModel != null)
             {
                 inventoryModel.OnInventoryChanged -= HandleModelChanged;
+            }
+            EventBus.Instance.OnItemRewarded -= HandleItemReward;
+        }
+
+        /// <summary>
+        /// 监听 EventBus 的物品奖励事件，从 Resources 加载 ItemData 并加入背包。
+        /// </summary>
+        private void HandleItemReward(string itemId, int amount)
+        {
+            var itemData = Resources.Load<ItemData>($"GameConfigs/PackageModel/{itemId}");
+            if (itemData != null)
+            {
+                inventoryModel?.AddItem(itemData, amount);
+                Debug.Log($"[InventoryViewModel] 收到物品: {itemId} x{amount}");
+            }
+            else
+            {
+                Debug.LogWarning($"[InventoryViewModel] ItemData not found: GameConfigs/PackageModel/{itemId}");
             }
         }
 
@@ -47,7 +72,7 @@ namespace InventorySystem.ViewModel
         }
 
         private List<InventorySlot> cachedDisplaySlots = new List<InventorySlot>();
-        private static readonly InventorySlot emptySlotRef = new InventorySlot(); // 只读全局空引用用于占位
+        private static readonly InventorySlot emptySlotRef = new InventorySlot(); // 鍙鍏ㄥ眬绌哄紩鐢ㄧ敤浜庡崰浣�
 
         private void RefreshDisplaySlots()
         {
@@ -68,7 +93,7 @@ namespace InventorySystem.ViewModel
                 if (i < filteredItems.Count)
                     displaySlots.Add(filteredItems[i]);
                 else
-                    displaySlots.Add(emptySlotRef); // 复用唯一的空引用对象替代 new InventorySlot()
+                    displaySlots.Add(emptySlotRef); // 澶嶇敤鍞竴鐨勭┖寮曠敤瀵硅薄鏇夸唬 new InventorySlot()
             }
 
             return displaySlots;
@@ -77,7 +102,7 @@ namespace InventorySystem.ViewModel
         public InventorySlot GetSlotAt(int index)
         {
             if (index < 0 || index >= cachedDisplaySlots.Count) 
-                return emptySlotRef; // 防止越界时分配新内存
+                return emptySlotRef; // 闃叉瓒婄晫鏃跺垎閰嶆柊鍐呭瓨
             return cachedDisplaySlots[index];
         }
 
@@ -98,10 +123,10 @@ namespace InventorySystem.ViewModel
             currentCategory = (ItemCategory)(categoryIndex - 1);
             selectedSlotIndex = -1;
             
-            // 先更新缓存数据
+            // 鍏堟洿鏂扮紦瀛樻暟鎹�
             RefreshDisplaySlots();
             
-            // 然后再更新绑定数据，触发事件
+            // 鐒跺悗鍐嶆洿鏂扮粦瀹氭暟鎹紝瑙﹀彂浜嬩欢
             if (bindableData != null)
             {
                 bindableData.currentCategoryIndex = categoryIndex;
@@ -111,18 +136,13 @@ namespace InventorySystem.ViewModel
             }
         }
 
-        public void HoverItem(int uiIndex)
-        {
-            // 保持悬停方法为空，因为我们使用点击显示预览
-        }
-
         public void SelectItem(int uiIndex)
         {
             selectedSlotIndex = uiIndex;
             if (bindableData != null)
                 bindableData.selectedSlotIndex = selectedSlotIndex;
 
-            // 直接从当前显示槽获取数据，不依赖缓存
+            // 鐩存帴浠庡綋鍓嶆樉绀烘Ы鑾峰彇鏁版嵁锛屼笉渚濊禆缂撳瓨
             var slot = GetSlotAt(uiIndex);
             if (!slot.IsEmpty)
             {
@@ -164,7 +184,6 @@ namespace InventorySystem.ViewModel
             selectedSlotIndex = -1;
             if (bindableData != null)
                 bindableData.selectedSlotIndex = -1;
-            HoverItem(-1);
         }
 
         public void DeleteItems(IEnumerable<int> uiIndices)
@@ -187,7 +206,6 @@ namespace InventorySystem.ViewModel
             selectedSlotIndex = -1;
             if (bindableData != null)
                 bindableData.selectedSlotIndex = -1;
-            HoverItem(-1);
         }
 
         public void SetActiveSortTab(int tabIndex)
@@ -195,32 +213,35 @@ namespace InventorySystem.ViewModel
             if (bindableData != null)
                 bindableData.activeSortTab = tabIndex;
 
-            // 点击排序Tab标签时，立即触发整理
+            // 鐐瑰嚮鎺掑簭Tab鏍囩鏃讹紝绔嬪嵆瑙﹀彂鏁寸悊
             SortInventory();
         }
 
-        // 调用底层排序逻辑
+        // 璋冪敤搴曞眰鎺掑簭閫昏緫
         public void SortInventory()
         {
             if (inventoryModel != null && bindableData != null)
             {
                 inventoryModel.SortInventory(bindableData.activeSortTab);
             }
+            // 鏄惧紡鍒锋柊缂撳瓨锛岄伩鍏嶄簨浠惰Е鍙戦『搴忓鑷翠笅娆I璇诲彇鍒版棫鏁版嵁
+            RefreshDisplaySlots();
             selectedSlotIndex = -1;
             if (bindableData != null) bindableData.selectedSlotIndex = -1;
-            HoverItem(-1);
         }
 
-        // 调用底层重置逻辑
+        // 璋冪敤搴曞眰閲嶇疆閫昏緫 (娓呯┖鑳屽寘)
         public void ResetInventory()
         {
             if (inventoryModel != null)
             {
-                inventoryModel.ReloadInitialItems();
+                foreach (var slot in inventoryModel.slots)
+                    slot.Clear();
+                // 鐢变簬Model灞備笉鍐嶆湁涓撻棬鐨凴eload鏂规硶锛岃繖閲屽彂閫佷竴娆″彉鍔ㄩ€氱煡鍗冲彲锛堜綘涔熷彲鍦∕odel灞傞澶栧姞ClearAll鏂规硶锛�
+                inventoryModel.SortInventory(0); // 鏆備笖鐢⊿ort瑙﹀彂涓€涓嬫洿鏂颁簨浠�
             }
             selectedSlotIndex = -1;
             if (bindableData != null) bindableData.selectedSlotIndex = -1;
-            HoverItem(-1);
         }
 
         public void UseItem(int uiIndex)
@@ -233,7 +254,10 @@ namespace InventorySystem.ViewModel
             var targetSlot = slots[uiIndex];
             var itemData = targetSlot.itemData;
 
-            Debug.Log($"使用物品: {itemData.itemName}");
+            // 标记最近使用时间，用于"按最近使用排序"
+            targetSlot.MarkUsed();
+
+            Debug.Log($"浣跨敤鐗╁搧: {itemData.itemName}");
             inventoryModel.RemoveItem(inventoryModel.slots.IndexOf(targetSlot), 1);
 
             selectedSlotIndex = -1;

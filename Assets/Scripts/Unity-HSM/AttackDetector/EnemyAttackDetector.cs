@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using HSM;
+using TaskManager;
 
 public class EnemyAttackDetector : MonoBehaviour
 {
@@ -10,39 +11,48 @@ public class EnemyAttackDetector : MonoBehaviour
     public float attackAngle = 120f;
     public LayerMask targetLayer;
 
-    // Ä¬ÈÏÒÔµ±Ç°TransformÎªÖĞĞÄ£¬ÈôĞèÒªÌØĞ§/ÌØ¶¨ÉíÌå²¿Î»¿É¹ÒÔØ×Ó½Úµã
+    [Header("â€”â€” SO é…ç½®ï¼ˆä¼˜å…ˆï¼‰â€”â€”")]
+    [Tooltip("æ‹–å…¥ MonsterStats èµ„äº§ï¼Œç•™ç©ºåˆ™ä½¿ç”¨ä¸‹æ–¹å›é€€é»˜è®¤å€¼")]
+    [SerializeField] private MonsterStats _stats;
+
+    [Header("â€”â€” å›é€€é»˜è®¤å€¼ï¼ˆ_stats ä¸ºç©ºæ—¶ç”Ÿæ•ˆï¼‰â€”â€”")]
+    public int attackDamage = 10;
+
+    private int _resolvedAttackDamage;
+
+    // é»˜è®¤ä»¥å½“å‰Transformä¸ºä¸­å¿ƒï¼Œè‹¥éœ€è¦ç‰¹æ•ˆ/ç‰¹å®šèº«ä½“éƒ¨ä½å¯æŒ‚è½½å­èŠ‚ç‚¹
     public Transform attackOrigin;
 
     void Awake()
     {
         if (attackOrigin == null)
-        {
             attackOrigin = transform;
-        }
+
+        _resolvedAttackDamage = _stats != null ? _stats.attackDamage : attackDamage;
     }
 
-    // ÓÉµĞÈË¹¥»÷¶¯»­£¨Ç°Ò¡½áÊø£¬ÊÍ·ÅÉËº¦µÄË²¼ä£©Í¨¹ı Animation Event µ÷ÓÃ
+    // ç”±æ•Œäººæ”»å‡»åŠ¨ç”»ï¼ˆå‰æ‘‡ç»“æŸï¼Œé‡Šæ”¾ä¼¤å®³çš„ç¬é—´ï¼‰é€šè¿‡ Animation Event è°ƒç”¨
     public void PerformSectorAttack()
     {
-        // È¡ÏûÁË targetLayer ÏŞÖÆ£¬·ÀÖ¹Òò Inspector Ãæ°åÃ»¹´Ñ¡ Layer µ¼ÖÂÖØµşÇòÄÚÓÀÔ¶Îª 0
+        // å–æ¶ˆäº† targetLayer é™åˆ¶ï¼Œé˜²æ­¢å›  Inspector é¢æ¿æ²¡å‹¾é€‰ Layer å¯¼è‡´é‡å çƒå†…æ°¸è¿œä¸º 0
         Collider[] hits = Physics.OverlapSphere(attackOrigin.position, attackRadius);
 
         foreach (var hit in hits)
         {
-            // Í¨¹ı Tag ¹ıÂË³öÍæ¼Ò£¬±ÜÃâÎóÉËÆäËûÎïÌå
+            // é€šè¿‡ Tag è¿‡æ»¤å‡ºç©å®¶ï¼Œé¿å…è¯¯ä¼¤å…¶ä»–ç‰©ä½“
             if (!hit.CompareTag("Player"))
                 continue;
 
-            // ºöÂÔ×ÔÉí£¨ËäÈ»Í¨³£µĞÈËºÍÍæ¼Ò²»ÊÇÍ¬Ò»²ã»òÍ¬Ò»Tag£¬µ«¼ÓÒ»²ã±£ÏÕ£©
+            // å¿½ç•¥è‡ªèº«ï¼ˆè™½ç„¶é€šå¸¸æ•Œäººå’Œç©å®¶ä¸æ˜¯åŒä¸€å±‚æˆ–åŒä¸€Tagï¼Œä½†åŠ ä¸€å±‚ä¿é™©ï¼‰
             if (hit.gameObject == this.gameObject || hit.gameObject == attackOrigin.gameObject)
                 continue;
 
             Vector3 targetPos = hit.transform.position;
 
-            // »ñÈ¡·½ÏòÏòÁ¿²¢Ä¨Æ½¸ß¶È²î£¬¼ÆËãÆ½ÃæÉÈĞÎ
+            // è·å–æ–¹å‘å‘é‡å¹¶æŠ¹å¹³é«˜åº¦å·®ï¼Œè®¡ç®—å¹³é¢æ‰‡å½¢
             Vector3 dirToTarget = targetPos - attackOrigin.position;
             dirToTarget.y = 0;
-            if (dirToTarget.sqrMagnitude < 0.0001f) continue; // ÌùµÃÌ«½ü
+            if (dirToTarget.sqrMagnitude < 0.0001f) continue; // è´´å¾—å¤ªè¿‘
             dirToTarget.Normalize();
 
             Vector3 forward = attackOrigin.forward;
@@ -50,11 +60,11 @@ public class EnemyAttackDetector : MonoBehaviour
             if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
             forward.Normalize();
 
-            // Èç¹û´¦ÓÚÇ°·½ÉÈĞÎÅĞ¶¨ÇøÄÚ
+            // å¦‚æœå¤„äºå‰æ–¹æ‰‡å½¢åˆ¤å®šåŒºå†…
             float angle = Vector3.Angle(forward, dirToTarget);
             if (angle <= attackAngle * 0.5f)
             {
-                // »ñÈ¡Íæ¼ÒÉíÉÏµÄ PlayerStateDriver
+                // è·å–ç©å®¶èº«ä¸Šçš„ PlayerStateDriver
                 PlayerStateDriver driver = hit.GetComponentInParent<PlayerStateDriver>();
                 if(driver != null) {
                     ApplyHit(driver);
@@ -69,14 +79,17 @@ public class EnemyAttackDetector : MonoBehaviour
     {
         if (driver != null)
         {
-            // ¸æËßÍæ¼Ò±»Ë­´òµÄ£¨Ô­µã×ø±ê£©ÓÃÓÚºóÑö»÷ÍË
+            // å‘Šè¯‰ç©å®¶è¢«è°æ‰“çš„ï¼ˆåŸç‚¹åæ ‡ï¼‰ç”¨äºåä»°å‡»é€€
             driver.ctx.currentHitSource = attackOrigin.position;
-            // ´¥·¢HitReaction
+            // è§¦å‘HitReaction
             driver.ctx.isHit = true;
+
+            // é€šè¿‡ EventBus å¹¿æ’­ä¼¤å®³ï¼Œç”± PlayerStatsProvider è®¢é˜…å¤„ç†
+            EventBus.Instance.RaiseDamage(_resolvedAttackDamage);
         }
     }
 
-    // ÔÚ±à¼­Æ÷Àï»­³öÉÈĞÎ¸¨ÖúÏß£¬·½±ãµ÷Õû¾àÀëºÍ½Ç¶È
+    // åœ¨ç¼–è¾‘å™¨é‡Œç”»å‡ºæ‰‡å½¢è¾…åŠ©çº¿ï¼Œæ–¹ä¾¿è°ƒæ•´è·ç¦»å’Œè§’åº¦
     private void OnDrawGizmosSelected()
     {
         Transform origin = attackOrigin != null ? attackOrigin : transform;

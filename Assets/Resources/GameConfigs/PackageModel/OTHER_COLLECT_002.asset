@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: OTHER_COLLECT_002
+  m_EditorClassIdentifier: 
+  itemID: OTHER_COLLECT_002
+  _itemName: "\u5192\u9669\u8005\u5468\u5E74\u7EAA\u5FF5\u5E01"
+  _description: "\u4E3B\u57CE\u5192\u9669\u8005\u534F\u4F1A\u53D1\u884C\u7684\u9650\u91CF\u7EAA\u5FF5\u5E01\uFF0C\u65E0\u5B9E\u9645\u529F\u80FD\uFF0C\u662F\u8D44\u6DF1\u5192\u9669\u8005\u7684\u8EAB\u4EFD\u8C61\u5F81\uFF0C\u6781\u5177\u6536\u85CF\u4EF7\u5024\u3002"
+  iconPath: PackageIcon/Other/OTHER_COLLECT_002
+  category: 5
+  rarity: 2
+  isStackable: 0
+  maxStack: 1

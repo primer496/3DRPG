@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TaskManager;
+using QuestSystem.View;
 
 namespace HSM {
     public interface ICapabilityConfigApplier {
@@ -20,7 +22,7 @@ namespace HSM {
         public float groundedSnapDownVelocity = 2f;
         public float groundUngroundedGraceTime = 0.08f;
         public LayerMask groundMask;
-        // 空中贴墙处理
+        // 绌轰腑璐村澶勭悊
         public LayerMask airWallMask;
         [Range(0.05f, 0.6f)]
         public float airWallBlockDistance = 0.22f;
@@ -49,9 +51,13 @@ namespace HSM {
         public InputAction dodgeAction;
         public InputAction attackAction;
 
-        // 意图来源：为空则默认读取玩家输入
+        [Header("UI Input Actions")]
+        public InputAction toggleInventoryAction;
+        public InputAction toggleQuestAction;
+
+        // 鎰忓浘鏉ユ簮锛氫负绌哄垯榛樿璇诲彇鐜╁杈撳叆
         public MonoBehaviour intentProviderOverride;
-        // 配置集入口：玩家配置优先于敌人配置
+        // 閰嶇疆闆嗗叆鍙ｏ細鐜╁閰嶇疆浼樺厛浜庢晫浜洪厤缃�
         public ScriptableObject playerConfigSet;
         public ScriptableObject enemyConfigSet;
 
@@ -70,10 +76,20 @@ namespace HSM {
 
         void OnEnable() {
             ToggleInputActions(true);
+            toggleInventoryAction?.Enable();
+            toggleQuestAction?.Enable();
+            EventBus.Instance.OnInputLockStateChanged += HandleInputLockStateChanged;
         }
 
         void OnDisable() {
             ToggleInputActions(false);
+            toggleInventoryAction?.Disable();
+            toggleQuestAction?.Disable();
+            EventBus.Instance.OnInputLockStateChanged -= HandleInputLockStateChanged;
+        }
+
+        private void HandleInputLockStateChanged(bool isLocked) {
+            ctx.inputLocked = isLocked;
         }
 
         void Update() {
@@ -82,6 +98,7 @@ namespace HSM {
             }
 
             ReadInputIntoContext();
+            HandleUIInputs();
             UpdateGroundedState();
             EnsureCombatRootMotionSafety();
             TickStateMachine();
@@ -94,14 +111,14 @@ namespace HSM {
         public Vector3 Velocity => ctx.velocity;
         public bool IsGrounded => ctx.grounded;
 
-        // --- 核心修复：用于接收 Animator 动画事件，并将其转发给剑上的 WeaponDetector ---
+        // --- 鏍稿績淇锛氱敤浜庢帴鏀� Animator 鍔ㄧ敾浜嬩欢锛屽苟灏嗗叾杞彂缁欏墤涓婄殑 WeaponDetector ---
         public void BeginAttack() {
             if (ctx.swordObject != null) {
                 var wd = ctx.swordObject.GetComponent<WeaponDetector>();
                 if (wd != null) {
                     wd.BeginAttack();
                 } else {
-                    Debug.LogWarning("PlayerStateDriver: [剑] 对象上未找到 WeaponDetector 组件！");
+                    Debug.LogWarning("PlayerStateDriver: [鍓慮 瀵硅薄涓婃湭鎵惧埌 WeaponDetector 缁勪欢锛�");
                 }
             }
         }
@@ -233,6 +250,15 @@ namespace HSM {
 
         void ReadInputIntoContext() {
             intentProvider?.WriteIntent(ctx);
+        }
+
+        void HandleUIInputs() {
+            if (toggleInventoryAction != null && toggleInventoryAction.WasPressedThisFrame()) {
+                EventBus.Instance.Raise("ToggleInventory");
+            }
+            if (toggleQuestAction != null && toggleQuestAction.WasPressedThisFrame()) {
+                EventBus.Instance.Raise("ToggleQuestLog");
+            }
         }
 
         void InitializeIntentProvider() {
@@ -445,7 +471,7 @@ namespace HSM {
 
             ctx.moveDriver.Move(deltaPos);
             if (ctx.combatRootMotionActive && Time.deltaTime > 0.0001f) {
-                // 不将RootMotion速度写回ctx.velocity，避免下一次非RootMotion计算帧拿着这个速度继续飘行
+                // 涓嶅皢RootMotion閫熷害鍐欏洖ctx.velocity锛岄伩鍏嶄笅涓€娆￠潪RootMotion璁＄畻甯ф嬁鐫€杩欎釜閫熷害缁х画椋樿
                 ctx.velocity.x = 0f;
                 ctx.velocity.z = 0f;
             } else {
@@ -479,7 +505,7 @@ namespace HSM {
 
         Vector3 BuildCombatRootMotionDelta(Vector3 animatorDeltaPosition) {
             float planarScale = Mathf.Max(0f, ctx.combatRootMotionPlanarScale);
-            // 【核心修复】如果在攻击滞帧期间（砍中敌人），则按照配置缩减运动位移
+            // 銆愭牳蹇冧慨澶嶃€戝鏋滃湪鏀诲嚮婊炲抚鏈熼棿锛堢爫涓晫浜猴級锛屽垯鎸夌収閰嶇疆缂╁噺杩愬姩浣嶇Щ
             if (ctx.hitSlowdownTimer > 0) {
                 planarScale *= ctx.hitStopRootMotionScale;
             }
@@ -740,7 +766,7 @@ namespace HSM {
         }
 
         /// <summary>
-        /// 若 Animator 与本脚本在同一物体上，也可直接把事件指到本方法；否则请用 <see cref="FootPlantAnimationEvents"/>。
+        /// 鑻� Animator 涓庢湰鑴氭湰鍦ㄥ悓涓€鐗╀綋涓婏紝涔熷彲鐩存帴鎶婁簨浠舵寚鍒版湰鏂规硶锛涘惁鍒欒鐢� <see cref="FootPlantAnimationEvents"/>銆�
         /// </summary>
         public void OnFootPlant(int foot) {
             ctx.RegisterFootPlantFromAnimation(foot);

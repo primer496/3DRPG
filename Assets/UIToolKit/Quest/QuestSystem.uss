@@ -1,0 +1,259 @@
+.quest-view-root {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(18, 18, 24, 0.95);
+    border-radius: 8px;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header-bar {
+    width: 100%;
+    height: 64px;
+    background-color: rgba(30, 38, 55, 0.95);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(42, 42, 42, 0.8);
+}
+
+.header-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: rgb(255, 255, 255);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.btn-close {
+    width: 80px;
+    height: 36px;
+    background-color: rgba(60, 60, 70, 0.8);
+    border-width: 1px;
+    border-color: rgb(80, 80, 90);
+    border-radius: 4px;
+    color: rgb(220, 220, 230);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.btn-close:hover {
+    background-color: rgba(80, 80, 90, 0.9);
+    border-color: rgb(100, 100, 110);
+}
+
+.btn-close:active {
+    background-color: rgba(40, 40, 50, 0.9);
+    border-color: rgb(60, 60, 70);
+}
+
+.detail-panel {
+    flex-grow: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.quest-info-header {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.quest-icon {
+    width: 72px;
+    height: 72px;
+    background-color: rgba(35, 43, 58, 0.8);
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgba(70, 95, 140, 0.5);
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.quest-title-container {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.text-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: rgb(230, 238, 255);
+    margin-bottom: 8px;
+}
+
+.tag-container {
+    flex-direction: row;
+    align-items: center;
+}
+
+.tag-main {
+    font-size: 11px;
+    font-weight: bold;
+    color: rgb(255, 193, 7);
+    background-color: rgba(255, 193, 7, 0.2);
+    border-radius: 4px;
+    padding: 2px 10px;
+    margin-right: 8px;
+}
+
+.tag-level {
+    font-size: 11px;
+    font-weight: bold;
+    color: rgb(33, 150, 243);
+    background-color: rgba(33, 150, 243, 0.2);
+    border-radius: 4px;
+    padding: 2px 10px;
+}
+
+.text-description {
+    font-size: 14px;
+    color: rgb(155, 168, 195);
+    line-height: 1.5;
+    margin-bottom: 20px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.text-subtitle {
+    font-size: 12px;
+    font-weight: bold;
+    color: rgb(130, 150, 180);
+    margin-bottom: 12px;
+}
+
+.objective-list {
+    background-color: rgba(20, 25, 38, 0.6);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+.objective-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.objective-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    margin-right: 12px;
+    background-color: rgb(35, 43, 58);
+    border-width: 2px;
+    border-color: rgb(70, 95, 140);
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.objective-text {
+    font-size: 13px;
+    color: rgb(190, 202, 225);
+    flex-grow: 1;
+}
+
+.objective-completed .objective-checkbox {
+    background-color: rgb(76, 175, 80);
+    border-color: rgb(76, 175, 80);
+}
+
+.objective-completed .objective-text {
+    color: rgb(120, 160, 120);
+    text-decoration: line-through;
+}
+
+.objective-active .objective-checkbox {
+    background-color: rgb(33, 150, 243);
+    border-color: rgb(33, 150, 243);
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.5);
+}
+
+.objective-active .objective-text {
+    color: rgb(255, 255, 255);
+    font-weight: 500;
+}
+
+.objective-locked .objective-checkbox {
+    background-color: rgb(45, 50, 60);
+    border-color: rgb(60, 65, 75);
+    opacity: 0.5;
+}
+
+.objective-locked .objective-text {
+    color: rgb(100, 115, 140);
+}
+
+.progress-section {
+    margin-bottom: 20px;
+}
+
+.custom-progress {
+    width: 100%;
+    height: 12px;
+}
+
+.custom-progress > .unity-progress-bar__track {
+    background-color: rgb(30, 38, 52);
+    border-radius: 6px;
+}
+
+.custom-progress > .unity-progress-bar__fill {
+    background-color: rgb(33, 150, 243);
+    border-radius: 6px;
+}
+
+.custom-progress > .unity-progress-bar__title {
+    font-size: 11px;
+    font-weight: bold;
+    color: rgb(140, 160, 190);
+    position: absolute;
+    right: 0;
+    top: -20px;
+}
+
+.action-section {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.btn-primary {
+    width: 140px;
+    height: 40px;
+    background-color: rgb(63, 81, 181);
+    border-width: 1px;
+    border-color: rgb(92, 107, 192);
+    border-radius: 4px;
+    color: rgb(230, 240, 255);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background-color: rgb(73, 91, 191);
+    border-color: rgb(102, 117, 202);
+}
+
+.btn-primary:active {
+    background-color: rgb(53, 71, 171);
+    border-color: rgb(82, 97, 182);
+}
+
+.footer-bar {
+    width: 100%;
+    height: 48px;
+    background-color: rgba(22, 28, 40, 0.95);
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    border-top-width: 1px;
+    border-top-color: rgba(42, 42, 42, 0.8);
+}
+
+.text-footer {
+    font-size: 12px;
+    color: rgb(130, 150, 180);
+}

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: MAT_LEGEND_003
+  m_EditorClassIdentifier: 
+  itemID: MAT_LEGEND_003
+  _itemName: "\u9F99\u9CDE\u788E\u7247"
+  _description: "\u8FDC\u53E4\u5DE8\u9F99\u8131\u843D\u7684\u9CDE\u7247\u788E\u7247\uFF0C\u8574\u542B\u6781\u5F3A\u7684\u5DE8\u9F99\u4E4B\u529B\uFF0C\u6253\u9020\u4F20\u8BF4\u7EA7\u88C5\u5907\u7684\u6838\u5FC3\u6750\u6599\uFF0C\u6781\u4E3A\u7A00\u6709\u3002"
+  iconPath: PackageIcon/Material/MAT_LEGEND_003
+  category: 4
+  rarity: 4
+  isStackable: 1
+  maxStack: 50

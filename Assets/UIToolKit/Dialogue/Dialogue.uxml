@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="Dialogue.uss" />
+    <ui:VisualElement name="DialogueRoot" class="dialogue-root">
+        <!-- 背景层 -->
+        <ui:VisualElement name="BackgroundLayer" class="background-layer" />
+
+        <!-- 主内容区 -->
+        <ui:VisualElement name="MainContent" class="main-content">
+            <!-- 选项区 -->
+            <ui:VisualElement name="OptionsContainer" class="options-container">
+                <ui:Button name="Option1" class="option-btn" text="选项 1" />
+                <ui:Button name="Option2" class="option-btn" text="选项 2" />
+                <ui:Button name="Option3" class="option-btn" text="选项 3" />
+            </ui:VisualElement>
+
+            <!-- 对话框 -->
+            <ui:VisualElement name="DialogueBox" class="dialogue-box">
+                <!-- 顶部装饰条 -->
+                <ui:VisualElement name="DialogueTopBar" class="dialogue-top-bar" />
+
+                <!-- 对话框内容 -->
+                <ui:VisualElement name="DialogueContent" class="dialogue-content">
+                    <!-- 角色信息 -->
+                    <ui:VisualElement name="CharacterInfo" class="character-info">
+                        <ui:VisualElement name="CharacterNameDecorator" class="character-name-decorator" />
+                        <ui:Label name="CharacterName" class="character-name" text="角色名称" />
+                    </ui:VisualElement>
+
+                    <!-- 对话文本 -->
+                    <ui:ScrollView name="DialogueTextContainer" class="dialogue-text-container">
+                        <ui:Label name="DialogueText" class="dialogue-text" text="这是一段对话文本，将会显示在这里。对话内容可能会很长，所以需要滚动显示。" />
+                    </ui:ScrollView>
+
+                    <!-- 底部导航栏 -->
+                    <ui:VisualElement name="BottomBar" class="bottom-bar">
+                        <ui:VisualElement name="ContinueIndicator" class="continue-indicator">
+                            <ui:Image name="ContinueIcon" class="continue-icon" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

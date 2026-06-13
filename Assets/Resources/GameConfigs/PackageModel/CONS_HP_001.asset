@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 510d43758257a6b43ac24d90023c6f22, type: 3}
+  m_Name: CONS_HP_001
+  m_EditorClassIdentifier: 
+  itemID: CONS_HP_001
+  _itemName: "\u5C0F\u578B\u6CBB\u7597\u836F\u6C34"
+  _description: "\u5192\u9669\u8005\u51FA\u95E8\u5FC5\u5907\u7684\u57FA\u7840\u836F\u6C34\uFF0C\u996E\u7528\u540E\u7ACB\u5373\u6062\u590D200\u70B9\u751F\u547D\u503C\u3002"
+  iconPath: PackageIcon/Consumable/CONS_HP_001
+  category: 3
+  rarity: 0
+  isStackable: 1
+  maxStack: 99

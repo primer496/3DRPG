@@ -18,20 +18,20 @@ namespace HSM {
             ExecuteHitImpact();
         }
 
-        // °ÑÊÜ»÷±íÏÖ³éÀëÎªÒ»¸ö¶ÀÁ¢·½·¨£¬·½±ãÔÚ×´Ì¬ÄÚÖØ¸´µ÷ÓÃ
+        // æŠŠå—å‡»è¡¨çŽ°æŠ½ç¦»ä¸ºä¸€ä¸ªç‹¬ç«‹æ–¹æ³•ï¼Œæ–¹ä¾¿åœ¨çŠ¶æ€å†…é‡å¤è°ƒç”¨
         void ExecuteHitImpact() {
             stateElapsed = 0f;
-            ctx.isHit = false; // ÏûºÄµôÕâ·¢¹¥»÷±ê¼Ç
+            ctx.isHit = false; // æ¶ˆè€—æŽ‰è¿™å‘æ”»å‡»æ ‡è®°
 
-            // Ç¿ÐÐ¹Ø±ÕÊÜ»÷ÕßµÄ RootMotion Ëø¶¨
+            // å¼ºè¡Œå…³é—­å—å‡»è€…çš„ RootMotion é”å®š
             ctx.combatRootMotionActive = false;
             if (ctx.anim != null) {
                 ctx.anim.applyRootMotion = false;
-                // Ç¿ÖÆ´Ó0Ãë¿ªÊ¼²¥·ÅÊÜ»÷¶¯×÷
+                // å¼ºåˆ¶ä»Ž0ç§’å¼€å§‹æ’­æ”¾å—å‡»åŠ¨ä½œ
                 ctx.anim.CrossFade("HitReaction", 0.05f, 0, 0f); 
             }
 
-            // ¡¾¸ÄÉÆÊÖ¸Ð£ºÒýÈëÕæÊµ»÷ÍË¡¿
+            // ã€æ”¹å–„æ‰‹æ„Ÿï¼šå¼•å…¥çœŸå®žå‡»é€€ã€‘
             Vector3 knockbackDir = Vector3.zero;
             if (ctx.currentHitSource.sqrMagnitude > 0.001f) {
                 knockbackDir = (ctx.anim != null ? ctx.anim.transform.position : Vector3.zero) - ctx.currentHitSource;
@@ -48,21 +48,21 @@ namespace HSM {
         protected override void OnUpdate(float deltaTime) {
             stateElapsed += deltaTime;
 
-            // --- Çø·ÖÍæ¼ÒºÍµÐÈËµÄÁ¬ÐøÊÜ»÷Âß¼­£¨ÎÞµÐÖ¡ vs ÎÞÏÞÓ²Ö±£© ---
+            // --- åŒºåˆ†çŽ©å®¶å’Œæ•Œäººçš„è¿žç»­å—å‡»é€»è¾‘ï¼ˆæ— æ•Œå¸§ vs æ— é™ç¡¬ç›´ï¼‰ ---
             if (ctx.isHit) {
-                ctx.isHit = false; // ÎÞÂÛÈçºÎ¶¼Ïû»¯µôÕâ´ÎÊÜ»÷ÊÂ¼þ
+                ctx.isHit = false; // æ— è®ºå¦‚ä½•éƒ½æ¶ˆåŒ–æŽ‰è¿™æ¬¡å—å‡»äº‹ä»¶
 
                 bool isPlayer = ctx.anim != null && ctx.anim.transform.CompareTag("Player");
                 if (!isPlayer) {
-                    // µÐÈË£ºÖ»Òª»¹ÔÚÊÜ»÷×´Ì¬ÀïÓÖ±»´òÖÐ£¬¾ÍÂíÉÏË¢ÐÂ¶¯×÷ºÍ»÷ÍË£¨Ò²¾ÍÊÇ³£ËµµÄÖØÐÂ´ò³öÓ²Ö±/¸¡¿ÕÁ¬¶Î£©
+                    // æ•Œäººï¼šåªè¦è¿˜åœ¨å—å‡»çŠ¶æ€é‡Œåˆè¢«æ‰“ä¸­ï¼Œå°±é©¬ä¸Šåˆ·æ–°åŠ¨ä½œå’Œå‡»é€€ï¼ˆä¹Ÿå°±æ˜¯å¸¸è¯´çš„é‡æ–°æ‰“å‡ºç¡¬ç›´/æµ®ç©ºè¿žæ®µï¼‰
                     ExecuteHitImpact();
                 } else {
-                    // Íæ¼Ò£ºÔÚÊÜ»÷¶¯×÷²¥·ÅÍêÖ®Ç°£¬ÊÜµ½¹¥»÷Ö»¿ÛÑªµ«²»Ë¢ÐÂÊÜ»÷¶¯×÷£¨ÎÞµÐÖ¡/°ÔÌå±£»¤»úÖÆ£©
-                    // ÕâÑù¿ÉÒÔ·ÀÖ¹Íæ¼Ò±»Ð¡¹ÖÎ§Å¹Ê±¿¨ËÀÔÚÔ­µØÊ²Ã´¶¼¸É²»ÁË
+                    // çŽ©å®¶ï¼šåœ¨å—å‡»åŠ¨ä½œæ’­æ”¾å®Œä¹‹å‰ï¼Œå—åˆ°æ”»å‡»åªæ‰£è¡€ä½†ä¸åˆ·æ–°å—å‡»åŠ¨ä½œï¼ˆæ— æ•Œå¸§/éœ¸ä½“ä¿æŠ¤æœºåˆ¶ï¼‰
+                    // è¿™æ ·å¯ä»¥é˜²æ­¢çŽ©å®¶è¢«å°æ€ªå›´æ®´æ—¶å¡æ­»åœ¨åŽŸåœ°ä»€ä¹ˆéƒ½å¹²ä¸äº†
                 }
             }
 
-            // Ä¦²ÁÁ¦Ë¥¼õËã·¨£ºÀûÓÃ²åÖµ°Ñ»÷ÍËµÄ¶¯ÄÜË²¼ä»¬Í£
+            // æ‘©æ“¦åŠ›è¡°å‡ç®—æ³•ï¼šåˆ©ç”¨æ’å€¼æŠŠå‡»é€€çš„åŠ¨èƒ½çž¬é—´æ»‘åœ
             ctx.velocity = Vector3.Lerp(ctx.velocity, Vector3.zero, ctx.hitKnockbackDecay * deltaTime);
         }
 
@@ -73,13 +73,13 @@ namespace HSM {
 
             var info = ctx.anim.GetCurrentAnimatorStateInfo(0);
 
-            // µ±×´Ì¬»úÈ·Êµ½øÈëÁËÊÜ»÷¶¯»­ºó£º
+            // å½“çŠ¶æ€æœºç¡®å®žè¿›å…¥äº†å—å‡»åŠ¨ç”»åŽï¼š
             if (info.IsName("HitReaction")) {
                 if (GetNormalized01(info) >= ctx.hitReactionExitNormalizedTime) {
                     return rootState.Grounded; 
                 }
             } 
-            // ¶µµ×±£»¤£º¹ýÁË0.15Ãë»¹Ã»ÓÐ½øÈë HitReaction ×´Ì¬£¬·ÀÖ¹ÓÀ¾ÃËÀËø
+            // å…œåº•ä¿æŠ¤ï¼šè¿‡äº†0.15ç§’è¿˜æ²¡æœ‰è¿›å…¥ HitReaction çŠ¶æ€ï¼Œé˜²æ­¢æ°¸ä¹…æ­»é”
             else if (stateElapsed > 0.15f && !ctx.anim.IsInTransition(0)) {
                 return rootState.Grounded;
             }
@@ -87,7 +87,7 @@ namespace HSM {
             return null;
         }
         
-        // ÌáÈ¡0-1¹éÒ»»¯Ê±¼ä
+        // æå–0-1å½’ä¸€åŒ–æ—¶é—´
         float GetNormalized01(AnimatorStateInfo info) {
             float n = info.normalizedTime;
             if (n >= 1.0f) {
