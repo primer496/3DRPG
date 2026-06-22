@@ -73,7 +73,7 @@ namespace DialogueSystem.Presenter
 
             bool hasOptions = node.Options != null && node.Options.Count > 0;
             view.ShowOptions(hasOptions);
-            view.ShowContinueIndicator(!hasOptions);
+            // 继续指示器由 View 根据打字机完成状态自行管理
 
             if (hasOptions)
             {

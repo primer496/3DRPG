@@ -14,6 +14,9 @@ public class DialogueUIController : MonoBehaviour
     public UnityEvent OnContinueClicked = new UnityEvent();
     public UnityEvent OnDialogueTextClicked = new UnityEvent();
 
+    private TypewriterEffect _typewriter;
+    private string _lastSetText; // 缓存上次设置文本，防止 RunOptions 重复触发
+
     private VisualElement root;
     private VisualElement optionsContainer;
     private Button option1;
@@ -34,6 +37,14 @@ public class DialogueUIController : MonoBehaviour
         root = uiDocument.rootVisualElement;
         BindComponents();
         RegisterEvents();
+
+        // 获取或添加打字机效果组件
+        _typewriter = GetComponent<TypewriterEffect>();
+        if (_typewriter == null)
+        {
+            _typewriter = gameObject.AddComponent<TypewriterEffect>();
+        }
+        _typewriter.SetLabel(dialogueText);
     }
 
     private void Start()
@@ -90,7 +101,8 @@ public class DialogueUIController : MonoBehaviour
 
         continueIndicator?.RegisterCallback<ClickEvent>(evt => OnContinueClicked.Invoke());
 
-        dialogueText?.RegisterCallback<ClickEvent>(evt => OnDialogueTextClicked.Invoke());
+        // 点击对话文本：打字机播放中 → 跳过；播放完毕 → 推进对话
+        dialogueText?.RegisterCallback<ClickEvent>(OnDialogueTextClick);
     }
 
     public void SetCharacterName(string name)
@@ -100,7 +112,16 @@ public class DialogueUIController : MonoBehaviour
 
     public void SetDialogueText(string text)
     {
-        dialogueText.text = text;
+        // 防止 RunLine → RunOptions 重复触发同一文本
+        if (text == _lastSetText && _typewriter != null && _typewriter.IsPlaying)
+            return;
+
+        _lastSetText = text;
+
+        // 打字机播放期间隐藏继续指示器
+        continueIndicator.style.display = DisplayStyle.None;
+
+        _typewriter.Play(text, OnTypewriterComplete);
     }
 
     public void SetOptionText(int index, string text)
@@ -111,10 +132,19 @@ public class DialogueUIController : MonoBehaviour
     public void ShowOptions(bool show)
     {
         optionsContainer.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+        // 显示选项时自动隐藏继续指示器
+        if (show)
+        {
+            continueIndicator.style.display = DisplayStyle.None;
+        }
     }
 
     public void ShowContinueIndicator(bool show)
     {
+        // 打字机播放中不允许显示继续指示器
+        if (show && _typewriter != null && _typewriter.IsPlaying)
+            return;
+
         continueIndicator.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
@@ -128,6 +158,33 @@ public class DialogueUIController : MonoBehaviour
         root.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
+    /// <summary>
+    /// 点击对话文本区域：打字机播放中 → Skip；播放完毕 → 推进对话。
+    /// </summary>
+    private void OnDialogueTextClick(ClickEvent evt)
+    {
+        if (_typewriter != null && _typewriter.IsPlaying)
+        {
+            _typewriter.Skip();
+        }
+        else
+        {
+            OnDialogueTextClicked.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// 打字机播放完成回调：无选项时显示继续指示器。
+    /// </summary>
+    private void OnTypewriterComplete()
+    {
+        // 只在没有选项时显示继续指示器
+        if (optionsContainer.style.display == DisplayStyle.None)
+        {
+            continueIndicator.style.display = DisplayStyle.Flex;
+        }
+    }
+
     private Button GetOptionButton(int index)
     {
         return index switch
@@ -137,5 +194,10 @@ public class DialogueUIController : MonoBehaviour
             2 => option3,
             _ => null
         };
+    }
+
+    private void OnDisable()
+    {
+        _typewriter?.Stop();
     }
 }
