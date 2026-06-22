@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using FinalRPG.Utils;
 
 namespace HSM {
     public class TransitionSequencer {
@@ -38,7 +39,7 @@ namespace HSM {
                         : (a.Mode == ActivityMode.Inactive);
                     if (!include) continue;
 
-                    Debug.Log($"[Phase {(deactivate?"Exit":"Enter")}] state={st.GetType().Name}, activity={a.GetType().Name}, mode={a.Mode}");
+                    RPGLog.Debug("HSM", $"[Phase {(deactivate?"Exit":"Enter")}] state={st.GetType().Name}, activity={a.GetType().Name}, mode={a.Mode}");
 
                     steps.Add(ct => deactivate ? a.DeactivateAsync(ct) : a.ActivateAsync(ct));
                 }

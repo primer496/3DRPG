@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using InventorySystem.Model;
+using FinalRPG.Utils;
 
 namespace InventorySystem.Utils
 {
@@ -48,19 +49,19 @@ namespace InventorySystem.Utils
                 Texture2D loadedTex = Resources.Load<Texture2D>(loadPath);
                 if (loadedTex != null)
                 {
-                    Debug.LogWarning($"图片被作为Texture2D加载，为了性能请将 {loadPath} 在导入设置中修改为 Sprite (2D and UI)。");
+                    RPGLog.Warning("Inventory", $"图片被作为Texture2D加载，为了性能请将 {loadPath} 在导入设置中修改为 Sprite (2D and UI)。");
                     Sprite newSprite = Sprite.Create(loadedTex, new Rect(0, 0, loadedTex.width, loadedTex.height), new Vector2(0.5f, 0.5f));
                     iconCache[iconPath] = newSprite; // 存入缓存
                     return newSprite;
                 }
 
-                Debug.LogWarning($"无法找到物品图标: {loadPath}。请检查路径是否在Resources文件夹下且拼写正确(不带后缀)。");
+                RPGLog.Warning("Inventory", $"无法找到物品图标: {loadPath}。请检查路径是否在Resources文件夹下且拼写正确(不带后缀)。");
                 iconCache[iconPath] = null; // 存入空标记，防止下次依然尝试反复读取硬盘
                 return null;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"加载物品图标失败: {loadPath}, 错误: {e.Message}");
+                RPGLog.Error("Inventory", $"加载物品图标失败: {loadPath}, 错误: {e.Message}");
                 return null;
             }
         }

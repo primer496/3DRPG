@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using TaskManager;
 using QuestSystem.View;
+using FinalRPG.Utils;
 
 namespace HSM {
     public interface ICapabilityConfigApplier {
@@ -118,7 +119,7 @@ namespace HSM {
                 if (wd != null) {
                     wd.BeginAttack();
                 } else {
-                    Debug.LogWarning("PlayerStateDriver: [鍓慮 瀵硅薄涓婃湭鎵惧埌 WeaponDetector 缁勪欢锛�");
+                    RPGLog.Warning("HSM", "剑对象上未找到 WeaponDetector 组件！");
                 }
             }
         }
@@ -155,7 +156,7 @@ namespace HSM {
                 ctx.moveDriver = this;
                 cc = GetComponent<CharacterController>();
                 if (cc == null) {
-                    Debug.LogError("PlayerStateDriver requires CharacterController when acting as default Move driver.");
+                    RPGLog.Error("HSM", "requires CharacterController when acting as default Move driver.");
                     enabled = false;
                 }
             }
@@ -176,7 +177,7 @@ namespace HSM {
 
         void ApplyRoleConfigOverrides() {
             if (playerConfigSet != null && enemyConfigSet != null) {
-                Debug.LogWarning(
+                RPGLog.Warning("HSM",
                     $"Both playerConfigSet and enemyConfigSet are assigned on {name}. playerConfigSet takes precedence."
                 );
             }
@@ -198,9 +199,8 @@ namespace HSM {
                 return true;
             }
 
-            Debug.LogError(
-                $"{name}.{fieldName} ({configSet.GetType().Name}) must implement ICapabilityConfigApplier.",
-                configSet
+            RPGLog.Error("HSM",
+                $"{name}.{fieldName} ({configSet.GetType().Name}) must implement ICapabilityConfigApplier."
             );
             return false;
         }
@@ -268,9 +268,8 @@ namespace HSM {
                     return;
                 }
 
-                Debug.LogError(
-                    $"Intent provider override on {name} must implement IIntentProvider.",
-                    intentProviderOverride
+                RPGLog.Error("HSM",
+                    $"Intent provider override on {name} must implement IIntentProvider."
                 );
             }
 
@@ -373,7 +372,7 @@ namespace HSM {
             var path = StatePath(leaf);
 
             if (path != lastPath) {
-                Debug.Log("State"+path);
+                RPGLog.Debug("HSM", path);
                 lastPath = path;
             }
         }

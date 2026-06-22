@@ -148,7 +148,8 @@ public event Action<bool> OnInputLockStateChanged;
 - ❌ 用 uGUI (Canvas/Image/Text/Button) — 必须用 UI Toolkit
 - ❌ 在 SO 的 `OnEnable()` / `OnValidate()` 里做运行时逻辑
 - ❌ 用 `Resources.Load` 在 Update 里频繁调用（缓存结果）
-- ❌ `Debug.Log` 在生产代码里乱打（用条件编译或封装日志系统）
+- ❌ 直接调用 `Debug.Log` / `Debug.LogWarning` / `Debug.LogError` — 必须用 `RPGLog.Debug/Warning/Error("Channel", msg)`
+- ❌ 在 `RPGLog.Debug` 消息里手写 `[Tag]` 前缀 — RPGLog 自动按频道追加 `[Channel]`
 - ❌ 修改 `TaskManager` 命名空间的名字（历史遗留，但涉及面太广）
 
 ---
@@ -166,11 +167,26 @@ public event Action<bool> OnInputLockStateChanged;
 
 ## 八、已知坑位 & 经验教训
 
+### 日志系统
+1. **所有调试输出必须通过 RPGLog** — `RPGLog.Debug("Channel", msg)`，禁止裸调 `Debug.Log`。参见 `Assets/Scripts/Utils/RPGLog.cs`。
+2. **频道命名与系统一一对应** — `Combat` / `Save` / `Quest` / `Dialogue` / `HSM` / `Player` / `Inventory` / `UI`。勿自创频道。
+3. **发布版自动剥离 Debug 级日志** — 用 `[Conditional("UNITY_EDITOR")]` / `[Conditional("DEVELOPMENT_BUILD")]` 双特性，编译器连调用点和字符串插值一起剥离，零 GC 零开销。Warning 和 Error 始终保留。
+4. **频道开关通过 RPGLogSettings SO 配置** — 运行时由 SaveSystem.Start() 自动加载 `Resources/GameConfigs/RPGLogSettings.asset`。
+
 ### 系统级
 1. **任务完成状态存储不一致** — Yarn 里的 quest 完成/接受状态必须与 QuestViewModel 同步。修复方式：在 Yarn 结束节点同时设置 `QuestCompleted`/`QuestAccepted` 并调用 `CompleteQuest`。
 2. **Yarn 里引用的 Item ID 必须和 `GameConfigs/PackageModel/` 下的 SO 文件名一致**。
 3. **EventBus 订阅必须在 `OnDisable` 里取消**，否则会产生悬挂引用。
 4. **UI Toolkit 的元素查询失败不报错**，`_root.Q<T>("name")` 返回 null 时静默失败，务必判空。
+5. **攻击检测中遍历 Collider 必须按角色去重** — `Physics.OverlapSphere` / `SphereCastAll` 返回的是所有碰撞体，一个角色身上可能有多个 Collider（CharacterController + 子碰撞体）。必须用 `HashSet<PlayerStateDriver>` 对已命中的 Driver 去重，否则一次攻击触发多次伤害/跳字。
+6. **DOTween 操作 `Time.timeScale` 必须用 `SetUpdate(true)`** — 帧冻结（Hit Stop）场景中 timeScale 被压低，如果 DOTween 自身也用 scaled time，tween 会被冻结无法完成恢复。`SetUpdate(true)` 强制使用 unscaled time。连段攻击时记得先 `_freezeTween?.Kill()` 再创建新 tween，避免多个 tween 竞争 timeScale。
+
+### UI Toolkit
+5. **`.Q<>()` 查不到 UXML 根元素自身** — `.Q()` 只搜索子元素。要获取 UXML 的根 `VisualElement`，直接用 `_root = _uiDoc.rootVisualElement`，不要用 `.Q<VisualElement>("root-name")`。
+6. **世界坐标→面板坐标必须用原生 API** — `Camera.WorldToScreenPoint` 返回屏幕像素坐标，但 UI Toolkit 的 PanelSettings 有独立的参考分辨率和缩放模式，两者坐标系不一致。正确做法：`RuntimePanelUtils.CameraTransformWorldToPanel(_root.panel, worldPos, cam)`。
+7. **跳字/头顶 UI 需要 Y 轴偏移** — 传入的世界坐标通常是 `transform.position`（脚底），需加 `_headHeight` 偏移到头顶。
+8. **透视相机下不要对世界坐标做 Z 轴随机散布** — Z 轴偏移会显著改变屏幕投影位置，导致 UI 偏离目标。只保留 X 轴微小散布即可。
+9. **USS 样式可能不加载，UI 元素需内联兜底** — `AddToClassList("damage-text")` 后如果 USS 路径不对或未加载，Label 可能完全不可见。在代码中设置 `style.color`、`style.fontSize` 等内联样式作为保底。
 
 ### 动画 & 移动
 5. **HSM 不要直接驱动 Animator 状态切换** — 让 Animator 自己管理 Transition（Exit Time / Speed 条件），HSM 用 `GetCurrentAnimatorStateInfo(0).IsName()` 轮询同步。
@@ -179,6 +195,10 @@ public event Action<bool> OnInputLockStateChanged;
 8. **接地检测不能只靠单帧射线** — 坡道边缘容易闪断，需要多帧平滑或 buffer。详见 `docs/practices/斜坡检测与移动实践总结.md`。
 9. **斜坡移动方向必须沿坡面切线** — 不能直接用世界 XZ 平面投影，否则上坡会卡顿/抖动。
 10. **不要双重注入 Y 轴位移** — 同时在代码和物理里修改 Y 会导致角色逐渐离开坡面。
+
+### 摄像机
+1. **`CinemachineImpulseListener` 必须放在 VCam 上，不能放在 Main Camera** — Cinemachine 2.x 的 `CinemachineImpulseListener` 继承自 `CinemachineExtension`，后者要求同 GameObject 存在 `CinemachineVirtualCameraBase`。`CinemachineBrain`（挂在 Main Camera 上）不继承该类，放在 Main Camera 上会报 `CinemachineExtension requires a Cinemachine Virtual Camera component`。正确做法：将 Listener 放在 `CinemachineVirtualCamera` 所在 GameObject。
+2. **不要用 DOTween `DOShakePosition()` 配合 Cinemachine** — DOTween 直接写 Camera transform，与 `CinemachineBrain` 的 `LateUpdate` 输出冲突。震屏应使用 `CinemachineImpulseSource` + `CinemachineImpulseListener`。
 
 ### 对话系统
 11. **MVP 架构中 View 是被动的** — View 只暴露 SetText/ShowOptions 等接口，不包含"下一步该干什么"的逻辑。View 通过 Event/回调把玩家操作透传给 Presenter。

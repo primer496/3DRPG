@@ -1,6 +1,7 @@
 using UnityEngine;
 using Yarn.Unity;
 using TaskManager;
+using FinalRPG.Utils;
 
 namespace HSM
 {
@@ -53,7 +54,7 @@ namespace HSM
             if (currentHealth <= 0) return;
 
             currentHealth -= amount;
-            Debug.Log($"[EnemyHealth] {gameObject.name} 受到 {amount} 点伤害，剩余 {currentHealth}/{_resolvedMaxHealth}");
+            RPGLog.Debug("Combat", $"{gameObject.name} 受到 {amount} 点伤害，剩余 {currentHealth}/{_resolvedMaxHealth}");
 
             if (currentHealth <= 0)
                 Die();
@@ -61,7 +62,7 @@ namespace HSM
 
         private void Die()
         {
-            Debug.Log($"[EnemyHealth] {gameObject.name} 死亡，向 EventBus 报告击杀 {_resolvedEnemyId}");
+            RPGLog.Debug("Combat", $"{gameObject.name} 死亡，向 EventBus 报告击杀 {_resolvedEnemyId}");
             EventBus.Instance.Raise(TargetType.Kill, _resolvedEnemyId, 1);
 
             // 在 Yarn 变量存储中标记已击杀，供对话分支判断

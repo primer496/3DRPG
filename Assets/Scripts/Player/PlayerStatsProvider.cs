@@ -1,5 +1,6 @@
 using UnityEngine;
 using TaskManager;
+using FinalRPG.Utils;
 
 /// <summary>
 /// 玩家属性提供者 — MonoBehaviour 桥接层。
@@ -22,7 +23,7 @@ public class PlayerStatsProvider : MonoBehaviour
         EventBus.Instance.OnGoldRewarded += AddGold;
         EventBus.Instance.OnExpRewarded  += AddExp;
         EventBus.Instance.OnPlayerDamaged += TakeDamage;
-        Debug.Log("[PlayerStatsProvider] 已订阅 EventBus 奖励/伤害事件");
+        RPGLog.Debug("Player", "已订阅 EventBus 奖励/伤害事件");
     }
 
     private void OnDisable()
@@ -34,13 +35,13 @@ public class PlayerStatsProvider : MonoBehaviour
 
     private void AddGold(int amount)
     {
-        Debug.Log($"[PlayerStatsProvider] 收到金币奖励: {amount}");
+        RPGLog.Debug("Player", $"收到金币奖励: {amount}");
         Stats.AddGold(amount);
     }
 
     private void AddExp(int amount)
     {
-        Debug.Log($"[PlayerStatsProvider] 收到经验奖励: {amount}");
+        RPGLog.Debug("Player", $"收到经验奖励: {amount}");
         Stats.AddExp(amount);
     }
 

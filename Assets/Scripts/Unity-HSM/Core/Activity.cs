@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using FinalRPG.Utils;
 
 namespace HSM {
     public enum ActivityMode { Inactive, Activating, Active, Deactivating }
@@ -21,7 +22,7 @@ namespace HSM {
             Mode = ActivityMode.Activating;
             await Task.CompletedTask;
             Mode = ActivityMode.Active;
-            Debug.Log($"Activated {GetType().Name} (mode={Mode})");
+            RPGLog.Debug("HSM", $"Activated {GetType().Name} (mode={Mode})");
         }
 
         public virtual async Task DeactivateAsync(CancellationToken ct) {
@@ -30,7 +31,7 @@ namespace HSM {
             Mode = ActivityMode.Deactivating;
             await Task.CompletedTask;
             Mode = ActivityMode.Inactive;
-            Debug.Log($"Deactivated {GetType().Name} (mode={Mode})");
+            RPGLog.Debug("HSM", $"Deactivated {GetType().Name} (mode={Mode})");
         }
     }
 
@@ -85,7 +86,7 @@ namespace HSM {
             }
 
             Mode = ActivityMode.Inactive;
-            Debug.Log($"Deactivated {GetType().Name} (mode={Mode})");
+            RPGLog.Debug("HSM", $"Deactivated {GetType().Name} (mode={Mode})");
         }
     }
 }

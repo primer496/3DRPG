@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using QuestSystem;
 using UnityEngine;
+using FinalRPG.Utils;
 
 namespace TaskManager
 {
@@ -171,20 +172,20 @@ namespace TaskManager
         {
             if (quest.isCompleted) return;
             quest.isCompleted = true;
-            Debug.Log($"[QuestManager] 任务完成：{quest.questData.title} (id={quest.questData.id})");
+            RPGLog.Debug("Quest", $"任务完成：{quest.questData.title} (id={quest.questData.id})");
 
             var rewards = quest.questData.rewards;
             if (rewards == null || rewards.Count == 0)
             {
-                Debug.LogWarning($"[QuestManager] 任务 {quest.questData.id} 没有配置奖励！");
+                RPGLog.Warning("Quest", $"任务 {quest.questData.id} 没有配置奖励！");
                 OnQuestUpdated?.Invoke(quest);
                 return;
             }
 
-            Debug.Log($"[QuestManager] 准备发放 {rewards.Count} 项奖励");
+            RPGLog.Debug("Quest", $"准备发放 {rewards.Count} 项奖励");
             foreach (var reward in rewards)
             {
-                Debug.Log($"[QuestManager] 奖励: type={reward.rewardType} id={reward.rewardId} amount={reward.amount}");
+                RPGLog.Debug("Quest", $"奖励: type={reward.rewardType} id={reward.rewardId} amount={reward.amount}");
                 switch (reward.rewardType)
                 {
                     case RewardType.Item:
@@ -198,7 +199,7 @@ namespace TaskManager
                         break;
                 }
             }
-            Debug.Log($"[QuestManager] 奖励广播完毕");
+            RPGLog.Debug("Quest", "奖励广播完毕");
 
             OnQuestUpdated?.Invoke(quest);
         }
@@ -215,7 +216,7 @@ namespace TaskManager
             }
             else
             {
-                Debug.LogWarning($"[QuestManager] CompleteQuest: 找不到进行中的任务 {questId}");
+                RPGLog.Warning("Quest", $"CompleteQuest: 找不到进行中的任务 {questId}");
             }
         }
 
@@ -229,13 +230,13 @@ namespace TaskManager
             var quest = activeQuests.Find(q => q.questData.id == questId && !q.isCompleted);
             if (quest == null)
             {
-                Debug.LogWarning($"[QuestManager] AdvanceQuestObjective: 找不到进行中的任务 {questId}");
+                RPGLog.Warning("Quest", $"AdvanceQuestObjective: 找不到进行中的任务 {questId}");
                 return;
             }
 
             if (quest.currentActiveIndex >= quest.questData.objectives.Count)
             {
-                Debug.LogWarning($"[QuestManager] AdvanceQuestObjective: {questId} 所有目标已完成，无法继续推进");
+                RPGLog.Warning("Quest", $"AdvanceQuestObjective: {questId} 所有目标已完成，无法继续推进");
                 return;
             }
 
@@ -243,7 +244,7 @@ namespace TaskManager
             quest.progressList[quest.currentActiveIndex] = obj.requiredAmount;
             quest.currentActiveIndex++;
 
-            Debug.Log($"[QuestManager] 推进目标: {questId} objective[{quest.currentActiveIndex - 1}] 完成 → 当前 activeIndex={quest.currentActiveIndex}");
+            RPGLog.Debug("Quest", $"推进目标: {questId} objective[{quest.currentActiveIndex - 1}] 完成 → 当前 activeIndex={quest.currentActiveIndex}");
 
             OnQuestUpdated?.Invoke(quest);
         }
@@ -268,7 +269,7 @@ namespace TaskManager
             var newQuest = new QuestInstance(data);
             activeQuests.Add(newQuest);
             
-            Debug.Log($"[QuestManager] 接受了新任务：{data.title}");
+            RPGLog.Debug("Quest", $"接受了新任务：{data.title}");
             OnQuestUpdated?.Invoke(newQuest); // 通知 UI 添加新任务面板
         }
     }

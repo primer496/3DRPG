@@ -1,0 +1,39 @@
+.ft-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.damage-text {
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: rgb(220, 60, 60);
+    -unity-text-outline-width: 1;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    white-space: nowrap;
+    transition: none;
+}
+
+/* 预留扩展：暴击样式 */
+.damage-crit {
+    font-size: 28px;
+    -unity-font-style: bold;
+    color: rgb(255, 180, 40);
+    -unity-text-outline-width: 1;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    white-space: nowrap;
+}
+
+/* 预留扩展：治疗样式 */
+.heal-text {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(80, 220, 80);
+    -unity-text-outline-width: 1;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    white-space: nowrap;
+}

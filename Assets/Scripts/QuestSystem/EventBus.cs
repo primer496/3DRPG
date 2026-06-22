@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 
 namespace TaskManager
@@ -25,6 +26,8 @@ namespace TaskManager
         public event Action<int> OnGoldRewarded;             // amount → PlayerStats 加金币
         public event Action<int> OnExpRewarded;              // amount → PlayerStats 加经验
         public event Action<int> OnPlayerDamaged;            // amount → PlayerStats 扣 HP
+        public event Action<int, Vector3> OnDamagePopup;    // amount, worldPos → FloatingTextController 显示跳字
+        public event Action<Vector3, bool> OnAttackHit;    // worldPos, isPlayerAttack → 命中反馈（帧冻结/震屏）
 
         // amount 给个默认值 1，大多数情况（杀一只怪、对话一次）就不需要每次都传数字了
         public void Raise(TargetType targetType, string targetId, int amount = 1)
@@ -55,6 +58,16 @@ namespace TaskManager
         public void RaiseDamage(int amount)
         {
             OnPlayerDamaged?.Invoke(amount);
+        }
+
+        public void RaiseDamagePopup(int amount, Vector3 worldPos)
+        {
+            OnDamagePopup?.Invoke(amount, worldPos);
+        }
+
+        public void RaiseAttackHit(Vector3 worldPos, bool isPlayerAttack)
+        {
+            OnAttackHit?.Invoke(worldPos, isPlayerAttack);
         }
 
         public void Raise(string eventName)

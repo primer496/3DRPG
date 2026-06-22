@@ -6,6 +6,7 @@ using Yarn.Unity;
 using TaskManager;
 using InventorySystem.Model;
 using InventorySystem.ViewModel;
+using FinalRPG.Utils;
 
 /// <summary>
 /// 存档系统核心协调器 — MonoBehaviour 单例（DontDestroyOnLoad）。
@@ -71,6 +72,14 @@ public class SaveSystem : MonoBehaviour
 
     private void Start()
     {
+        // 加载日志频道配置（需在 Unity 中手动创建:
+        //   Assets → Create → RPG → Log Settings → 放入 Resources/GameConfigs/）
+        var logSettings = Resources.Load<RPGLogSettings>("GameConfigs/RPGLogSettings");
+        if (logSettings != null)
+        {
+            RPGLog.ApplySettings(logSettings);
+        }
+
         CacheReferences();
 
         // 启动时自动恢复存档（纯自动存档模式，无 UI 选择）
@@ -149,7 +158,7 @@ public class SaveSystem : MonoBehaviour
     {
         if (slot < 0 || slot > 2)
         {
-            Debug.LogError($"[SaveSystem] 无效存档槽位: {slot}，合法值为 0-2");
+            RPGLog.Error("Save", $"无效存档槽位: {slot}，合法值为 0-2");
             return;
         }
 
@@ -164,11 +173,11 @@ public class SaveSystem : MonoBehaviour
         try
         {
             File.WriteAllText(path, json);
-            Debug.Log($"[SaveSystem] 存档成功 → 槽位 {slot}: {path} ({saveData.saveTime})");
+            RPGLog.Debug("Save", $"存档成功 → 槽位 {slot}: {path} ({saveData.saveTime})");
         }
         catch (Exception e)
         {
-            Debug.LogError($"[SaveSystem] 存档写入失败 槽位 {slot}: {e.Message}");
+            RPGLog.Error("Save", $"存档写入失败 槽位 {slot}: {e.Message}");
         }
     }
 
@@ -179,14 +188,14 @@ public class SaveSystem : MonoBehaviour
     {
         if (slot < 0 || slot > 2)
         {
-            Debug.LogError($"[SaveSystem] 无效存档槽位: {slot}，合法值为 0-2");
+            RPGLog.Error("Save", $"无效存档槽位: {slot}，合法值为 0-2");
             return;
         }
 
         string path = GetSlotPath(slot);
         if (!File.Exists(path))
         {
-            Debug.LogWarning($"[SaveSystem] 存档不存在 槽位 {slot}: {path}");
+            RPGLog.Warning("Save", $"存档不存在 槽位 {slot}: {path}");
             return;
         }
 
@@ -197,20 +206,20 @@ public class SaveSystem : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[SaveSystem] 存档读取失败 槽位 {slot}: {e.Message}");
+            RPGLog.Error("Save", $"存档读取失败 槽位 {slot}: {e.Message}");
             return;
         }
 
         var saveData = JsonUtility.FromJson<SaveData>(json);
         if (saveData == null)
         {
-            Debug.LogError($"[SaveSystem] 存档解析失败 槽位 {slot}");
+            RPGLog.Error("Save", $"存档解析失败 槽位 {slot}");
             return;
         }
 
         CacheReferences();
         RestoreFromSaveData(saveData);
-        Debug.Log($"[SaveSystem] 读档成功 ← 槽位 {slot}: {saveData.saveTime}");
+        RPGLog.Debug("Save", $"读档成功 ← 槽位 {slot}: {saveData.saveTime}");
     }
 
     // ========================================================================
@@ -234,11 +243,11 @@ public class SaveSystem : MonoBehaviour
         try
         {
             File.WriteAllText(path, json);
-            Debug.Log($"[SaveSystem] 自动存档完成: {path} ({saveData.saveTime})");
+            RPGLog.Debug("Save", $"自动存档完成: {path} ({saveData.saveTime})");
         }
         catch (Exception e)
         {
-            Debug.LogError($"[SaveSystem] 自动存档写入失败: {e.Message}");
+            RPGLog.Error("Save", $"自动存档写入失败: {e.Message}");
         }
     }
 
@@ -250,7 +259,7 @@ public class SaveSystem : MonoBehaviour
         string path = GetAutoSavePath();
         if (!File.Exists(path))
         {
-            Debug.LogWarning($"[SaveSystem] 自动存档不存在: {path}");
+            RPGLog.Warning("Save", $"自动存档不存在: {path}");
             return;
         }
 
@@ -261,20 +270,20 @@ public class SaveSystem : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[SaveSystem] 自动存档读取失败: {e.Message}");
+            RPGLog.Error("Save", $"自动存档读取失败: {e.Message}");
             return;
         }
 
         var saveData = JsonUtility.FromJson<SaveData>(json);
         if (saveData == null)
         {
-            Debug.LogError("[SaveSystem] 自动存档解析失败");
+            RPGLog.Error("Save", "自动存档解析失败");
             return;
         }
 
         CacheReferences();
         RestoreFromSaveData(saveData);
-        Debug.Log($"[SaveSystem] 读档成功 ← 自动存档: {saveData.saveTime}");
+        RPGLog.Debug("Save", $"读档成功 ← 自动存档: {saveData.saveTime}");
     }
 
     // ========================================================================
@@ -329,12 +338,12 @@ public class SaveSystem : MonoBehaviour
             if (File.Exists(path))
             {
                 File.Delete(path);
-                Debug.Log($"[SaveSystem] 已删除存档 槽位 {slot}");
+                RPGLog.Debug("Save", $"已删除存档 槽位 {slot}");
             }
         }
         catch (Exception e)
         {
-            Debug.LogError($"[SaveSystem] 删除存档失败 槽位 {slot}: {e.Message}");
+            RPGLog.Error("Save", $"删除存档失败 槽位 {slot}: {e.Message}");
         }
     }
 
@@ -349,12 +358,12 @@ public class SaveSystem : MonoBehaviour
             if (File.Exists(path))
             {
                 File.Delete(path);
-                Debug.Log("[SaveSystem] 已删除自动存档");
+                RPGLog.Debug("Save", "已删除自动存档");
             }
         }
         catch (Exception e)
         {
-            Debug.LogError($"[SaveSystem] 删除自动存档失败: {e.Message}");
+            RPGLog.Error("Save", $"删除自动存档失败: {e.Message}");
         }
     }
 
@@ -442,7 +451,7 @@ public class SaveSystem : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[SaveSystem] PlayerStatsProvider 未找到，跳过属性恢复");
+            RPGLog.Warning("Save", "PlayerStatsProvider 未找到，跳过属性恢复");
         }
 
         // 2. 恢复背包
@@ -452,7 +461,7 @@ public class SaveSystem : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[SaveSystem] InventoryViewModel 未找到，跳过背包恢复");
+            RPGLog.Warning("Save", "InventoryViewModel 未找到，跳过背包恢复");
         }
 
         // 3. 恢复任务进度
@@ -472,7 +481,7 @@ public class SaveSystem : MonoBehaviour
                     _yarnStorage.SetValue(entry.name, entry.value);
                 }
             }
-            Debug.Log($"[SaveSystem] Yarn 变量恢复完成: 共 {data.yarnVariables.Count} 个");
+            RPGLog.Debug("Save", $"Yarn 变量恢复完成: 共 {data.yarnVariables.Count} 个");
         }
     }
 
@@ -498,13 +507,13 @@ public class SaveSystem : MonoBehaviour
         {
             if (string.IsNullOrEmpty(saved.questId))
             {
-                Debug.LogWarning("[SaveSystem] 存档中存在空 questId，已跳过");
+                RPGLog.Warning("Save", "存档中存在空 questId，已跳过");
                 continue;
             }
 
             if (!questDataDict.TryGetValue(saved.questId, out var questData))
             {
-                Debug.LogWarning($"[SaveSystem] 无法找到 QuestData: {saved.questId}，已跳过");
+                RPGLog.Warning("Save", $"无法找到 QuestData: {saved.questId}，已跳过");
                 continue;
             }
 
@@ -525,7 +534,7 @@ public class SaveSystem : MonoBehaviour
 
         // 通过 EventBus string 事件通知 UI 刷新（QuestViewModel 可订阅 "QuestsRestored"）
         EventBus.Instance.Raise("QuestsRestored");
-        Debug.Log($"[SaveSystem] 任务进度恢复完成: 共 {activeQuests.Count} 个任务");
+        RPGLog.Debug("Save", $"任务进度恢复完成: 共 {activeQuests.Count} 个任务");
     }
 
     // ========================================================================

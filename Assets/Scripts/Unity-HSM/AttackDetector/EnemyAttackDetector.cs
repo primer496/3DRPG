@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using HSM;
 using TaskManager;
+using FinalRPG.Utils;
 
 public class EnemyAttackDetector : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class EnemyAttackDetector : MonoBehaviour
     // 默认以当前Transform为中心，若需要特效/特定身体部位可挂载子节点
     public Transform attackOrigin;
 
+    // 单次攻击去重：玩家身上可能有多个 Collider，同一次扇形扫描只命中一次
+    private HashSet<PlayerStateDriver> _hitDrivers = new HashSet<PlayerStateDriver>();
+
     void Awake()
     {
         if (attackOrigin == null)
@@ -34,8 +38,10 @@ public class EnemyAttackDetector : MonoBehaviour
     // 由敌人攻击动画（前摇结束，释放伤害的瞬间）通过 Animation Event 调用
     public void PerformSectorAttack()
     {
-        // 取消了 targetLayer 限制，防止因 Inspector 面板没勾选 Layer 导致重叠球内永远为 0
+        // 取消 targetLayer 限制，防止因 Inspector 面板没勾选 Layer 导致重叠球内永远为 0
         Collider[] hits = Physics.OverlapSphere(attackOrigin.position, attackRadius);
+
+        _hitDrivers.Clear();
 
         foreach (var hit in hits)
         {
@@ -66,7 +72,9 @@ public class EnemyAttackDetector : MonoBehaviour
             {
                 // 获取玩家身上的 PlayerStateDriver
                 PlayerStateDriver driver = hit.GetComponentInParent<PlayerStateDriver>();
-                if(driver != null) {
+                if(driver != null && !_hitDrivers.Contains(driver)) {
+                    _hitDrivers.Add(driver);
+                    RPGLog.Debug("Combat", $"扇形命中玩家！damage={_resolvedAttackDamage}");
                     ApplyHit(driver);
                 }
             }
@@ -86,6 +94,10 @@ public class EnemyAttackDetector : MonoBehaviour
 
             // 通过 EventBus 广播伤害，由 PlayerStatsProvider 订阅处理
             EventBus.Instance.RaiseDamage(_resolvedAttackDamage);
+            // 广播跳字事件（世界坐标取玩家位置）
+            EventBus.Instance.RaiseDamagePopup(_resolvedAttackDamage, driver.transform.position);
+            // 广播命中事件（敌人攻击 → 仅触发震屏，不冻结）
+            EventBus.Instance.RaiseAttackHit(driver.transform.position, isPlayerAttack: false);
         }
     }
 

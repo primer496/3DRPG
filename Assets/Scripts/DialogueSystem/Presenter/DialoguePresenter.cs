@@ -2,6 +2,7 @@ using UnityEngine;
 using DialogueSystem.Model;
 using DialogueSystem.Adapter;
 using HSM;
+using FinalRPG.Utils;
 
 namespace DialogueSystem.Presenter
 {
@@ -33,7 +34,7 @@ namespace DialogueSystem.Presenter
             }
             else
             {
-                Debug.LogError("[DialoguePresenter] 找不到 YarnDialogueAdapter！");
+                RPGLog.Error("Dialogue", "找不到 YarnDialogueAdapter！");
             }
             
             // 将Presenter绑定到View上
@@ -43,7 +44,7 @@ namespace DialogueSystem.Presenter
             }
             else
             {
-                Debug.LogWarning("[DialoguePresenter] 找不到 DialogueUIController！请确保场景中存在UI。");
+                RPGLog.Warning("Dialogue", "找不到 DialogueUIController！请确保场景中存在UI。");
             }
         }
 
@@ -63,7 +64,7 @@ namespace DialogueSystem.Presenter
             TaskManager.EventBus.Instance.RaiseInputLock(true);
 
             // 如果UI在游戏过程中被销毁了或者没找到，直接返回
-            if (view == null) { Debug.LogError("[DialoguePresenter] HandleNodeChanged: view 为 null！"); return; }
+            if (view == null) { RPGLog.Error("Dialogue", "HandleNodeChanged: view 为 null！"); return; }
 
             // [Debug] Debug.Log($"[DialoguePresenter] 显示对话: {node.SpeakerName}: {node.Text}");
             view.ShowDialogue(true);

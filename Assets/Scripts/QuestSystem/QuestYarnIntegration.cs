@@ -1,6 +1,7 @@
 using UnityEngine;
 using Yarn.Unity;
 using TaskManager;
+using FinalRPG.Utils;
 
 namespace QuestSystem
 {
@@ -16,7 +17,7 @@ namespace QuestSystem
             dialogueRunner = FindFirstObjectByType<DialogueRunner>();
             if (dialogueRunner == null)
             {
-                Debug.LogWarning("[QuestYarnIntegration] 场景中未找到 DialogueRunner 组件，请挂载！");
+                RPGLog.Warning("Quest", "场景中未找到 DialogueRunner 组件，请挂载！");
                 return;
             }
 
@@ -53,13 +54,13 @@ namespace QuestSystem
             if (currentProgress == 0)
             {
                 storage.SetValue("$InvestigationProgress", 1f);
-                Debug.Log("[Test] 自动发起了推进 -> InvestigationProgress 设为 1");
+                RPGLog.Debug("Quest", "[Test] 自动发起了推进 -> InvestigationProgress 设为 1");
                 GivePlayerItem("Clue_Footprint", 1); // 顺便给测试用的包里虚空塞个道具
             }
             else if (currentProgress == 1)
             {
                 storage.SetValue("$InvestigationProgress", 2f);
-                Debug.Log("[Test] 自动发起了推进 -> InvestigationProgress 设为 2");
+                RPGLog.Debug("Quest", "[Test] 自动发起了推进 -> InvestigationProgress 设为 2");
                 GivePlayerItem("Clue_Herb", 1);
             }
         }
@@ -73,7 +74,7 @@ namespace QuestSystem
             }
             else
             {
-                Debug.LogError($"[Yarn] 接取任务失败，找不到 QuestData: {questId}");
+                RPGLog.Error("Quest", $"接取任务失败，找不到 QuestData: {questId}");
             }
         }
 
@@ -86,7 +87,7 @@ namespace QuestSystem
         private void SetReputation(string factionId, int amount)
         {
             // TODO: 接入声望系统后在此扩展；目前仅打日志，不阻塞对话流程
-            Debug.Log($"[QuestYarnIntegration] SetReputation: {factionId} +{amount}");
+            RPGLog.Debug("Quest", $"SetReputation: {factionId} +{amount}");
         }
 
         private void GivePlayerItem(string itemId, int amount)
@@ -95,7 +96,7 @@ namespace QuestSystem
             if (string.Equals(itemId, "Gold", System.StringComparison.OrdinalIgnoreCase))
             {
                 EventBus.Instance.RaiseGoldReward(amount);
-                Debug.Log($"[QuestYarnIntegration] 发放金币: {amount}");
+                RPGLog.Debug("Quest", $"发放金币: {amount}");
                 return;
             }
 
@@ -103,7 +104,7 @@ namespace QuestSystem
             // 同时广播 Collect 活动，供 QuestManager 追踪任务目标进度
             EventBus.Instance.RaiseItemReward(itemId, amount);
             EventBus.Instance.Raise(TargetType.Collect, itemId, amount);
-            Debug.Log($"[QuestYarnIntegration] 发放物品: {itemId} x{amount}");
+            RPGLog.Debug("Quest", $"发放物品: {itemId} x{amount}");
         }
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace QuestSystem
             // 运行时加载：QuestData 资产必须放在 Resources/QuestData/ 文件夹下，文件名与 questId 一致
             QuestData data = Resources.Load<QuestData>($"GameConfigs/Quest/{questId}");
             if (data == null)
-                Debug.LogError($"[QuestYarnIntegration] 找不到 QuestData：Resources/GameConfigs/Quest/{questId}，请确认资产已放入该目录且文件名与 questId 匹配。");
+                RPGLog.Error("Quest", $"找不到 QuestData：Resources/GameConfigs/Quest/{questId}，请确认资产已放入该目录且文件名与 questId 匹配。");
             return data;
         }
 
@@ -144,13 +145,13 @@ namespace QuestSystem
             if (dialogueRunner != null)
             {
                 dialogueRunner.gameObject.AddComponent<QuestYarnIntegration>();
-                Debug.Log("[QuestYarnIntegration] 自动注册到 DialogueRunner。");
+                RPGLog.Debug("Quest", "自动注册到 DialogueRunner。");
             }
             else
             {
                 var go = new GameObject("[QuestYarnIntegration]");
                 go.AddComponent<QuestYarnIntegration>();
-                Debug.Log("[QuestYarnIntegration] 未找到 DialogueRunner，已创建独立节点。");
+                RPGLog.Debug("Quest", "未找到 DialogueRunner，已创建独立节点。");
             }
         }
     }

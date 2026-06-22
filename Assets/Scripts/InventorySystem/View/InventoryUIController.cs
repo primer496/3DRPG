@@ -6,6 +6,7 @@ using InventorySystem.ViewModel;
 using InventorySystem.Model;
 using InventorySystem.Utils;
 using TaskManager;
+using FinalRPG.Utils;
 
 public class InventoryUIController : MonoBehaviour
 {
@@ -307,14 +308,14 @@ public class InventoryUIController : MonoBehaviour
     private void OnResetButtonClicked() 
     {
         CancelDeleteMode();
-        Debug.Log("鎵ц鑳屽寘閲嶇疆");
+        RPGLog.Debug("Inventory", "执行背包重置");
         if (viewModel != null)
             viewModel.ResetInventory();
     }
 
     private void OnDisplayButtonClicked() 
     {
-        Debug.Log("鏄剧ず璁惧畾 - 姝ゅ鍙互鍔犲叆鎺у埗鐗╁搧妯″瀷闅愯棌/鏄剧ず鐨勯€昏緫");
+        RPGLog.Debug("Inventory", "显示设定 - 此处可以加入控制物品模型隐藏/显示的逻辑");
         // 濡傛灉鏈夐澶栫殑闈㈡澘锛屽彲浠ュ湪姝ゅ Toggle
     }
 
@@ -341,7 +342,7 @@ public class InventoryUIController : MonoBehaviour
 
     private void OnUISwitchButtonClicked() 
     {
-        Debug.Log("鐣岄潰璁剧疆琚偣鍑� - 鍛煎嚭娓告垙绯荤粺鑿滃崟");
+        RPGLog.Debug("Inventory", "界面设置被点击 - 呼出游戏系统菜单");
     }
 
     private void OnDeleteItemButtonClicked()

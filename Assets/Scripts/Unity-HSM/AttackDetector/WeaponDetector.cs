@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using HSM;
+using TaskManager;
+using FinalRPG.Utils;
 
 public class WeaponDetector : MonoBehaviour
 {
@@ -21,7 +23,7 @@ public class WeaponDetector : MonoBehaviour
     public void BeginAttack()
     {
         if (weaponBase == null || weaponTip == null) return;
-        Debug.Log("WeaponDetector: 【开启武器打击判定】");
+        RPGLog.Debug("Combat", "【开启武器打击判定】");
         isAttacking = true;
         hitDrivers.Clear();
         SaveControlPoints();
@@ -74,19 +76,28 @@ public class WeaponDetector : MonoBehaviour
         // 避免打中自己
         if (col.transform.root == this.transform.root) return;
 
-        Debug.Log("WeaponDetector: 武器碰撞扫描到对象 -> " + col.name);
+        RPGLog.Debug("Combat", $"武器碰撞扫描到对象 -> {col.name}");
 
         PlayerStateDriver driver = col.GetComponentInParent<PlayerStateDriver>();
         if (driver != null && !hitDrivers.Contains(driver))
         {
-            Debug.Log("【玩家挥剑命中敌人成功】触发敌人受击硬直！对象 -> " + driver.gameObject.name);
+            RPGLog.Debug("Combat", $"命中敌人！对象={driver.gameObject.name} col={col.name}");
             hitDrivers.Add(driver);
             ApplyHit(driver);
 
             // 扣血
             EnemyHealth health = driver.GetComponentInParent<EnemyHealth>();
             if (health != null)
+            {
                 health.TakeDamage(1);
+                // 广播跳字事件（世界坐标取碰撞体位置）
+                RPGLog.Debug("Combat", $"→ RaiseDamagePopup(1, {col.transform.position})");
+                EventBus.Instance.RaiseDamagePopup(1, col.transform.position);
+            }
+            else
+            {
+                RPGLog.Warning("Combat", $"敌人无 EnemyHealth 组件！对象={driver.gameObject.name}");
+            }
         }
     }
 
@@ -120,6 +131,9 @@ public class WeaponDetector : MonoBehaviour
             if (attackerDriver != null) {
                 attackerDriver.ctx.hitSlowdownTimer = attackerDriver.ctx.hitStopDuration;
             }
+
+            // 广播命中事件（玩家攻击 → 触发帧冻结 + 震屏）
+            EventBus.Instance.RaiseAttackHit(driver.transform.position, isPlayerAttack: true);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using InventorySystem.Model;
 using TaskManager;
+using FinalRPG.Utils;
 
 namespace InventorySystem.ViewModel
 {
@@ -50,11 +51,11 @@ namespace InventorySystem.ViewModel
             if (itemData != null)
             {
                 inventoryModel?.AddItem(itemData, amount);
-                Debug.Log($"[InventoryViewModel] 收到物品: {itemId} x{amount}");
+                RPGLog.Debug("Inventory", $"收到物品: {itemId} x{amount}");
             }
             else
             {
-                Debug.LogWarning($"[InventoryViewModel] ItemData not found: GameConfigs/PackageModel/{itemId}");
+                RPGLog.Warning("Inventory", $"ItemData not found: GameConfigs/PackageModel/{itemId}");
             }
         }
 
@@ -257,7 +258,7 @@ namespace InventorySystem.ViewModel
             // 标记最近使用时间，用于"按最近使用排序"
             targetSlot.MarkUsed();
 
-            Debug.Log($"浣跨敤鐗╁搧: {itemData.itemName}");
+            RPGLog.Debug("Inventory", $"使用物品: {itemData.itemName}");
             inventoryModel.RemoveItem(inventoryModel.slots.IndexOf(targetSlot), 1);
 
             selectedSlotIndex = -1;

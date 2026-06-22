@@ -1,4 +1,5 @@
 using UnityEngine;
+using FinalRPG.Utils;
 
 namespace HSM {
     /// <summary>
@@ -49,7 +50,7 @@ namespace HSM {
             fallbackDuration = TierToFallbackDuration(ctx.detectedClimbTier);
 
             if (ctx.climbDebugLog) {
-                Debug.Log($"[Climb] Enter tier={ctx.detectedClimbTier}, animState={currentClimbStateName}");
+                RPGLog.Debug("HSM", $"[Climb] Enter tier={ctx.detectedClimbTier}, animState={currentClimbStateName}");
             }
 
             if (ctx.anim != null) {

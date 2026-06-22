@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using FinalRPG.Utils;
 
 /// <summary>
 /// 玩家属性—纯数据类 (非 MonoBehaviour)。
@@ -31,8 +32,8 @@ public class PlayerStats
         CurrentHP -= amount;
         if (CurrentHP < 0) CurrentHP = 0;
         OnHPChanged?.Invoke(CurrentHP, maxHP);
-        Debug.Log($"[PlayerStats] -{amount} HP → {CurrentHP}/{maxHP}");
-        if (CurrentHP <= 0) Debug.Log("[PlayerStats] 玩家死亡");
+        RPGLog.Debug("Player", $"-{amount} HP → {CurrentHP}/{maxHP}");
+        if (CurrentHP <= 0) RPGLog.Debug("Player", "玩家死亡");
     }
 
     public void Heal(int amount)
@@ -48,7 +49,7 @@ public class PlayerStats
         if (amount <= 0) return;
         if (expToNextLevel <= 0) expToNextLevel = 100;   // 防序列化归零
         Exp += amount;
-        Debug.Log($"[PlayerStats] +{amount} Exp → {Exp}/{expToNextLevel} (Lv.{Level})");
+        RPGLog.Debug("Player", $"+{amount} Exp → {Exp}/{expToNextLevel} (Lv.{Level})");
         while (Exp >= expToNextLevel) { Exp -= expToNextLevel; LevelUp(); }
         OnExpChanged?.Invoke(Exp, expToNextLevel);
     }
@@ -62,7 +63,7 @@ public class PlayerStats
         OnLevelUp?.Invoke(Level);
         OnHPChanged?.Invoke(CurrentHP, maxHP);
         OnExpChanged?.Invoke(Exp, expToNextLevel);
-        Debug.Log($"[PlayerStats] Level Up! Lv.{Level} HP {CurrentHP}/{maxHP} 下级 {expToNextLevel}");
+        RPGLog.Debug("Player", $"Level Up! Lv.{Level} HP {CurrentHP}/{maxHP} 下级 {expToNextLevel}");
     }
 
     public void AddGold(int amount)
@@ -70,7 +71,7 @@ public class PlayerStats
         if (amount <= 0) return;
         Gold += amount;
         OnGoldChanged?.Invoke(Gold);
-        Debug.Log($"[PlayerStats] +{amount} Gold → {Gold}");
+        RPGLog.Debug("Player", $"+{amount} Gold → {Gold}");
     }
 
     public bool SpendGold(int amount)

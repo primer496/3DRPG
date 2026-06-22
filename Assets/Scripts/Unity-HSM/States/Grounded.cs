@@ -1,4 +1,5 @@
 using UnityEngine;
+using FinalRPG.Utils;
 
 namespace HSM {
     public class Grounded : State {
@@ -355,7 +356,7 @@ namespace HSM {
                 return;
             }
 
-            Debug.Log($"[ClimbCheck] {reason}");
+            RPGLog.Debug("HSM", $"[ClimbCheck] {reason}");
         }
 
         int ResolveVaultWallMask() {
@@ -372,7 +373,7 @@ namespace HSM {
                 return;
             }
 
-            Debug.Log($"[VaultCheck] {reason}");
+            RPGLog.Debug("HSM", $"[VaultCheck] {reason}");
         }
     }
 }

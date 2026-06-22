@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using QuestSystem.ViewModel;
 using TaskManager;
+using FinalRPG.Utils;
 
 namespace QuestSystem.View
 {
@@ -27,7 +28,7 @@ namespace QuestSystem.View
             var uiDoc = GetComponent<UIDocument>();
             if (uiDoc == null)
             {
-                Debug.LogError("[QuestUIController] 未找到 UIDocument 组件，请确认挂载在正确的 GameObject 上。");
+                RPGLog.Error("Quest", "未找到 UIDocument 组件，请确认挂载在正确的 GameObject 上。");
                 return;
             }
             root = uiDoc.rootVisualElement;
@@ -51,7 +52,7 @@ namespace QuestSystem.View
                     if (viewModel == null)
                     {
                         viewModel = gameObject.AddComponent<QuestViewModel>();
-                        Debug.LogWarning("[QuestUIController] 未找到 QuestViewModel，已在本 GameObject 上创建。建议在 Inspector 中手动赋值。");
+                        RPGLog.Warning("Quest", "未找到 QuestViewModel，已在本 GameObject 上创建。建议在 Inspector 中手动赋值。");
                     }
                 }
             }
@@ -275,7 +276,7 @@ namespace QuestSystem.View
 
         private void OnTrackQuestClicked()
         {
-            Debug.Log("[QuestUI] 追踪任务按钮被点击");
+            RPGLog.Debug("Quest", "追踪任务按钮被点击");
         }
 
         private void OnCloseQuestClicked()

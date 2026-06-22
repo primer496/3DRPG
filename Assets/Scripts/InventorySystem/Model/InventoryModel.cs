@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using FinalRPG.Utils;
 
 namespace InventorySystem.Model
 {
@@ -167,7 +168,7 @@ namespace InventorySystem.Model
                 if (slotIndex >= slots.Count) break;
                 if (string.IsNullOrEmpty(saved.itemId))
                 {
-                    Debug.LogWarning("[InventoryModel] Load: 存档中存在空 itemId，已跳过");
+                    RPGLog.Warning("Inventory", "Load: 存档中存在空 itemId，已跳过");
                     continue;
                 }
 
@@ -181,7 +182,7 @@ namespace InventorySystem.Model
                 }
                 else
                 {
-                    Debug.LogWarning($"[InventoryModel] Load: 无法找到 ItemData: {saved.itemId}，已跳过");
+                    RPGLog.Warning("Inventory", $"Load: 无法找到 ItemData: {saved.itemId}，已跳过");
                 }
             }
 
