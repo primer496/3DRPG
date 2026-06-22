@@ -227,6 +227,7 @@ public event Action<bool> OnInputLockStateChanged;
 | 发现了新的禁止事项或常见踩坑 | 追加到本文第八节，按子类别分组 | `AGENTS.md` 第八节 |
 | 完成了有意义的配置/数据变更 | 记录变更摘要 | `docs/changelog/YYYY-MM-DD_<简述>.md` |
 | 遇到并解决了一个非显而易见的工程问题 | 追加到 `/memories/repo/` | `/memories/repo/<主题>.md` |
+| 更新了 AGENTS.md / docs 下的 .md 文件 | commit + push 到远程仓库 | `git add -A && git commit && git push` |
 
 **记录规范：**
 - changelog 命名格式：`YYYY-MM-DD_<简短英文或中文描述>.md`
