@@ -9,6 +9,8 @@ namespace QuestSystem.Interaction
     {
         [Header("NPC 信息")]
         public string npcId = "VillageChief";
+        [Tooltip("移动端靠近时显示的 NPC 名称")]
+        public string npcDisplayName = "村长";
 
         [Header("Yarn 对话设置")]
         public string startNodeName = "Start";
@@ -19,6 +21,12 @@ namespace QuestSystem.Interaction
         private void Start()
         {
             dialogueRunner = FindFirstObjectByType<DialogueRunner>();
+            EventBus.Instance.Subscribe("TriggerNPCInteract", OnMobileInteract);
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Instance.Unsubscribe("TriggerNPCInteract", OnMobileInteract);
         }
 
         private void Update()
@@ -42,7 +50,7 @@ namespace QuestSystem.Interaction
             if (other.CompareTag("Player"))
             {
                 isPlayerInRange = true;
-                // TODO: 可以在这里抛出事件，通过UI显示“按 [E] 键交谈”的提示
+                EventBus.Instance.RaiseNPCInteractAvailable(npcDisplayName);
             }
         }
 
@@ -51,12 +59,23 @@ namespace QuestSystem.Interaction
             if (other.CompareTag("Player"))
             {
                 isPlayerInRange = false;
-                
+                EventBus.Instance.RaiseNPCInteractUnavailable();
+
                 // 如果玩家被外力击退或某种原因脱离了触发器范围，强制中断对话以防Bug
                 if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
                 {
                     dialogueRunner.Stop();
                 }
+            }
+        }
+        /// <summary>移动端对话按钮点击时，由 EventBus "TriggerNPCInteract" 触发。</summary>
+        private void OnMobileInteract()
+        {
+            if (!isPlayerInRange) return;
+            if (dialogueRunner != null && !dialogueRunner.IsDialogueRunning)
+            {
+                dialogueRunner.StartDialogue(startNodeName);
+                EventBus.Instance.Raise(TargetType.Communicate, npcId, 1);
             }
         }
     }

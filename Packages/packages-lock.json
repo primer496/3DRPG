@@ -19,9 +19,9 @@
       "url": "https://packages.tuanjie.cn"
     },
     "com.boxqkrtm.ide.cursor": {
-      "version": "file:D:/BaiduNetdiskDownload/YingModel/com.unity.ide.cursor-master/com.unity.ide.cursor-master",
+      "version": "file:com.boxqkrtm.ide.cursor",
       "depth": 0,
-      "source": "local",
+      "source": "embedded",
       "dependencies": {
         "com.unity.test-framework": "1.1.9"
       }
@@ -82,6 +82,13 @@
         "com.unity.test-framework": "1.4.6",
         "com.unity.test-framework.performance": "3.0.3"
       },
+      "url": "https://packages.tuanjie.cn"
+    },
+    "com.unity.device-simulator.devices": {
+      "version": "1.0.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
       "url": "https://packages.tuanjie.cn"
     },
     "com.unity.dt.app-ui": {
@@ -275,9 +282,9 @@
       "url": "https://packages.tuanjie.cn"
     },
     "dev.yarnspinner.unity": {
-      "version": "file:D:/YarnSpinner-Unity-2.4.2/YarnSpinner-Unity-2.4.2",
+      "version": "file:dev.yarnspinner.unity",
       "depth": 0,
-      "source": "local",
+      "source": "embedded",
       "dependencies": {}
     },
     "com.unity.modules.ai": {

@@ -1,0 +1,42 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         engine="UnityEngine.UIElements" editor="UnityEditor.UIElements"
+         noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="MobileHUD.uss" />
+
+    <!-- 全屏根容器：穿透触摸，让摇杆接收事件 -->
+    <ui:VisualElement name="mobile-hud-root" class="mobile-hud-root" picking-mode="Ignore">
+
+        <!-- ===== 左下：摇杆 ===== -->
+        <ui:VisualElement name="joystick-area" class="mobile-joystick-area" picking-mode="Position">
+            <ui:VisualElement name="joystick-base" class="joystick-base" picking-mode="Ignore" />
+            <ui:VisualElement name="joystick-handle" class="joystick-handle" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <!-- ===== 右下：攻击 + 闪避按钮 ===== -->
+        <ui:VisualElement name="action-btns" class="mobile-action-btns" picking-mode="Ignore">
+            <ui:VisualElement name="dodge-btn" class="mobile-btn mobile-dodge-btn" picking-mode="Position">
+                <ui:Label text="闪避" class="mobile-btn-label" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="attack-btn" class="mobile-btn mobile-attack-btn" picking-mode="Position">
+                <ui:Label text="攻击" class="mobile-btn-label" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ===== 右上：背包 + 任务按钮 ===== -->
+        <ui:VisualElement name="menu-btns" class="mobile-menu-btns" picking-mode="Ignore">
+            <ui:VisualElement name="inventory-btn" class="mobile-btn mobile-menu-btn" picking-mode="Position">
+                <ui:Label text="背包" class="mobile-btn-label" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="quest-btn" class="mobile-btn mobile-menu-btn" picking-mode="Position">
+                <ui:Label text="任务" class="mobile-btn-label" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ===== 中下方：对话入口按钮（默认隐藏） ===== -->
+        <ui:VisualElement name="interact-btn" class="mobile-btn mobile-interact-btn" picking-mode="Position" style="display: none;">
+            <ui:Label name="interact-label" text="村长" class="mobile-btn-label" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

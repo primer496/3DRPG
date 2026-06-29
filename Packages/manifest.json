@@ -1,12 +1,13 @@
 {
   "dependencies": {
     "cn.tuanjie.ai.graph": "1.0.6",
-    "com.boxqkrtm.ide.cursor": "file:D:/BaiduNetdiskDownload/YingModel/com.unity.ide.cursor-master/com.unity.ide.cursor-master",
+    "com.boxqkrtm.ide.cursor": "file:Packages/com.boxqkrtm.ide.cursor",
     "com.unity.ai.navigation": "1.1.7",
     "com.unity.animation.rigging": "1.2.1",
     "com.unity.cinemachine": "2.10.6",
     "com.unity.collab-proxy": "2.7.1",
     "com.unity.collections": "2.5.7",
+    "com.unity.device-simulator.devices": "1.0.1",
     "com.unity.ide.rider": "3.0.36",
     "com.unity.ide.visualstudio": "2.0.27",
     "com.unity.ide.vscode": "1.2.5",
@@ -18,7 +19,7 @@
     "com.unity.timeline": "1.7.7",
     "com.unity.ugui": "1.0.0",
     "com.unity.visualscripting": "1.9.4",
-    "dev.yarnspinner.unity": "file:D:/YarnSpinner-Unity-2.4.2/YarnSpinner-Unity-2.4.2",
+    "dev.yarnspinner.unity": "file:Packages/dev.yarnspinner.unity",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",

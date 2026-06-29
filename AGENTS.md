@@ -197,6 +197,12 @@ public event Action<bool> OnInputLockStateChanged;
 9. **斜坡移动方向必须沿坡面切线** — 不能直接用世界 XZ 平面投影，否则上坡会卡顿/抖动。
 10. **不要双重注入 Y 轴位移** — 同时在代码和物理里修改 Y 会导致角色逐渐离开坡面。
 
+### 移动端适配
+1. **`IIntentProvider` 替换必须注意 Awake/Start 顺序** — `PlayerStateDriver.Awake()` 中初始化 intentProvider 时读取 `intentProviderOverride`。若 Bridge 在 `Start()` 才设置 override，为时已晚，HSM 会一直使用默认 `PlayerInputProvider`。修复：Bridge 在 `Awake()` 设置 override，`InitializeIntentProvider()` 移至 `Start()`。
+2. **UI Toolkit Y 轴与游戏坐标系相反** — UI Toolkit 原点在左上角（Y↓），游戏 Y+ 为前方。摇杆计算游戏方向时必须翻转 Y 分量，视觉偏移保持原始坐标系。
+3. **摇杆线性映射走/跑速度** — 设置 `ctx.runHeld = true` 使基准速度为 `runReal`，由摇杆位移量 `inputMagnitude` 线性缩放。轻推=慢走，推满=全速跑，Animator Speed 从 0 平滑到 1.0。
+4. **移动端对话用 EventBus 解耦** — NPCInteractable 触发 `OnNPCInteractAvailable/Unavailable` → MobileInputBridge 显示/隐藏对话按钮 → 点击回传 `TriggerNPCInteract`。两端互不引用。
+
 ### 摄像机
 1. **`CinemachineImpulseListener` 必须放在 VCam 上，不能放在 Main Camera** — Cinemachine 2.x 的 `CinemachineImpulseListener` 继承自 `CinemachineExtension`，后者要求同 GameObject 存在 `CinemachineVirtualCameraBase`。`CinemachineBrain`（挂在 Main Camera 上）不继承该类，放在 Main Camera 上会报 `CinemachineExtension requires a Cinemachine Virtual Camera component`。正确做法：将 Listener 放在 `CinemachineVirtualCamera` 所在 GameObject。
 2. **不要用 DOTween `DOShakePosition()` 配合 Cinemachine** — DOTween 直接写 Camera transform，与 `CinemachineBrain` 的 `LateUpdate` 输出冲突。震屏应使用 `CinemachineImpulseSource` + `CinemachineImpulseListener`。

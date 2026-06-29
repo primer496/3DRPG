@@ -122,6 +122,15 @@ WeaponDetector → EventBus(Collect) → QuestManager + InventoryModel
 - UI Toolkit ProgressBar + Label，事件驱动刷新
 - 半透明暗色面板叠加
 
+### 移动端适配
+
+- **虚拟摇杆**：纯 UI Toolkit 自研 `UIToolkitJoystick`，Pointer 事件驱动，滑块线性映射走/跑速度
+- **攻击/闪避按钮**：右下角 UI 按钮，PointerDown 事件写入 `PlayerContext`
+- **背包/任务入口**：右上角按钮，Click 事件直发 EventBus
+- **对话入口**：靠近 NPC 显示名称按钮，EventBus 与 `NPCInteractable` 解耦
+- **PC 回落**：`MobileInputBridge` 实现 `IIntentProvider`，包装 `PlayerInputProvider` 保证键鼠完整可用
+- 见 [手游适配变更记录](docs/changelog/2026-06-29_MobileAdaptation.md)
+
 ---
 
 ## 关键技术难点与解决方案
@@ -237,8 +246,9 @@ FinalRPG/
 │   │   ├── Player/                 # 玩家属性 + HUD
 │   │   ├── Camera/                 # 第三人称相机 + 震屏
 │   │   ├── Combat/                 # 帧冻结控制器
-│   │   └── UI/                     # 伤害跳字
+│   │   └── UI/                     # 移动端输入桥接 + 伤害跳字
 │   ├── UIToolKit/                  # UI Toolkit 资源 (UXML/USS)
+│   │   └── Mobile/                 # 移动端屏幕控件
 │   ├── Resources/GameConfigs/      # 游戏配置 (角色/道具/任务/对话)
 │   ├── Scenes/                     # 场景文件
 │   └── Shader/                     # URP Shader

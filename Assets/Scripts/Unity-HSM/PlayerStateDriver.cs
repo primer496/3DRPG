@@ -72,6 +72,9 @@ namespace HSM {
             BuildStateMachine();
             EnsureGroundCheck();
             InitializeSwordState();
+        }
+
+        void Start() {
             InitializeIntentProvider();
         }
 

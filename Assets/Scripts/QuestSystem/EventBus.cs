@@ -29,6 +29,10 @@ namespace TaskManager
         public event Action<int, Vector3> OnDamagePopup;    // amount, worldPos → FloatingTextController 显示跳字
         public event Action<Vector3, bool> OnAttackHit;    // worldPos, isPlayerAttack → 命中反馈（帧冻结/震屏）
 
+        // ========== 移动端 NPC 交互 ==========
+        public event Action<string> OnNPCInteractAvailable;   // npcDisplayName → MobileInputBridge 显示对话按钮
+        public event Action OnNPCInteractUnavailable;          // → MobileInputBridge 隐藏对话按钮
+
         // amount 给个默认值 1，大多数情况（杀一只怪、对话一次）就不需要每次都传数字了
         public void Raise(TargetType targetType, string targetId, int amount = 1)
         {
@@ -68,6 +72,16 @@ namespace TaskManager
         public void RaiseAttackHit(Vector3 worldPos, bool isPlayerAttack)
         {
             OnAttackHit?.Invoke(worldPos, isPlayerAttack);
+        }
+
+        public void RaiseNPCInteractAvailable(string npcName)
+        {
+            OnNPCInteractAvailable?.Invoke(npcName);
+        }
+
+        public void RaiseNPCInteractUnavailable()
+        {
+            OnNPCInteractUnavailable?.Invoke();
         }
 
         public void Raise(string eventName)
