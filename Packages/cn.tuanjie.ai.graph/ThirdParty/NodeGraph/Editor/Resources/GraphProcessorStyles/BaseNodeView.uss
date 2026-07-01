@@ -1,0 +1,405 @@
+#node {
+    background-color: rgba(0, 63, 63, 0.8);
+}
+
+#controls {
+    background-color: rgba(63, 63, 63, 0.8);
+}
+
+#settings-button {
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: resource("Icons/SettingsIcons_hover@2x");
+}
+
+#settings-button,
+#trigger-button,
+#pause-button,
+#save-button {
+    border-width: 0px;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(63, 63, 63, 0);
+    border-radius: 0px;
+}
+
+#settings-button > #icon {
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: resource("Icons/SettingsIcons_hover@2x");
+    flex-grow: 1;
+}
+
+#save-button:hover,
+#settings-button:hover,
+#trigger-button:hover,
+#pause-button:hover {
+    background-color: rgba(127, 127, 127 0.2);
+}
+
+#contents #top .executed #connector, #contents #top .executed #connector #cap,
+#contents #top .executes #connector, #contents #top .executes #connector #cap,
+#contents #top .executeAfter #connector, #contents #top .executeAfter #connector #cap,
+#contents #top .true #connector, #contents #top .true #connector #cap,
+#contents #top .false #connector, #contents #top .false #connector #cap,
+#contents #top .loopBody #connector, #contents #top .loopBody #connector #cap,
+#contents #top .loopCompleted #connector, #contents #top .loopCompleted #connector #cap {
+    border-radius: 0px;
+}
+
+.Highlight {
+    background-color: rgba(0, 63, 63, 0.8);
+}
+
+ParameterNodeView #title {
+    height: 16px;
+}
+
+ParameterNodeView #title.input {
+    flex-direction: row-reverse;
+}
+
+ParameterNodeView #node-border {
+    border-radius: 10px;
+    border-bottom-color: rgba(25, 25, 25, 1);
+    border-right-color: rgba(25, 25, 25, 1);
+    border-left-color: rgba(25, 25, 25, 1);
+    border-top-color: rgba(25, 25, 25, 1);
+    transition: background-color 0.3s, box-shadow 0.3s;  
+}
+
+ParameterNodeView #node-border.highlighted {  
+    background-color: green;  
+    border-bottom-color: rgba(0, 255, 0, 1);
+    border-right-color: rgba(0, 255, 0, 1);
+    border-left-color: rgba(0, 255, 0, 1);
+    border-top-color: rgba(0, 255, 0, 1);
+    /* box-shadow: 0 0 10px 5px rgba(255, 255, 0, 0.5); */
+}  
+
+ParameterNodeView #selection-border {
+    border-radius: 12px;
+}
+
+ParameterNodeView #title > Label {
+    margin-left: 2px;
+    font-size: 11px;
+}
+
+ParameterNodeView #title #top PortView {
+    padding-right: 0;
+    padding-left: 0;
+    margin-top: 2px;
+}
+
+ParameterNodeView PortView > Label {
+    visibility: hidden;
+    width: 0;
+}
+
+ParameterNodeView #controls EnumField {
+    margin: 0;
+}
+
+ParameterNodeView #controls EnumField > VisualElement {
+    border-width: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+    height: 14px;
+}
+
+ParameterNodeView #controls EnumField > VisualElement > TextElement {
+    font-size: 10px;
+    margin-top: 0;
+}
+
+ParameterNodeView #controls EnumField > VisualElement > VisualElement {
+    margin-right: -2px;
+}
+
+#RightTitleContainer {
+    justify-content: flex-end;
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: Center;
+}
+
+#input-container {
+    position: absolute;
+    right: 100%;
+    top: 65px;
+    align-items: flex-end;
+    --layer: -50;
+}
+
+.node.collapsed-in-group > #input-container {
+    top: 7px;
+}
+
+#input-container > .port-input-element > * {
+    min-width: 30px;
+    max-width: 200px;
+}
+
+#input-container > .port-input-element > PropertyField > ColorField,
+#input-container > .port-input-element > PropertyField > ObjectField,
+#input-container > .port-input-element > PropertyField > CurveField {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#input-container > .port-input-element > PropertyField > TextField {
+    min-width: 50px;
+}
+
+#input-container > .port-input-element > PropertyField > CurveField {
+    width: 100px;
+}
+
+#input-container > .port-input-element > PropertyField > Vector4Field Label,
+#input-container > .port-input-element > PropertyField > Vector3Field Label,
+#input-container > .port-input-element > PropertyField > Vector2Field Label,
+#input-container > .port-input-element > PropertyField > Vector3IntField Label,
+#input-container > .port-input-element > PropertyField > Vector2IntField Label {
+    font-size: 8px;
+    min-width: 8px;
+    flex-basis: 8px;
+    padding-top: 2px;
+    margin-right: 1px;
+    max-height: 150px;
+}
+
+#input-container > .port-input-element > PropertyField > Vector4Field FloatInput,
+#input-container > .port-input-element > PropertyField > Vector3Field FloatInput,
+#input-container > .port-input-element > PropertyField > Vector2Field FloatInput,
+#input-container > .port-input-element > PropertyField > Vector3IntField IntegerInput,
+#input-container > .port-input-element > PropertyField > Vector2IntField IntegerInput {
+    min-width: 28px;
+}
+
+#input-container > .port-input-element > PropertyField > * .unity-composite-field__field-spacer {
+    flex-grow: 0.01;
+}
+
+#input-container ObjectFieldSelector {
+    width: 17px;
+    height: 15px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+
+#input-container ObjectFieldDisplay > Label {
+    margin-top: 2px;
+}
+
+#input-container ObjectFieldDisplay > Image {
+    margin: 0;
+}
+
+#input-container > .port-input-element > PropertyField > ColorField {
+    width: 60px;
+}
+
+#input-container > .port-input-element > * {
+    margin-left: 2px;
+}
+
+#input-container > .port-input-element * {
+    font-size: 8px;
+}
+
+#input-container > .port-input-element {
+    max-width: 180px;
+    background-color: rgba(72, 72, 72, 0.6);
+    margin-top: 3px;
+    margin-bottom: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    height: 19px;
+    overflow: hidden;
+    padding-right: 1px;
+}
+
+#input-container > .port-input-element.empty {
+    width: 0;
+    padding: 0;
+}
+
+#input-container > .port-input-element.collapsed {
+    height: 0;
+    padding: 0;
+}
+
+.collapsed #input-container {
+    visibility: hidden;
+}
+
+#input-container {
+    opacity: 0.6;
+}
+
+.node:checked > #input-container {
+    opacity: 1;
+}
+
+#input-container > .port-input-element IntegerInput,
+#input-container > .port-input-element FloatInput,
+#input-container > .port-input-element TextInput {
+    border-top-left-radius: 1px;
+    border-bottom-left-radius: 1px;
+    border-top-right-radius: 1px;
+    border-bottom-right-radius: 1px;
+    padding-bottom: 1px;
+    height: 15px;
+}
+
+#TopPortContainer, #BottomPortContainer
+{
+   align-self: center; 
+   flex-direction: row;
+}
+
+#TopPortContainer
+{
+    margin-bottom: -1px;
+}
+
+#BottomPortContainer
+{
+    margin-top: -1px;
+}
+
+#title-button-container
+{
+    align-items: center;
+    align-content: center;
+}
+
+#collapse-button
+{
+    width: 16px;
+    height: 16px;
+    margin: 4px;
+}
+
+.resizer {  
+    position: absolute;  
+    width: 16px;  
+    height: 16px;  
+    bottom: 0;  
+    right: 0;  
+    cursor: slide-arrow; 
+}  
+
+/* In Unity 2020.3, we need to manually hide labels of property fields with empty label */
+.DrawerField_2020_3 > * > Label
+{
+    display: none;
+}
+
+.status-button {  
+    background-color: rgba(63, 63, 63, 0.6);
+    color: white;  
+    border-radius: 4px;  
+    padding: 4px 8px;  
+    margin: 2px;  
+    font-size: 12px;  
+}  
+  
+.status-button.active {  
+    background-color: rgba(127, 127, 127 0.2);  
+}
+
+.node {
+    /*max-width: 300px;*/
+    width: auto;
+}
+
+.node.collapsed-in-group {
+    width: 256px;
+}
+
+.node.collapsed-in-group > #node-border {
+    margin: 0;
+    border-width: 1px;
+}
+
+MuseGenerateNodeView > #node-border > #title{
+    min-height: 36px;
+}
+
+MuseGenerateNodeView > #node-border > #controls > #historyContainer {
+    min-height: 24px;
+}
+
+MuseGenerateNodeView > #node-border > #controls > #mode-info {
+    min-height: 20px;
+}
+
+.node.collapsed-in-group > #node-border > #contents > #divider.horizontal {
+    height: 0;
+    border-width: 0;
+}
+
+.node.collapsed-in-group > #node-border > #contents > #top > #input {
+    width: 50%;
+}
+
+.node.collapsed-in-group > #node-border > #contents > #top > #output {
+    width: 50%;
+}
+
+.node.collapsed-in-group > #node-border > #contents > #top.full-input > #input {
+    width: 100%;
+}
+.node.collapsed-in-group > #node-border > #contents > #top.full-input > #output {
+    width: 0;
+}
+.node.collapsed-in-group > #node-border > #contents > #top.full-output > #input {
+    width: 0;
+}
+.node.collapsed-in-group > #node-border > #contents > #top.full-output > #output {
+    width: 100%;
+}
+
+.port.collapsed {
+    display: none;
+}
+
+SDTxt2ImgNodeView .Preview > VisualElement {
+    max-height: 256px;
+}
+
+#preview-image {
+    height: 256px;
+}
+
+SDTxt2ImgNodeView #controls > TextField {
+    white-space: Normal;
+    height: auto;
+}
+
+#divider.horizontal.progress {
+    height: 3px;
+}
+
+#circularContainer {
+    flex-direction: row;
+    align-self: center;
+    align-items: center;
+}
+
+#circularContainer > CircularProgress {
+    width: 20px;
+    height: 20px;
+}
+
+#circularContainer > Label {
+    margin-left: 3px;
+    align-self: center;
+    align-content: center;
+    align-items: center;
+    font-size: 12px;
+}

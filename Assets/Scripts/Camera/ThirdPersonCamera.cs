@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
 using TaskManager;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
@@ -12,6 +14,9 @@ public class ThirdPersonCamera : MonoBehaviour
 
     public float horizontalsensitivity;
     public float verticalsensitivity;
+    [Header("Touch Camera")]
+    [Tooltip("触摸灵敏度倍率")]
+    public float touchSensitivity = 0.5f;
     [Header("Look Input")]
     public float lookDeadZone = 0.01f;
     // 濡傛灉浣犵殑 Look 鏄憞鏉嗚酱鍊硷紙闈為紶鏍嘾elta锛夛紝寤鸿寮€鍚紱榧犳爣涓€鑸缓璁叧闂�
@@ -43,11 +48,13 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void OnEnable()
     {
+        EnhancedTouchSupport.Enable();
         EventBus.Instance.OnInputLockStateChanged += OnInputLockChanged;
     }
 
     private void OnDisable()
     {
+        EnhancedTouchSupport.Disable();
         EventBus.Instance.OnInputLockStateChanged -= OnInputLockChanged;
     }
 
@@ -77,6 +84,19 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         if (CameraTarget == null) return;
 
+        // 移动端相机：EnhancedTouch API，右半屏=转视角
+        if (!_lookLocked)
+        {
+            foreach (var t in Touch.activeTouches)
+            {
+                if (t.phase == UnityEngine.InputSystem.TouchPhase.Moved && t.screenPosition.x > Screen.width * 0.45f)
+                {
+                    _cinemachineTargetYaw += t.delta.x * horizontalsensitivity * touchSensitivity;
+                    _cinemachineTargetPitch -= t.delta.y * verticalsensitivity * touchSensitivity;
+                }
+            }
+        }
+
         // yaw 鐜粫鍒� [-360, 360]锛岄伩鍏� 0/360 杈圭晫鍑虹幇琛ㄧず璺冲彉
         if (_cinemachineTargetYaw < -360f) _cinemachineTargetYaw += 720f;
         if (_cinemachineTargetYaw >  360f) _cinemachineTargetYaw -= 720f;
@@ -105,8 +125,7 @@ public class ThirdPersonCamera : MonoBehaviour
         if (CameraTarget == null) return;
         if (_lookLocked) return;
 
-        // 榧犳爣鐨� InputValue 閫氬父鏄€渄elta鈥濓紝鐩存帴鍙犲姞鍒� yaw/pitch銆�
-        // 杩欐牱 Move state 鍦� Update 閲岃鍙� CurrentYawDeg 鏃朵笉浼氳惤鍚庝竴甯с€�
+        // PC 鼠标相机（触摸已改用 Update 原生API，永不冲突）
         var look = value.Get<Vector2>();
         if (look.sqrMagnitude < lookDeadZone * lookDeadZone) return;
 

@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" appui="Unity.AppUI.UI" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="../uss/StyleBrowser.uss" />
+    <ui:VisualElement name="__root__">
+        <ui:VisualElement name="title-row" class="titlebar row bottom-gap preview-zone" style="padding-top: 8px;">
+            <Unity.AppUI.UI.Text text="风格浏览器" size="M" class="title" style="-unity-font-style: bold;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="preview-zone" class="row bottom-gap preview-zone">
+            <ui:VisualElement name="preview-thunmnail-container" picking-mode="Ignore" class="preview-thumbnail__container">
+                <ui:Image name="preview-thumbnail" picking-mode="Ignore" class="preview-thumbnail__image" />
+            </ui:VisualElement>
+            <ui:VisualElement name="preview-info" picking-mode="Ignore" class="preview-info">
+                <Unity.AppUI.UI.Text text="未知风格" name="style-name" size="M" picking-mode="Ignore" primary="true" class="title preview-info__name" />
+                <Unity.AppUI.UI.Text text="未知风格描述" size="S" name="style-description" picking-mode="Ignore" class="title preview-info__description" />
+            </ui:VisualElement>
+            <ui:VisualElement name="preview-buttons" class="button-group">
+                <Unity.AppUI.UI.ActionButton name="use" label="使用" size="M" class="preview-buttons" style="margin-bottom: 10px;" />
+                <Unity.AppUI.UI.ActionButton name="locate" label="定位" class="preview-buttons" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="search-zone" class="row bottom-gap preview-zone">
+            <Unity.AppUI.UI.Dropdown name="style-dropdown" class="style-filter" />
+            <Unity.AppUI.UI.SearchBar name="search-bar" placeholder="搜索..." trailing-icon-name="x--regular" class="style-search-bar" />
+            <ui:VisualElement class="button-group">
+                <Unity.AppUI.UI.ActionButton name="new" label="新建" class="preview-buttons" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="pool-zone" class="row bottom-gap preview-zone">
+            <UnityEngine.AIGraph.GridView name="grid-view" style="flex-shrink: 1; flex-grow: 1;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

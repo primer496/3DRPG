@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 208ef023f003b3948bee266ce1ccb80c, type: 3}
+  m_Name: ServerConfig
+  m_EditorClassIdentifier: 
+  serverList:
+  - https://TJAI-sprite.unity.cn
+  - https://TJAI-texture.unity.cn
+  - https://TJAI-3d.unity.cn
+  - https://tuanjie-ai-stg.unity.cn
+  - https://ai.tuanjie.cn
+  serverIndex: 4
+  secretToken: 
+  webRequestPollRate: 1.5
+  maxRetries: 5
+  model: 1
+  simulate: 0
+  m_DebugMode: 1

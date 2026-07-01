@@ -1,0 +1,47 @@
+#headerColorPicker {
+    position: absolute;
+    margin: 8px;
+    width: 50px;
+}
+
+.scope > .mainContainer > #headerContainer {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+#titleContainer {
+    margin-right: 16px;
+}
+
+#titleContainer > #titleLabel, #titleContainer > #titleField {
+    margin-left: 66px;
+}
+
+#collapse-button {
+    -unity-background-scale-mode: scale-to-fit;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    align-self: center;
+    opacity: 0.5;
+    visibility: hidden;
+}
+
+#collapse-button:hover:enabled {
+    background-color: rgba(0.169,0.169,0.169,1.0);
+    border-radius: 1px;
+    opacity: 1;
+}
+
+.group:hover #collapse-button {
+    visibility: visible;
+}
+
+.group.collapsed #collapse-button {
+    background-image: resource("graphview/nodes/nodechevronleft.png");
+}
+
+.group.expanded #collapse-button {
+    background-image: resource("graphview/nodes/nodechevrondown.png");
+}

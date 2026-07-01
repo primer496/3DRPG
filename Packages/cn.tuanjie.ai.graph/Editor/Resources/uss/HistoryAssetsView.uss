@@ -1,0 +1,164 @@
+.history-assets-view #header {
+	height: 27px;
+}
+
+.history-assets-view > .mainContainer {
+	flex: 1 0 0;
+}
+
+
+
+.history-assets-view > .mainContainer > #content {
+	flex: 1 0 0;
+}
+
+.history-assets-view > .mainContainer > #content > #contentContainer {
+	flex: 1 0 0;
+	padding: 0px;
+}
+
+.history-assets-view #titleLabel {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+.history-assets-view .nodeList {
+	flex: 1 0 0;
+	height: 100%;
+	background-color: #2b2b2b;
+	border-top-width: 1px;
+	border-top-color: #181818;
+	border-bottom-width: 1px;
+	border-bottom-color: #181818;
+}
+
+.history-assets-view #buttonZone {
+	flex-direction: row;
+	height: 40px;
+	width: 100%;
+	background-color: #393939;
+	align-items: center;
+}
+
+.history-assets-view #buttonZone #buttonZoneLeft {
+	flex-direction: row;
+	flex-grow: 1;
+	padding-left: 10px;
+}
+
+.history-assets-view #buttonZone #buttonZoneRight {
+	flex-direction: row;
+	justify-content: flex-end;
+	flex-grow: 1;
+	padding-right: 10px;
+}
+
+.history-assets-view #buttonZone #buttonZoneLeft #expandBtn {
+	background-color: #393939;
+	border-width: 0px;
+	min-width: 12px;
+	height: 12px;
+	margin-top: 12px;
+}
+
+.history-assets-view #buttonZone #buttonZoneRight ActionButton {
+	border-width: 1px;
+	background-color: #393939;
+}
+.history-assets-view #buttonZone #buttonZoneRight ActionButton:hover {
+	background-color: #2b2b2b;
+}
+
+.history-assets-view .blackboardRow {
+	padding-left: 10px;
+	padding-right: 5px;
+}
+
+.history-assets-view .blackboardRow #itemRowContentContainer {
+	align-self: center;
+}
+
+.history-assets-field .pill {
+	flex: 1 0 0;
+}
+
+.history-assets-grid {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.history-assets-griditem {
+    width: 100%;
+    height: 100%;
+    flex-grow: 1;
+    flex-shrink: 1;
+    border-radius: var(--appui-alias-control-border-radius);
+    overflow: hidden;
+	border-color: rgba(0, 0, 0, 0);
+	transition: border-color 1ms;
+}
+
+.appui-grid-view__item {
+	padding: var(--appui-spacing-25);
+	border-width: 3px;
+}
+
+.history-assets-griditem.is-selected,
+.history-assets-griditem.is-selected:hover{
+    border-color: var(--appui-accent-100);
+}
+
+.history-assets-griditem__view:{
+	width: 100%;
+	height: 100%;
+}
+
+.history-assets-griditem__view:hover{
+	border-width: 2px;
+	border-color: var(--appui-accent-25);
+}
+
+.history-assets-griditem__view > .li-element > Chip{
+    border-radius: 8px;
+    width: 30px;
+    height: 20px;
+}
+
+.history-assets-griditem.is-selected > .history-assets-griditem__view:hover{
+	border-width: 0px;
+	border-color: rgba(0, 0, 0, 0);
+}
+
+.history-assets-griditem * {
+    /*border-color: var(--appui-accent-25);*/
+	cursor: var(--appui-alias-control-cursor-pointer);
+}
+
+.history-assets-view #statusZone {
+	flex-direction: row;
+	height: 30px;
+	width: 100%;
+	background-color: #2b2b2b;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.history-assets-view #statusZone #size-slider {
+	width: 100px;
+	right: 20px;
+}
+
+.history-assets-view #statusZone #size-slider .appui-slider__track {
+	height: 2px;
+	background-color: #393939;
+}
+
+.history-assets-view #pill #node-border {
+	background-image: none;
+	border-top-color: #2b2b2b;
+	border-bottom-color: #2b2b2b;
+	border-left-color: #2b2b2b;
+	border-right-color: #2b2b2b;
+}

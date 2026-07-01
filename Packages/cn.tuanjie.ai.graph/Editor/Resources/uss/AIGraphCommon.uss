@@ -1,0 +1,382 @@
+﻿.ControlsContainer {
+    border-top-width: 1px;
+    border-color: rgb(24, 24, 24);
+    padding-top: 4px;
+}
+
+.PropertyContainer {
+    padding: 6px;
+}
+
+.PreviewToggleButton {
+    font-size: 12px;
+    height: 16px;
+    background-image: resource('Icons/Collapse-Up');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.Collapsed {
+    background-image: resource('Icons/Collapse-Down');
+}
+
+.PreviewToggleButton:hover {
+    background-color: rgb(68, 68, 68);
+}
+
+.PreviewToggleButton:active {
+    background-color: rgb(85, 85, 85);
+}
+
+.RTSettingsView {
+    border-top-width: 1px;
+    border-color: rgb(24, 24, 24);
+    background-color: rgb(34, 34, 34);
+    padding: 6px;
+    padding-left: 10px;
+}
+
+.PropertyEditorTitle {
+    -unity-font-style: bold;
+    font-size: 16px;
+}
+
+.PropertyEditorHeader {
+    -unity-font-style: bold;
+    font-size: 12px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.MaterialInspector {
+    margin-left: 10px;
+}
+
+.Hidden {
+    display: none;
+}
+
+.Visible {
+    display: flex;
+}
+
+.ControlsContainer > NodePropertyField > * > Label,
+.ControlsContainer > PropertyField > * > Label,
+.ControlsContainer > * > Label
+{
+    min-width: 80px;
+}
+
+.Preview {
+    margin-top: 5px;
+    background-color: rgba(63, 63, 63, 0.8);
+}
+
+.PinButton {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 0;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.PinButton:hover {
+    background-color: rgba(127, 127, 127, 0.2);
+}
+
+.PinButton_Hover:hover {
+    background-color: rgb(64, 64, 64);
+}
+
+.highlight
+{
+    border-color: #fdd835;
+    border-width: 2px;
+    padding: -2px;
+    border-radius: 10px;
+}
+
+.Indent
+{
+    margin-left: 10px;
+}
+
+.node.preview {
+    width: 256px;
+}
+
+.input-text {
+    margin: 3px;
+    -unity-text-align: upper-left;
+    white-space: normal;
+    height: auto;
+}
+
+TJAIGraphNodeView #title{
+    background-color: rgba(155, 155, 255, 0.3);
+}
+
+#OpHeader {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#OpHeader > Label {
+    padding-left: 2px;
+    padding-top: 2px;
+    align-self: Center;
+    margin-left: 2px;
+    margin-right: 45px;
+    width: 80px;
+}
+
+#OpHeader > Button {
+    width: 25px;
+}
+
+#OpInputs Label,
+#OpOutputs > Label,
+#OpInfo Label {
+    margin-left: 2px;
+    min-width: 80px;
+}
+
+#OpOutputs > Label,
+#OpInfo > Label {
+    padding-left: 2px;
+    padding-top: 2px;
+    color: rgb(255, 165, 0);
+    text-overflow: ellipsis;
+}
+
+#OpInfo > * > Label{
+    padding-left: 2px;
+    padding-top: 2px;
+}
+
+#OpOutputs > Label {
+    color: rgb(40, 167, 69);
+}
+
+#OpInputs > #divider,
+#OpOutputs > #divider {
+    margin-top: 2px;
+}
+
+#OpOutputs ListView .unity-list-view__item,
+#OpInfo ListView .unity-list-view__item {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#OpOutputs ListView .unity-list-view__item > DropdownField,
+#OpInfo ListView .unity-list-view__item > DropdownField {
+    min-width: 100px;
+}
+
+#OpOutputs ListView .unity-list-view__item > IntegerField > Label,
+#OpInfo ListView .unity-list-view__item > IntegerField > Label {
+    width: auto;
+    min-width: 30px;
+}
+
+#BtnContainer {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+#BtnContainer > Button {
+    width: 25px;
+}
+
+#OpArg-Tuple2 {
+    flex-direction: row;
+}
+
+#OpArg-Tuple2 IntegerInput {
+    width: 48px;
+}
+
+#OpArg-Tuple3 {
+    flex-direction: row;
+}
+
+#OpArg-Tuple3 IntegerInput {
+    width: 32px;
+}
+
+#OpArg-TensorShape > #Row {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#OpArg-TensorShape > #Row IntegerInput {
+    min-width: 40px;
+}
+
+#OpArg-TensorShape > #Row IntegerInput .optional {
+    color: rgb(114, 114, 114);
+    -unity-font-style: italic;
+}
+
+.optional Label {
+    color: rgb(114, 114, 114);
+    border-bottom-color: gray;
+    -unity-font-style: italic;
+}
+
+#RunContainer {
+    align-self: Center;
+}
+
+.unity-file-path-field__selector {
+    width: 18px;
+    height: 16px;
+    align-self: center;
+    flex-shrink: 0;
+    background-color: rgba(0.216, 0.216, 0.216, 1);
+    background-image: resource("images/d_pick_uielements");
+    -unity-slice-top: 1;
+}
+
+.unity-file-path-field-display__label {
+    flex-direction: row;
+    flex: 1 0 0;
+    width: auto;
+    min-width: 120px;
+}
+
+HyUploadModelByUrlNodeView {
+    width: 300px;
+}
+
+#title-label {
+    max-width: 150px;
+}
+
+.unity-base-field__label {
+    width: 120px;
+    margin-left: 3px;
+    margin-right: 5px;
+    padding: 2px 2px 0 1px;
+}
+
+.unity-base-field__input {
+    flex-grow: 1;
+    max-width: 150px;
+}
+
+.slider-range-integer-field {
+    flex-direction: row;
+}
+
+.slider-range-integer-field__slider {
+    width: 95px;
+    align-self: flex-start;
+}
+
+.slider-range-integer-field__range {
+    width: 50px;
+    align-self: flex-end;
+}
+
+.vast-toggle > .unity-base-field__label,
+#textureSeedField > .unity-base-field__label,
+.vast-dropdown > .unity-base-field__label,
+#faceCountSlider > .unity-base-field__label,
+DropdownField > .unity-base-field__label {
+    width: 120px;
+    margin-left: 3px;
+    margin-right: 5px;
+    padding: 2px 2px 0 1px;
+}
+
+DropdownField > .unity-base-field__input,
+#textureSeedField > .unity-base-field__input,
+.vast-dropdown > .unity-base-field__input {
+    flex-grow: 1;
+    max-width: 150px;
+}
+
+.vast-dropdown-container {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    left: 5px;
+}
+
+#textureToggle {
+    margin: 1px 3px;
+}
+
+#textureContainer {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+#faceCountContainer {
+    flex-direction: row;
+    max-width: 300px;
+}
+
+#faceCountSlider {
+    width: 230px;
+    align-self: flex-start;
+}
+
+#faceCountShowField {
+    width: 50px;
+    align-self: flex-end;
+}
+
+#costTimeLabel {
+    font-size: 12px;
+    align-content: center;
+    align-self: center;
+    background-color: #f0f0f0;
+    color: #827c7c;
+    border-radius: 12px;
+    text-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 3px 10px;
+    border-width: 1px;
+    border-color: #ccc;
+    /*border: 1px solid #ccc;*/
+    margin-bottom: 2px;
+}
+#costTokenLabel {
+    font-size: 12px;
+    align-content: center;
+    align-self: flex-end;
+    background-color: rgba(255, 215, 0, 0.56);
+    color: whitesmoke;
+    border-radius: 3px;
+    text-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 1px 5px;
+    border-width: 1px;
+    border-color: #ccc;
+    height: 20px;
+    -unity-text-align: middle-center;
+}
+
+.control-container-divider {
+    height: 1px;
+    background-color: rgba(0.137,0.137,0.137,0.804);
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+#revisedPromptField > TextInput {
+    width: 100%;
+    max-width: 100%;
+    margin-right: 3px;
+    white-space: normal;
+}
+
+#revisedPromptField > TextInput > TextElement {
+    white-space: normal;
+}
+
+.unity-text-element {
+    -unity-font-definition: resource('Fonts/NotoSansSC-Regular SDF 20');
+}

@@ -1,0 +1,50 @@
+#generate-node-left-button{  
+    position: absolute;  
+    top: 43%;  
+    left: 5px;  
+    transform-origin: 0% -50%;  
+    opacity: 0;  
+    transition: opacity 0.3s ease;  
+    background-color: rgba(63, 63, 63, 0.5);
+    background-image: resource("Icons/CaretLeft@2x");
+    border-width: 0;  
+    color: white;  
+    padding: 10px;  
+    cursor: link;  
+    flex-grow: 1;
+}  
+
+#generate-node-right-button{  
+    position: absolute;  
+    top: 43%;  
+    right: 5px;  
+    transform-origin: 0% -50%;  
+    opacity: 0;  
+    transition: opacity 0.3s ease;  
+    background-color: rgba(0, 0, 0, 0.5);
+    background-image: resource("Icons/CaretRight@2x");
+    border-width: 0;  
+    color: white;  
+    padding: 10px;  
+    cursor: link;  
+    flex-grow: 1;
+}  
+
+#generate-node-left-button:hover, #generate-node-right-button:hover{  
+    opacity: 1;  
+}  
+
+#previewimage-info-label {  
+    font-size: 12px;  
+    background-color: rgba(0, 0, 0, 0.5);  
+    position: absolute;  
+    bottom: 0;  
+    white-space: normal;  
+    width: 256px;  
+    height: auto;  
+    display: none;  
+} 
+
+#previewimage-info-label:hover {  
+    display: none;  
+}  

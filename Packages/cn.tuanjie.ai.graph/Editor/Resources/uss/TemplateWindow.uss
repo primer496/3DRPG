@@ -1,0 +1,102 @@
+﻿/* Root container styles */  
+.root {  
+    flex-direction: column;  
+    padding-top: 10px;  
+    padding-left: 15px;  
+    padding-right: 15px;  
+    padding-bottom: 15px;  
+}  
+  
+/* Header styles */  
+.header {  
+    position: absolute;  
+    flex-direction: row;  
+    justify-content: space-between;  
+    margin-bottom: 20px;  
+}  
+  
+.title {  
+    font-size: 20px;  
+    -unity-font-style: bold;  
+    color: #E5E5E5; /* RGB (0.9, 0.9, 0.9) */  
+}  
+  
+/* Category bar styles */  
+.category-bar {  
+    flex-direction: row;  
+    justify-content: flex-end;  
+    margin-bottom: 20px;  
+}  
+  
+.button {  
+    margin-left: 5px;  
+    width: 70px;  
+    height: 25px;  
+    background-color: #333333; /* RGB (0.2, 0.2, 0.2) */  
+}  
+  
+.button-active {  
+    background-color: #4D80CC; /* RGB (0.3, 0.5, 0.8) */  
+}  
+  
+/* Content area styles */  
+.content-scroll-view {  
+    flex-grow: 1;  
+}  
+  
+.grid-container {  
+    flex-direction: row;  
+    flex-wrap: wrap;  
+    justify-content: flex-start;  
+    align-content: flex-start;  
+}  
+
+/* 主卡片容器样式 */  
+.item-card {  
+    width: 240px;  
+    height: 300px;  
+    margin: 10px;  
+    background-color: #262626; /* RGB (0.15, 0.15, 0.15) */  
+    border-radius: 5px;  
+    padding-bottom: 10px;  
+}  
+  
+/* 图片占位符样式 */  
+.item-card-image {  
+    width: 240px;  
+    height: 180px;  
+    background-color: #404040; /* RGB (0.25, 0.25, 0.25) */  
+    align-items: center;  
+    justify-content: center;  
+}  
+  
+/* 图片文本样式 */  
+.image-text {  
+    display: none; 
+    color: #999999; /* RGB (0.6, 0.6, 0.6) */  
+}  
+  
+/* 标题样式 */  
+.item-card-title {  
+    -unity-font-style: bold;  
+    font-size: 14px;  
+    margin-top: 10px;  
+    margin-left: 10px;  
+    margin-right: 10px;  
+    color: white;  
+    white-space: normal;  
+}  
+  
+/* 描述样式 */  
+.item-card-description {  
+    font-size: 12px;  
+    margin-top: 5px;  
+    margin-left: 10px;  
+    margin-right: 10px;  
+    color: #CCCCCC; /* RGB (0.8, 0.8, 0.8) */  
+    white-space: normal;  
+} 
+
+Label {
+    -unity-font-definition: resource('Fonts/NotoSansSC-Regular SDF');
+}

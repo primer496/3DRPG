@@ -1,0 +1,6 @@
+@import url('project://database/Packages/com.unity.dt.app-ui/PackageResources/Styles/Themes/App UI.tss');
+@import url('project://database/Packages/cn.tuanjie.ai.graph/Editor/Resources/uss/GridView.uss');
+@import url('project://database/Packages/cn.tuanjie.ai.graph/Editor/Resources/uss/TJAIStyle.uss');
+@import url('project://database/Packages/cn.tuanjie.ai.graph/Editor/Resources/uss/Icons.uss');
+VisualElement {
+}

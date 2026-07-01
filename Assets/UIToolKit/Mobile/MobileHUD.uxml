@@ -4,8 +4,8 @@
          noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="MobileHUD.uss" />
 
-    <!-- 全屏根容器：穿透触摸，让摇杆接收事件 -->
-    <ui:VisualElement name="mobile-hud-root" class="mobile-hud-root" picking-mode="Ignore">
+    <!-- 全屏根容器：USS pointer-events:none 穿透空白区，子元素 pointer-events:auto 恢复交互 -->
+    <ui:VisualElement name="mobile-hud-root" class="mobile-hud-root">
 
         <!-- ===== 左下：摇杆 ===== -->
         <ui:VisualElement name="joystick-area" class="mobile-joystick-area" picking-mode="Position">
@@ -13,13 +13,18 @@
             <ui:VisualElement name="joystick-handle" class="joystick-handle" picking-mode="Ignore" />
         </ui:VisualElement>
 
-        <!-- ===== 右下：攻击 + 闪避按钮 ===== -->
+        <!-- ===== 右下：闪避 + 跳跃 + 攻击 ===== -->
         <ui:VisualElement name="action-btns" class="mobile-action-btns" picking-mode="Ignore">
             <ui:VisualElement name="dodge-btn" class="mobile-btn mobile-dodge-btn" picking-mode="Position">
                 <ui:Label text="闪避" class="mobile-btn-label" picking-mode="Ignore" />
             </ui:VisualElement>
-            <ui:VisualElement name="attack-btn" class="mobile-btn mobile-attack-btn" picking-mode="Position">
-                <ui:Label text="攻击" class="mobile-btn-label" picking-mode="Ignore" />
+            <ui:VisualElement name="attack-stack" class="mobile-attack-stack" picking-mode="Ignore">
+                <ui:VisualElement name="jump-btn" class="mobile-btn mobile-jump-btn" picking-mode="Position">
+                    <ui:Label text="跳跃" class="mobile-btn-label" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="attack-btn" class="mobile-btn mobile-attack-btn" picking-mode="Position">
+                    <ui:Label text="攻击" class="mobile-btn-label" picking-mode="Ignore" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

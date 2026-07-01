@@ -1,0 +1,41 @@
+#description
+{
+	border-bottom-width: 4px;
+}
+
+#label-description
+{
+	font-size: 13px;
+    white-space: normal; 
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+}
+
+#textfield-description
+{
+    font-size: 13px;
+    white-space: normal; 
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+}
+
+#refreshContainer {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#refreshContainer > DropdownField > .unity-popup-field__input {
+    min-width: 120px;
+}
+
+#refreshContainer > Button {
+    min-height: 20px;
+    min-width: 20px;
+    background-image: resource("Icons/Refresh");
+}
+
+.NodeControls > .unity-foldout {
+    margin-left: 12px;
+}

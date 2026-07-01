@@ -1,0 +1,25 @@
+.doodle-pad-view {
+	position: absolute;
+	background-color: #383838;
+	border-width: 2px;
+	border-radius: 5px;
+}
+
+.doodle-pad-view #ControlBar {
+	margin: var(--appui-spacing-125);
+}
+
+.doodle-pad-view #ControlBarRight {
+	flex-grow: 1;
+	justify-content: flex-end;
+}
+
+.doodle-pad-view #PreviewContainer {
+	width: 512px;
+	height: 512px;
+}
+
+.doodle-pad-view #PreviewContainer Image {
+	width: 512px;
+	height: 512px;
+}

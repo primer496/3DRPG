@@ -1,0 +1,28 @@
+{
+    "name": "Tuanjie.AIGraph.Editor",
+    "rootNamespace": "",
+    "references": [
+        "com.alelievr.NodeGraphProcessor.Editor",
+        "Unity.RenderPipelines.Universal.Editor",
+        "Unity.EditorCoroutines.Editor",
+        "com.alelievr.NodeGraphProcessor.Runtime",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.AppUI",
+        "RotaryHeart",
+        "RotaryHeart.Editor",
+        "Unity.InternalAPIEditorBridgeDev.004",
+        "glTFast.Editor",
+        "Tuanjie.AIGraph.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

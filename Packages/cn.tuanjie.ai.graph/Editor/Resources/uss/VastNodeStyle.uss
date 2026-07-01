@@ -1,0 +1,47 @@
+.vast-toggle > .unity-base-field__label,
+#textureSeedField > .unity-base-field__label,
+.vast-dropdown > .unity-base-field__label,
+#faceCountSlider > .unity-base-field__label,
+DropdownField > .unity-base-field__label {
+    width: 120px;
+    margin-left: 3px;
+    margin-right: 5px;
+    padding: 2px 2px 0 1px;
+}
+
+DropdownField > .unity-base-field__input,
+#textureSeedField > .unity-base-field__input,
+.vast-dropdown > .unity-base-field__input {
+    flex-grow: 1;
+    max-width: 150px;
+}
+
+.vast-dropdown-container {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    left: 5px;
+}
+
+#textureToggle {
+    margin: 1px 3px;
+}
+
+#textureContainer {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+#faceCountContainer {
+    flex-direction: row;
+}
+
+#faceCountSlider {
+    width: 230px;
+    align-self: flex-start;
+}
+
+#faceCountShowField {
+    width: 50px;
+    align-self: flex-end;
+}

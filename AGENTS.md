@@ -202,6 +202,10 @@ public event Action<bool> OnInputLockStateChanged;
 2. **UI Toolkit Y 轴与游戏坐标系相反** — UI Toolkit 原点在左上角（Y↓），游戏 Y+ 为前方。摇杆计算游戏方向时必须翻转 Y 分量，视觉偏移保持原始坐标系。
 3. **摇杆线性映射走/跑速度** — 设置 `ctx.runHeld = true` 使基准速度为 `runReal`，由摇杆位移量 `inputMagnitude` 线性缩放。轻推=慢走，推满=全速跑，Animator Speed 从 0 平滑到 1.0。
 4. **移动端对话用 EventBus 解耦** — NPCInteractable 触发 `OnNPCInteractAvailable/Unavailable` → MobileInputBridge 显示/隐藏对话按钮 → 点击回传 `TriggerNPCInteract`。两端互不引用。
+5. **移动端相机死区用半屏方案，不要用手指追踪** — `OnLook(InputValue)` 中 `<Pointer>/delta` 会合并所有触摸 delta，无法区分左右手。正确做法：触摸相机从 Input System 剥离，在 `Update()` 用 `EnhancedTouch` API 直读 `Touch.activeTouches`，按 `screenPosition.x > Screen.width * 0.45f` 过滤右半屏。鼠标走 `OnLook`，触摸走 `Update`，两条独立路径永不冲突。
+6. **UI Toolkit `picking-mode="Ignore"` 会阻断子元素事件** — 根元素设 `Ignore` 会导致所有按钮/摇杆无法响应。用 USS `pointer-events: none`（仅阻止根自身）+ 子元素 `pointer-events: auto` 实现"空白区穿透、控件可交互"。需配合场景中的 `EventSystem` + `InputSystemUIInputModule` 组件。
+7. **新输入系统下 UI Toolkit 必须配 EventSystem** — "仅新输入系统"模式下 UI Toolkit 需要场景中有 `EventSystem` + `InputSystemUIInputModule`，否则所有按钮点击静默失效。
+8. **移动端中文字体需用 `Resources.Load<Font>()` 而非 USS `resource()`** — TTF 字体在 `resource()` 中移动端不可靠。正确做法：字体放 `Assets/Resources/Fonts/`，C# 代码 `Resources.Load<Font>("Fonts/xx")` 赋给 `root.style.unityFont`。
 
 ### 摄像机
 1. **`CinemachineImpulseListener` 必须放在 VCam 上，不能放在 Main Camera** — Cinemachine 2.x 的 `CinemachineImpulseListener` 继承自 `CinemachineExtension`，后者要求同 GameObject 存在 `CinemachineVirtualCameraBase`。`CinemachineBrain`（挂在 Main Camera 上）不继承该类，放在 Main Camera 上会报 `CinemachineExtension requires a Cinemachine Virtual Camera component`。正确做法：将 Listener 放在 `CinemachineVirtualCamera` 所在 GameObject。

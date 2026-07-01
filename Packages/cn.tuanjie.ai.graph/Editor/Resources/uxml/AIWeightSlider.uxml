@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns="UnityEngine.UIElements">
+  <VisualElement class="ai-row">
+    <Label name="aiTitleLabel" text="AI权重" class="ai-title" />
+
+    <Slider name="aiSlider"
+            class="ai-slider"
+            showInputField="false" />
+
+    <Label name="aiValueLabel"
+           class="ai-value-label"
+           text="50%" />
+  </VisualElement>
+</UXML>  

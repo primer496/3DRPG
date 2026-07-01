@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:EnumField label="Model Type" type="UnityEngine.AIGraph.UploadModelType, FernRender.SDGraph.Runtime" name="modelTypeEnum" />
+    <ui:TextField picking-mode="Ignore" label="glb url" name="glbUrlField" keyboard-type="URL" style="display: none;" />
+    <ui:TextField picking-mode="Ignore" label="fbx url" name="fbxUrlField" keyboard-type="URL" />
+    <ui:VisualElement name="objContainer" style="flex-grow: 1;">
+        <ui:TextField picking-mode="Ignore" label="obj url" name="objUrlField" keyboard-type="URL" />
+        <ui:TextField picking-mode="Ignore" label="mtl url" name="mtlUrlField" keyboard-type="URL" />
+        <ui:TextField picking-mode="Ignore" label="texture image url" name="textureImageUrlField" keyboard-type="URL" />
+        <ui:TextField picking-mode="Ignore" label="pbr metallic url" name="pbrMetallicUrlField" keyboard-type="URL" />
+        <ui:TextField picking-mode="Ignore" label="pbr roughness url" name="pbrRougnessUrlField" keyboard-type="URL" />
+        <ui:TextField picking-mode="Ignore" label="pbr normal map url" name="pbrNormalUrlField" keyboard-type="URL" />
+        <ui:TextField picking-mode="Ignore" label="pbr base map url" name="pbrBaseMapUrlField" keyboard-type="URL" />
+    </ui:VisualElement>
+</ui:UXML>

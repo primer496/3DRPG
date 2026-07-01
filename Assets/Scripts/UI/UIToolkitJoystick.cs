@@ -46,7 +46,7 @@ namespace FinalRPG.UI
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
-            if (_area.HasPointerCapture(_capturedPointerId))
+            if (_capturedPointerId != PointerId.invalidPointerId && _area.HasPointerCapture(_capturedPointerId))
             {
                 UpdateHandle(evt.localPosition);
             }

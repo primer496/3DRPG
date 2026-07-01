@@ -1,0 +1,26 @@
+{
+    "name": "Tuanjie.AIGraph.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "com.alelievr.NodeGraphProcessor.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.AppUI",
+        "Unity.Burst",
+        "Unity.EditorCoroutines.Editor",
+        "RotaryHeart",
+        "glTFast",
+        "glTFast.Export",
+        "glTFast.Newtonsoft",
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": ["Android"],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

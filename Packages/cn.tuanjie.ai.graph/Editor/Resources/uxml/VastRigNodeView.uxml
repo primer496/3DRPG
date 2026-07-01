@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:DropdownField label="Model Version" name="modelVersionDropdown" tooltip="Specifies the version of the rigging model to use" index="1" choices="v2.0-20250506,v1.0-20240301" focusable="false" class="vast-dropdown" />
+    <ui:DropdownField label="Rig Method" choices="mixamo,tripo" index="0" tooltip="Specifies the rigging method to be used" name="rigMethodDropdown" class="vast-dropdown" />
+</ui:UXML>
