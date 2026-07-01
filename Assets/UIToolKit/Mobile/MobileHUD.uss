@@ -1,25 +1,17 @@
-/* ===== 全局字体（中文支持） ===== */
-* {
-    -unity-font: resource("Fonts/NotoSansSC-Regular");
-}
-
-/* ===== 根容器 ===== */
 .mobile-hud-root {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    pointer-events: none;
 }
 
-/* ===== 交互元素通用恢复 pointer-events ===== */
-.mobile-btn,
+.mobile-btn {
+}
+
 .mobile-joystick-area {
-    pointer-events: auto;
 }
 
-/* ===== 摇杆区域 ===== */
 .mobile-joystick-area {
     position: absolute;
     left: 40px;
@@ -30,7 +22,6 @@
     justify-content: center;
 }
 
-/* 底座背景图（Sprite 由 C# 代码赋值） */
 .joystick-base {
     position: absolute;
     width: 180px;
@@ -38,7 +29,6 @@
     -unity-background-scale-mode: scale-to-fit;
 }
 
-/* 手柄小球：居中布局，通过代码 translate 偏移 */
 .joystick-handle {
     position: absolute;
     width: 80px;
@@ -48,7 +38,6 @@
     -unity-background-scale-mode: scale-to-fit;
 }
 
-/* ===== 右下攻击+闪避容器 ===== */
 .mobile-action-btns {
     position: absolute;
     right: 30px;
@@ -57,14 +46,12 @@
     align-items: flex-end;
 }
 
-/* 右侧 跳跃+攻击 纵向堆叠 */
 .mobile-attack-stack {
     flex-direction: column;
     align-items: center;
     margin-left: 12px;
 }
 
-/* ===== 跳跃按钮（中圆，攻击上方） ===== */
 .mobile-jump-btn {
     width: 72px;
     height: 72px;
@@ -75,9 +62,9 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 8px;
+    -unity-font: resource('Fonts/NotoSansSC-Regular');
 }
 
-/* ===== 攻击按钮（大圆） ===== */
 .mobile-attack-btn {
     width: 100px;
     height: 100px;
@@ -89,7 +76,6 @@
     justify-content: center;
 }
 
-/* ===== 闪避按钮（小圆） ===== */
 .mobile-dodge-btn {
     width: 72px;
     height: 72px;
@@ -101,7 +87,6 @@
     justify-content: center;
 }
 
-/* ===== 右上菜单按钮容器 ===== */
 .mobile-menu-btns {
     position: absolute;
     right: 20px;
@@ -109,7 +94,6 @@
     flex-direction: column;
 }
 
-/* ===== 背包/任务小方块按钮 ===== */
 .mobile-menu-btn {
     width: 64px;
     height: 64px;
@@ -122,7 +106,6 @@
     margin-bottom: 10px;
 }
 
-/* ===== 对话入口按钮（中下方，胶囊形） ===== */
 .mobile-interact-btn {
     position: absolute;
     bottom: 30%;
@@ -139,7 +122,6 @@
     justify-content: center;
 }
 
-/* ===== 按钮文字 ===== */
 .mobile-btn-label {
     color: white;
     font-size: 16px;

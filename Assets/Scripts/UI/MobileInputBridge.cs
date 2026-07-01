@@ -70,9 +70,9 @@ namespace FinalRPG.UI
 
             _joystick = new UIToolkitJoystick(_joystickArea, joystickHandle);
 
-            // 中文显示：C# 加载字体（比 USS resource() 在移动端更可靠）
-            var cjkFont = Resources.Load<Font>("Fonts/NotoSansSC-Regular");
-            if (cjkFont != null) root.style.unityFont = cjkFont;
+
+            // 中文显示由 PanelSettings → Text Settings → DefaultFontAsset 统一管理
+            // （选中 PanelSettings.asset → Inspector → Text Settings → 拖入 UITK Text Settings）
 
             // 追踪所有交互元素的触摸，供相机判断死区
             RegisterUITouchTracking(_joystickArea);
@@ -162,12 +162,15 @@ namespace FinalRPG.UI
             // 1. 键盘/鼠标回落先写入
             _keyboardFallback?.WriteIntent(ctx);
 
-            // 2. 摇杆覆盖移动方向，位移长度线性映射 0→奔跑速度
+            // 2. 摇杆：手游标准二值走/跑，0.7进跑 0.5回走（滞回防抖），平滑过渡由Move.SmoothDamp负责
             var joyDir = _joystick.InputDirection;
             if (joyDir.sqrMagnitude > 0.001f)
             {
-                ctx.moveInput = joyDir;
-                ctx.runHeld = true;   // 始终以奔跑为基准，由 inputMagnitude 线性缩放
+                float mag = joyDir.magnitude;
+                if (mag > 0.7f) ctx.runHeld = true;
+                else if (mag < 0.5f) ctx.runHeld = false;
+                // runHeld 不变时保持上一帧状态（0.5~0.7 之间滞回）
+                ctx.moveInput = joyDir.normalized;   // 方向始终归一化，不走连续速度
             }
 
             // 3. 移动端攻击覆盖
