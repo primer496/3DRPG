@@ -2,6 +2,8 @@
   "dependencies": {
     "cn.tuanjie.ai.graph": "1.0.6",
     "com.boxqkrtm.ide.cursor": "file:Packages/com.boxqkrtm.ide.cursor",
+    "com.code-philosophy.hybridclr": "file:C:/Users/22604/Desktop/hybridclr_unity-main/hybridclr_unity-main",
+    "com.unity.addressables": "1.22.3",
     "com.unity.ai.navigation": "1.1.7",
     "com.unity.animation.rigging": "1.2.1",
     "com.unity.cinemachine": "2.10.6",

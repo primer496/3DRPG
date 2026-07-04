@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using Yarn.Unity;
 using TaskManager;
@@ -54,6 +56,11 @@ public class SaveSystem : MonoBehaviour
     }
 
     // ========================================================================
+    // 异步工具
+    // ========================================================================
+    private readonly AsyncRunner _asyncRunner = new AsyncRunner();
+
+    // ========================================================================
     // Unity 生命周期
     // ========================================================================
     private void Awake()
@@ -82,11 +89,16 @@ public class SaveSystem : MonoBehaviour
 
         CacheReferences();
 
-        // 启动时自动恢复存档（纯自动存档模式，无 UI 选择）
+        // 启动时异步恢复存档，避免 File.ReadAllText 阻塞首帧
         if (HasAutoSave())
         {
-            LoadAutoSave();
+            LoadAutoSaveAsync();
         }
+    }
+
+    private void Update()
+    {
+        _asyncRunner.Tick();
     }
 
     private void OnApplicationQuit()
@@ -148,43 +160,15 @@ public class SaveSystem : MonoBehaviour
     };
 
     // ========================================================================
-    // 公开 API：手动存档
+    // 公开 API：异步读档
     // ========================================================================
 
     /// <summary>
-    /// 将当前游戏状态保存到指定槽位 (0-2)。
+    /// 从指定槽位 (0-2) 异步加载存档。
+    /// File.ReadAllText 在后台线程执行，避免阻塞主线程；
+    /// 解析和恢复在主线程回调中完成。加载期间锁定玩家输入。
     /// </summary>
-    public void SaveGame(int slot)
-    {
-        if (slot < 0 || slot > 2)
-        {
-            RPGLog.Error("Save", $"无效存档槽位: {slot}，合法值为 0-2");
-            return;
-        }
-
-        CacheReferences();
-
-        var saveData = CollectSaveData();
-        saveData.saveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-        string json = JsonUtility.ToJson(saveData, prettyPrint: true);
-        string path = GetSlotPath(slot);
-
-        try
-        {
-            File.WriteAllText(path, json);
-            RPGLog.Debug("Save", $"存档成功 → 槽位 {slot}: {path} ({saveData.saveTime})");
-        }
-        catch (Exception e)
-        {
-            RPGLog.Error("Save", $"存档写入失败 槽位 {slot}: {e.Message}");
-        }
-    }
-
-    /// <summary>
-    /// 从指定槽位 (0-2) 加载存档。
-    /// </summary>
-    public void LoadGame(int slot)
+    public void LoadGameAsync(int slot)
     {
         if (slot < 0 || slot > 2)
         {
@@ -199,27 +183,68 @@ public class SaveSystem : MonoBehaviour
             return;
         }
 
-        string json;
-        try
+        EventBus.Instance.RaiseInputLock(true);
+
+        string json = null;
+        _asyncRunner.RunSequential(new Func<CancellationToken, Task>[] {
+            // Step 1: 线程池读取文件，不阻塞主线程
+            ct => Task.Run(() => {
+                json = File.ReadAllText(path);
+            }, ct),
+            // Step 2: 主线程解析 JSON + 恢复游戏状态
+            ct => {
+                var saveData = JsonUtility.FromJson<SaveData>(json);
+                if (saveData == null)
+                {
+                    RPGLog.Error("Save", $"存档解析失败 槽位 {slot}");
+                    EventBus.Instance.RaiseInputLock(false);
+                    return Task.CompletedTask;
+                }
+
+                CacheReferences();
+                RestoreFromSaveData(saveData);
+                EventBus.Instance.RaiseInputLock(false);
+                RPGLog.Debug("Save", $"读档成功 ← 槽位 {slot}: {saveData.saveTime}");
+                return Task.CompletedTask;
+            }
+        });
+    }
+
+    /// <summary>
+    /// 异步加载自动存档。File.ReadAllText 在后台线程执行。
+    /// </summary>
+    public void LoadAutoSaveAsync()
+    {
+        string path = GetAutoSavePath();
+        if (!File.Exists(path))
         {
-            json = File.ReadAllText(path);
-        }
-        catch (Exception e)
-        {
-            RPGLog.Error("Save", $"存档读取失败 槽位 {slot}: {e.Message}");
+            RPGLog.Warning("Save", $"自动存档不存在: {path}");
             return;
         }
 
-        var saveData = JsonUtility.FromJson<SaveData>(json);
-        if (saveData == null)
-        {
-            RPGLog.Error("Save", $"存档解析失败 槽位 {slot}");
-            return;
-        }
+        EventBus.Instance.RaiseInputLock(true);
 
-        CacheReferences();
-        RestoreFromSaveData(saveData);
-        RPGLog.Debug("Save", $"读档成功 ← 槽位 {slot}: {saveData.saveTime}");
+        string json = null;
+        _asyncRunner.RunSequential(new Func<CancellationToken, Task>[] {
+            ct => Task.Run(() => {
+                json = File.ReadAllText(path);
+            }, ct),
+            ct => {
+                var saveData = JsonUtility.FromJson<SaveData>(json);
+                if (saveData == null)
+                {
+                    RPGLog.Error("Save", "自动存档解析失败");
+                    EventBus.Instance.RaiseInputLock(false);
+                    return Task.CompletedTask;
+                }
+
+                CacheReferences();
+                RestoreFromSaveData(saveData);
+                EventBus.Instance.RaiseInputLock(false);
+                RPGLog.Debug("Save", $"读档成功 ← 自动存档: {saveData.saveTime}");
+                return Task.CompletedTask;
+            }
+        });
     }
 
     // ========================================================================
@@ -249,41 +274,6 @@ public class SaveSystem : MonoBehaviour
         {
             RPGLog.Error("Save", $"自动存档写入失败: {e.Message}");
         }
-    }
-
-    /// <summary>
-    /// 加载自动存档。
-    /// </summary>
-    public void LoadAutoSave()
-    {
-        string path = GetAutoSavePath();
-        if (!File.Exists(path))
-        {
-            RPGLog.Warning("Save", $"自动存档不存在: {path}");
-            return;
-        }
-
-        string json;
-        try
-        {
-            json = File.ReadAllText(path);
-        }
-        catch (Exception e)
-        {
-            RPGLog.Error("Save", $"自动存档读取失败: {e.Message}");
-            return;
-        }
-
-        var saveData = JsonUtility.FromJson<SaveData>(json);
-        if (saveData == null)
-        {
-            RPGLog.Error("Save", "自动存档解析失败");
-            return;
-        }
-
-        CacheReferences();
-        RestoreFromSaveData(saveData);
-        RPGLog.Debug("Save", $"读档成功 ← 自动存档: {saveData.saveTime}");
     }
 
     // ========================================================================

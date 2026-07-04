@@ -11,7 +11,7 @@
 **规模**：70+ C# 脚本 · 7 大系统闭环 · 15+ Python 自动化工具
 
 ### 架构设计
-- 设计并实现**分层状态机 (HSM)** 框架，支持状态嵌套与 LCA 路径寻路，TransitionSequencer 管理异步三阶段切换，零 `await` 阻塞主循环
+- 实现非阻塞多帧状态过渡系统：Activity 承载跨帧操作（动画等待、延迟激活），TransitionSequencer 编排退出→切换→进入三阶段，Task 轮询替代协程避免 GC，支持串行/并行执行与随时取消，过渡零帧阻塞
 - 搭建 **EventBus 解耦架构**，所有系统间通信走事件总线，消除跨系统直接引用，子系统完全可插拔
 - 统一采用 **MVVM/MVP 分层**：Model 纯数据 (ScriptableObject) → ViewModel/Presenter 桥接 → View (UI Toolkit) 被动渲染，UI 迭代无需改逻辑
 - 全项目配置数据 **ScriptableObject 驱动**，策划可在 Inspector 直接调参，运行时 `Resources.Load` 热加载
@@ -39,19 +39,19 @@
 
 **3D RPG Demo · Unity 2022.3+ URP · 独立开发 · 70+ C# 脚本**
 
-- 自研分层状态机 (HSM) 框架，实现状态嵌套与异步切换，驱动 15+ 玩家状态及敌人 AI 决策树，零 await 阻塞主循环
+- 基于 HSM（树形组织、Activity 异步过渡）实现 12 种玩家状态与敌人行为树决策，通过意图抽象层统一玩家输入与 AI 控制，SO 能力配置集支持行为可插拔组合
 - 搭建 EventBus 解耦架构，基于 MVVM/MVP 分层完成背包、任务、对话等 7 大系统闭环，全项目 ScriptableObject 驱动、UI Toolkit 构建界面
 - 集成 Yarn Spinner 对话引擎（5+ 分支剧情、8+ 自定义命令），Yarn 变量与任务状态类型安全同步持久化
-- 实现全量数据存档闭环（PlayerStats / Inventory / Quest / Yarn 变量），攻克动画混合适配与斜坡检测等关键技术难点
+- 实现全量数据存档闭环（PlayerStats / Inventory / Quest / Yarn 变量），攻克动画混合适配与 CC 接地/墙体检测等关键技术难点
 
 ---
 
 ## 压缩版（篇幅极紧张时使用 · 3 条）
 
 > **3D RPG Demo · Unity 2022.3+ URP · 独立开发**
-> - 自研 HSM 状态机框架（15+ 状态、零 await），搭建 EventBus 解耦架构与 MVVM/MVP 分层体系
+> - 基于 HSM 实现 12 种玩家状态与敌人行为树决策，搭建 EventBus 解耦架构与 MVVM/MVP 分层体系
 > - 完成 7 大核心系统闭环：玩家控制、敌人 AI、背包、任务、对话（Yarn Spinner）、存档、摄像机
-> - 攻克动画混合适配、斜坡检测、Yarn 变量持久化等关键技术难点，实现全链路存档闭环
+> - 攻克动画混合适配、CC 接地/墙体检测、Yarn 变量持久化等关键技术难点，实现全链路存档闭环
 
 ---
 
@@ -62,5 +62,5 @@
 | 简历「项目经历」板块 | **精简版**（4 条，架构/系统/难点全覆盖，符合国内行业简历规范） |
 | 简历篇幅充裕 | **完整版**（12 条分 4 组，面试可展开聊细节） |
 | 简历只剩 2-3 行 | **压缩版**（3 条浓缩） |
-| 面试自我介绍 | 从精简版中挑 3 条口述，重点讲 HSM 自研过程和存档闭环 |
-| HR 一句话 | 「用 Unity 从零搭建 70+ 脚本的 3D RPG Demo，自研 HSM 状态机框架，集成 Yarn Spinner，7 大系统全链路闭环」 |
+| 面试自我介绍 | 从精简版中挑 3 条口述，重点讲 HSM 动画过渡机制和存档闭环 |
+| HR 一句话 | 「用 Unity 从零搭建 70+ 脚本的 3D RPG Demo，实现 HSM 状态机 + Yarn Spinner 对话 + 全链路存档闭环，7 大系统完整可玩」 |

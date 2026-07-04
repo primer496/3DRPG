@@ -1,0 +1,18 @@
+<ui:USS xmlns:ui="UnityEngine.UIElements">
+    .root {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 8px;
+        padding: 10px 20px;
+    }
+    .success {
+        color: rgb(0, 255, 100);
+        font-size: 32px;
+        font-weight: bold;
+    }
+    .error {
+        color: rgb(255, 80, 80);
+    }
+</ui:USS>

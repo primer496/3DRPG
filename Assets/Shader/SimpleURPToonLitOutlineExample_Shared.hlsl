@@ -20,6 +20,7 @@
 // Include this if you are doing a lit shader. This includes lighting shader variables,
 // lighting and shadow functions
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
 
 // Material shader variables are not defined in SRP or URP shader library.
 // This means _BaseColor, _BaseMap, _BaseMap_ST, and all variables in the Properties section of a shader

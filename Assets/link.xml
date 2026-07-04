@@ -1,0 +1,4 @@
+<linker>
+  <!-- 安全兜底：如果 System.Windows.Forms 仍出现在构建中，全部剥离 -->
+  <assembly fullname="System.Windows.Forms" preserve="nothing" />
+</linker>

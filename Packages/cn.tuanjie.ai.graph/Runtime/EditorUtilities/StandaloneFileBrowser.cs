@@ -16,14 +16,16 @@ namespace UnityEngine.AIGraph
         private static IStandaloneFileBrowser _platformWrapper = null;
 
         static StandaloneFileBrowser() {
+#if UNITY_EDITOR
 #if UNITY_STANDALONE_OSX
             _platformWrapper = new StandaloneFileBrowserMac();
 #elif UNITY_STANDALONE_WIN
             _platformWrapper = new StandaloneFileBrowserWindows();
 #elif UNITY_STANDALONE_LINUX
             _platformWrapper = new StandaloneFileBrowserLinux();
-#elif UNITY_EDITOR
+#else
             _platformWrapper = new StandaloneFileBrowserEditor();
+#endif
 #endif
         }
 

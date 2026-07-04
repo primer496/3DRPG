@@ -43,6 +43,7 @@ namespace TaskManager
                 if (_instance == null)
                 {
                     var go = new GameObject("[QuestManager]");
+                    DontDestroyOnLoad(go);  // 先移出场景再挂组件，避免关闭场景时残留警告
                     _instance = go.AddComponent<QuestManager>();
                 }
                 return _instance;

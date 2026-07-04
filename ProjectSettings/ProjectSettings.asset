@@ -42,7 +42,7 @@ PlayerSettings:
     height: 1
   m_SplashScreenLogos: []
   m_VirtualRealitySplashScreen: {fileID: 0}
-  expectedBundleIdentifier: com.UnityTechnologies.com.unity.template.urpblank
+  expectedBundleIdentifier: com.Unity-Technologies.com.unity.template.urp-blank
   integrityHash: 
   m_HolographicTrackingLossScreen: {fileID: 0}
   defaultScreenWidth: 1024
@@ -885,6 +885,7 @@ PlayerSettings:
   platformArchitecture: {}
   scriptingBackend:
     Android: 1
+    Standalone: 1
   il2cppCompilerConfiguration: {}
   il2cppCodeGeneration: {}
   managedStrippingLevel:
@@ -1014,7 +1015,7 @@ PlayerSettings:
   OpenHarmonyUseCustomKeystore: 0
   OpenHarmonyUseCustomModuleJsonFive: 0
   OpenHarmonyUseCustomTuanjiePlayerAbility: 0
-  apiCompatibilityLevel: 6
+  apiCompatibilityLevel: 3
   weixinMiniGameMemorySize: 32
   weixinMiniGameExceptionSupport: 1
   weixinMiniGameExceptionOnlyEnableForUserCodes: 0

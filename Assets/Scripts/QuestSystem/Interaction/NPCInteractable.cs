@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Yarn.Unity;
 using TaskManager;
 
@@ -32,11 +33,10 @@ namespace QuestSystem.Interaction
         private void Update()
         {
             // 当玩家在范围内，按下 E 键，且当前没有正在播放的对话时触发
-            if (isPlayerInRange && Input.GetKeyDown(KeyCode.E))
+            if (isPlayerInRange && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
             {
                 if (dialogueRunner != null && !dialogueRunner.IsDialogueRunning)
                 {
-                    // [Debug] Debug.Log($"[NPCInteractable] LinesAvailable={dialogueRunner.lineProvider?.LinesAvailable}, YarnProject={dialogueRunner.yarnProject?.name}");
                     dialogueRunner.StartDialogue(startNodeName);
 
                     // 抛出沟通事件完成目标

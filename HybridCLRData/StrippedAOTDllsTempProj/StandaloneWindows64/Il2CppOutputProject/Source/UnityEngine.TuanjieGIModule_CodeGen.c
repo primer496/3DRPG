@@ -1,0 +1,125 @@
+﻿#include "pch-c.h"
+#ifndef _MSC_VER
+# include <alloca.h>
+#else
+# include <malloc.h>
+#endif
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+
+
+
+extern void Manager_get_debugTextureIndex_m5183147CC660C5BDB418524F5227B73D864590F4 (void);
+extern void Manager_set_debugTextureIndex_mF781481CD3182ABD85DB616604DCFB73E8FD44D2 (void);
+extern void Manager_get_pipelineType_m28798CDF87E24BB3556CF5657B8B9EE89089C793 (void);
+extern void Manager_set_pipelineType_m5867B13F7E2BB80AD249654911EAC7C644A632AE (void);
+extern void Manager_get_fullscreenDebugMinRange_mA4F481C1BAC4EDDD4202CCF62C62481ECEF9480F (void);
+extern void Manager_set_fullscreenDebugMinRange_m30D157274760F98DE5A8E8A7E3118643858962CE (void);
+extern void Manager_get_fullscreenDebugMaxRange_m25FCD65086211C65C1A39F3CA6CD4939F39B629B (void);
+extern void Manager_set_fullscreenDebugMaxRange_m4155CD8A43B259FE98E52C82965A03925274D2B8 (void);
+extern void Manager_set_fullscreenDebugComputeRangeTag_mD9F682FB447533F8997B9BEFF1A1BCDFBC69E3A4 (void);
+extern void Manager_get_pooledTextureNames_mAF78851C9758DC6D6CAC13310BCE71680B183C71 (void);
+extern void Manager_GetTextureByIndex_m3314CFF7C7973F0739C4948928496A7941EDAC73 (void);
+extern void TuanjieGIOption_MarshalOptions_m413AE492807390622851277D7E74685E952FEEE7 (void);
+extern void TuanjieGIOption_MarshalVisualizeOptions_m8194612B1BB0A00B684D387B1761C0441FD48734 (void);
+extern void TuanjieGIOption_SetVisualizeOption_m04839D235CC1C517CE73713E7BFAFEE4EC692969 (void);
+extern void TuanjieGIOption_SetBoolOption_mFCBA1B29D9BC1AF9F72C8D94066B256BA3D05A4D (void);
+extern void TuanjieGIOption_GetBoolOption_m0EBD3696D68E45BFC33C812977B8E000C36B1468 (void);
+extern void TuanjieGIOption_SetIntOption_mE28C9162F57E3FC665B4FE64E8649F97135BFBAE (void);
+extern void TuanjieGIOption_GetIntOption_m9FE1FC9CDD91CCA39A8ADFBFFA0C3101DB5B9EA1 (void);
+extern void TuanjieGIOption_SetFloatOption_m5026C34C30C83473946E2B38EB4989C52B384315 (void);
+extern void TuanjieGIOption_GetFloatOption_m7B9CDB8A63852688F88A213B1F4A93900151C717 (void);
+extern void ExecutionContextURP_Execute_m28960424B4D81E6E0B4552D70A095E3A501D7B5B (void);
+extern void ExecutionContextURP_GetDiffuseIndirectTexture_m7109CAB384ED0B24A335F75ECCADC1D7E5F69724 (void);
+extern void ExecutionContextURP_GetSpecularIndirectTexture_mC77C125D2CA6CEAFF090EA2AC3284E50D1CE4EFF (void);
+extern void ExecutionContextURP_GetRoughSpecularIndirectTexture_mD9FE38A37152EDA4867EC88B51D170AFBC094C61 (void);
+extern void ExecutionContextURP_DrawFullScreenDebug_m2A38AB92E44EAF72E79FE3DBA7A2570BEA068B5B (void);
+extern void ExecutionContextURP_GetSkyboxCubemap_m7E7AA630C51322FECC0ACA96D7D0F475AB097EA4 (void);
+extern void ExecutionContextURP_Execute_Injected_m7DE1AA4F4010B1FB011FFA540821D1CE827F8FAC (void);
+extern void ExecutionContextURP_DrawFullScreenDebug_Injected_m6F384EBCADF8F508B224A4D9D5D37F890F233247 (void);
+static Il2CppMethodPointer s_methodPointers[28] = 
+{
+	Manager_get_debugTextureIndex_m5183147CC660C5BDB418524F5227B73D864590F4,
+	Manager_set_debugTextureIndex_mF781481CD3182ABD85DB616604DCFB73E8FD44D2,
+	Manager_get_pipelineType_m28798CDF87E24BB3556CF5657B8B9EE89089C793,
+	Manager_set_pipelineType_m5867B13F7E2BB80AD249654911EAC7C644A632AE,
+	Manager_get_fullscreenDebugMinRange_mA4F481C1BAC4EDDD4202CCF62C62481ECEF9480F,
+	Manager_set_fullscreenDebugMinRange_m30D157274760F98DE5A8E8A7E3118643858962CE,
+	Manager_get_fullscreenDebugMaxRange_m25FCD65086211C65C1A39F3CA6CD4939F39B629B,
+	Manager_set_fullscreenDebugMaxRange_m4155CD8A43B259FE98E52C82965A03925274D2B8,
+	Manager_set_fullscreenDebugComputeRangeTag_mD9F682FB447533F8997B9BEFF1A1BCDFBC69E3A4,
+	Manager_get_pooledTextureNames_mAF78851C9758DC6D6CAC13310BCE71680B183C71,
+	Manager_GetTextureByIndex_m3314CFF7C7973F0739C4948928496A7941EDAC73,
+	TuanjieGIOption_MarshalOptions_m413AE492807390622851277D7E74685E952FEEE7,
+	TuanjieGIOption_MarshalVisualizeOptions_m8194612B1BB0A00B684D387B1761C0441FD48734,
+	TuanjieGIOption_SetVisualizeOption_m04839D235CC1C517CE73713E7BFAFEE4EC692969,
+	TuanjieGIOption_SetBoolOption_mFCBA1B29D9BC1AF9F72C8D94066B256BA3D05A4D,
+	TuanjieGIOption_GetBoolOption_m0EBD3696D68E45BFC33C812977B8E000C36B1468,
+	TuanjieGIOption_SetIntOption_mE28C9162F57E3FC665B4FE64E8649F97135BFBAE,
+	TuanjieGIOption_GetIntOption_m9FE1FC9CDD91CCA39A8ADFBFFA0C3101DB5B9EA1,
+	TuanjieGIOption_SetFloatOption_m5026C34C30C83473946E2B38EB4989C52B384315,
+	TuanjieGIOption_GetFloatOption_m7B9CDB8A63852688F88A213B1F4A93900151C717,
+	ExecutionContextURP_Execute_m28960424B4D81E6E0B4552D70A095E3A501D7B5B,
+	ExecutionContextURP_GetDiffuseIndirectTexture_m7109CAB384ED0B24A335F75ECCADC1D7E5F69724,
+	ExecutionContextURP_GetSpecularIndirectTexture_mC77C125D2CA6CEAFF090EA2AC3284E50D1CE4EFF,
+	ExecutionContextURP_GetRoughSpecularIndirectTexture_mD9FE38A37152EDA4867EC88B51D170AFBC094C61,
+	ExecutionContextURP_DrawFullScreenDebug_m2A38AB92E44EAF72E79FE3DBA7A2570BEA068B5B,
+	ExecutionContextURP_GetSkyboxCubemap_m7E7AA630C51322FECC0ACA96D7D0F475AB097EA4,
+	ExecutionContextURP_Execute_Injected_m7DE1AA4F4010B1FB011FFA540821D1CE827F8FAC,
+	ExecutionContextURP_DrawFullScreenDebug_Injected_m6F384EBCADF8F508B224A4D9D5D37F890F233247,
+};
+static const int32_t s_InvokerIndices[28] = 
+{
+	23718,
+	22765,
+	23718,
+	22765,
+	23769,
+	22783,
+	23769,
+	22783,
+	22756,
+	23729,
+	22301,
+	23729,
+	23729,
+	20464,
+	20464,
+	21913,
+	20466,
+	22117,
+	20471,
+	22435,
+	22761,
+	22307,
+	22307,
+	22307,
+	20620,
+	23729,
+	22754,
+	20616,
+};
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_UnityEngine_TuanjieGIModule_CodeGenModule;
+const Il2CppCodeGenModule g_UnityEngine_TuanjieGIModule_CodeGenModule = 
+{
+	"UnityEngine.TuanjieGIModule.dll",
+	28,
+	s_methodPointers,
+	0,
+	NULL,
+	s_InvokerIndices,
+	0,
+	NULL,
+	0,
+	NULL,
+	0,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};
