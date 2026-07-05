@@ -3,56 +3,60 @@ using System.Collections;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
 
 /// <summary>
 /// 热更新验证加载器（AOT 侧，Assembly-CSharp）。
+/// 统一走 Addressables 一条管线：DLL + 预制体都从同一个远程地址加载。
 /// 
 /// 运行时流程：
-/// 1. 从本地 HTTP 服务器下载 HotUpdate.dll
-/// 2. Assembly.Load 加载热更程序集
-/// 3. Addressables 加载预制体
-/// 4. 实例化预制体 → HotUpdateLabelChanger.Start() 执行
+/// 1. Addressables.InitializeAsync
+/// 2. 通过 Addressables 下载 HotUpdate.dll.bytes → Assembly.Load
+/// 3. 通过 Addressables 加载预制体 → Instantiate → HotUpdateLabelChanger.Start()
 /// </summary>
 public class HotUpdateTestLoader : MonoBehaviour
 {
-    [Header("Remote Config")]
-    [Tooltip("热更 DLL 的远程 URL")]
-    public string hotUpdateDllUrl = "http://localhost:8000/StandaloneWindows64/HotUpdate.dll";
+    [Header("Addressable Keys")]
+    [Tooltip("热更 DLL 在 Addressables 中的 Key")]
+    public string dllKey = "HotUpdateDll";
 
-    [Tooltip("Addressables 中预制体的 Key")]
+    [Tooltip("热更预制体在 Addressables 中的 Key")]
     public string prefabKey = "TestHotUpdatePrefab";
 
     [Header("Status Label")]
     [Tooltip("显示状态的 Label 名称")]
     public string statusLabelName = "hot-update-label";
 
+    private AsyncOperationHandle<TextAsset> _dllHandle;
+    private AsyncOperationHandle<GameObject> _prefabHandle;
+    private GameObject _instantiated;
+
     private IEnumerator Start()
     {
-        SetStatusLabel("初始化中...");
+        SetStatusLabel("初始化 Addressables...");
+        Debug.Log("[HotUpdateTestLoader] Initializing Addressables...");
+        var initOp = Addressables.InitializeAsync();
+        yield return new WaitUntil(() => initOp.IsDone);
+        Debug.Log("[HotUpdateTestLoader] Addressables initialized.");
 
-        // Step 1: Download HotUpdate.dll from remote
+        // Step 1: Load DLL via Addressables
         SetStatusLabel("正在下载热更 DLL...");
-        Debug.Log("[HotUpdateTestLoader] Downloading HotUpdate.dll...");
+        Debug.Log("[HotUpdateTestLoader] Loading HotUpdateDll via Addressables...");
+        _dllHandle = Addressables.LoadAssetAsync<TextAsset>(dllKey);
+        yield return new WaitUntil(() => _dllHandle.IsDone);
 
-        byte[] dllBytes = null;
-        using (var req = UnityWebRequest.Get(hotUpdateDllUrl))
+        if (_dllHandle.Status != AsyncOperationStatus.Succeeded)
         {
-            yield return req.SendWebRequest();
-
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                SetStatusLabel($"失败: DLL下载 - {req.error}");
-                Debug.LogError($"[HotUpdateTestLoader] DLL download failed: {req.error}");
-                yield break;
-            }
-            dllBytes = req.downloadHandler.data;
+            SetStatusLabel($"失败: DLL加载 - {_dllHandle.OperationException?.Message}");
+            Debug.LogError($"[HotUpdateTestLoader] DLL load failed: {_dllHandle.OperationException}");
+            yield break;
         }
-        Debug.Log($"[HotUpdateTestLoader] Downloaded {dllBytes.Length} bytes.");
 
-        // Step 2: Load the assembly
+        byte[] dllBytes = _dllHandle.Result.bytes;
+        Debug.Log($"[HotUpdateTestLoader] DLL loaded: {dllBytes.Length} bytes.");
+
+        // Step 2: Assembly.Load
         SetStatusLabel("正在加载热更程序集...");
         Assembly hotUpdateAssembly;
         try
@@ -67,30 +71,35 @@ public class HotUpdateTestLoader : MonoBehaviour
             yield break;
         }
 
-        // Step 3: Initialize Addressables
-        SetStatusLabel("正在初始化 Addressables...");
-        var initOp = Addressables.InitializeAsync();
-        yield return new WaitUntil(() => initOp.IsDone);
-        Debug.Log("[HotUpdateTestLoader] Addressables initialized.");
-
-        // Step 4: Load prefab from Addressables
+        // Step 3: Load prefab via Addressables
         SetStatusLabel("正在加载热更预制体...");
-        var loadOp = Addressables.LoadAssetAsync<GameObject>(prefabKey);
-        yield return new WaitUntil(() => loadOp.IsDone);
+        Debug.Log("[HotUpdateTestLoader] Loading prefab via Addressables...");
+        _prefabHandle = Addressables.LoadAssetAsync<GameObject>(prefabKey);
+        yield return new WaitUntil(() => _prefabHandle.IsDone);
 
-        if (loadOp.Status != AsyncOperationStatus.Succeeded)
+        if (_prefabHandle.Status != AsyncOperationStatus.Succeeded)
         {
             SetStatusLabel("失败: 预制体加载失败");
-            Debug.LogError($"[HotUpdateTestLoader] Failed to load prefab '{prefabKey}': {loadOp.OperationException}");
+            Debug.LogError($"[HotUpdateTestLoader] Prefab load failed: {_prefabHandle.OperationException}");
             yield break;
         }
 
-        // Step 5: Instantiate
+        // Step 4: Instantiate
         SetStatusLabel("正在实例化预制体...");
-        Instantiate(loadOp.Result, Vector3.zero, Quaternion.identity);
-        Debug.Log("[HotUpdateTestLoader] Prefab instantiated. HotUpdateLabelChanger should now run.");
+        _instantiated = Instantiate(_prefabHandle.Result, Vector3.zero, Quaternion.identity);
+        Debug.Log("[HotUpdateTestLoader] Prefab instantiated.");
 
         SetStatusLabel("热更流程完成！");
+    }
+
+    private void OnDestroy()
+    {
+        if (_instantiated != null)
+            Destroy(_instantiated);
+        if (_prefabHandle.IsValid())
+            Addressables.Release(_prefabHandle);
+        if (_dllHandle.IsValid())
+            Addressables.Release(_dllHandle);
     }
 
     private void SetStatusLabel(string text)

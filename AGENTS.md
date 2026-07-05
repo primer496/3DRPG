@@ -225,6 +225,13 @@ public event Action<bool> OnInputLockStateChanged;
 19. **`InMemoryVariableStorage.TryGetValue<T>()` 类型不匹配时抛异常** — 不能用于运行时类型探测（先试 bool 再试 float 会炸）。必须预先知道每个变量的类型，用 `Dictionary<string, bool>` 显式声明，新增变量时追加定义即可。
 20. **Collect 事件匹配失败时用 `AdvanceQuestObjective` 兜底** — 当 Quest SO 的 objective.targetId 与 Yarn `<<GivePlayerItem>>` 的 itemId 不一致时，Collect 事件无法推进任务目标。可在 QuestManager 中新增 `AdvanceQuestObjective(questId)` 直接标记当前目标完成并推进索引，通过 Yarn 命令 `<<AdvanceQuestObjective questId>>` 调用。详见 `docs/changelog/2026-06-12_QuestSaveYarnFixes.md`。
 
+### IL2CPP & 热更新
+21. **AI Graph 包的 `System.Windows.Forms.dll` 和 `Ookii.Dialogs.dll` 必须排除 Standalone 平台** — 这两个 DLL 在 `Packages/cn.tuanjie.ai.graph/Runtime/EditorUtilities/Plugins/` 下，.meta 中默认 Standalone Win/Win64 设为 enabled。HybridCLR 的 `StripAOTDll`（内部触发 IL2CPP BuildPlayer）会因为 UnityLinker 无法解析 `Mono.Posix` 而失败。修复：将 .meta 中 `Standalone: Win` 和 `Standalone: Win64` 的 `enabled` 改为 `0`；同时 `StandaloneFileBrowserWindows.cs` 和 `StandaloneFileBrowser.cs` 需包裹 `#if UNITY_EDITOR`。
+22. **HybridCLR Settings 中 `hotUpdateAssemblyDefinitions` 和 `hotUpdateAssemblies` 不能同时设置** — 用 asmdef 引用就用前者，用字符串名就用后者。两者都设会导致 `BuildFailedException: hot update assembly:HotUpdate is duplicated`。
+23. **热更 DLL 中修改代码默认值不会覆盖 prefab 已序列化的值** — `public string Message = "新值"` 改了之后重编 DLL，运行时 Prefab 上序列化的旧值仍然生效。纯代码热更验证应修改非序列化逻辑（颜色、字号等）。
+24. **Addressables 的 Address Key 必须与 `LoadAssetAsync(key)` 完全一致** — 大小写、拼写都要匹配，否则 `InvalidKeyException: No Location found for Key=xxx`。Group 中的 Address 列就是运行时加载用的 key。
+25. **Addressables 句柄和 Instantiate 的对象必须在 OnDestroy 释放** — `LoadAssetAsync` 返回的 handle 要用 `Addressables.Release(handle)` 释放；`Instantiate` 出的 GameObject 要用 `Destroy()` 清理。否则场景关闭时报警告。
+
 ---
 
 ## 九、自动化记录规则（强制执行）

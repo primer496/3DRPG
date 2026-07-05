@@ -17,6 +17,7 @@
     <type fullname="UnityEngine.UIElements.IStyle" preserve="all" />
     <type fullname="UnityEngine.UIElements.Label" preserve="all" />
     <type fullname="UnityEngine.UIElements.StyleColor" preserve="all" />
+    <type fullname="UnityEngine.UIElements.StyleLength" preserve="all" />
     <type fullname="UnityEngine.UIElements.TextElement" preserve="all" />
     <type fullname="UnityEngine.UIElements.UIDocument" preserve="all" />
     <type fullname="UnityEngine.UIElements.UQueryExtensions" preserve="all" />

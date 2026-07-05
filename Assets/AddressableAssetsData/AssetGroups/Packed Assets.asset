@@ -17,11 +17,15 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 81ddfb49038e48b458e4cf42c4296be9
   m_SerializeEntries:
+  - m_GUID: 4fc92b4450d3a3d49a574f448908ce8e
+    m_Address: HotUpdateDll
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a7525c8f29da88f488302c19fb3d772d
     m_Address: TestHotUpdatePrefab
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - hotupdate
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 7744e8d0fc7f9ab4cad58f922e724d12, type: 2}

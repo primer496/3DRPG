@@ -11,7 +11,7 @@ namespace HotUpdate
     {
         [Header("Verification")]
         [Tooltip("热更后显示的文本")]
-        public string Message = "热更新成功！";
+        public string Message = "新版文本";
 
         [Header("Color")]
         [Tooltip("文字颜色（可选）")]
@@ -26,6 +26,7 @@ namespace HotUpdate
                 var label = doc.rootVisualElement?.Q<Label>("hot-update-label");
                 if (label != null)
                 {
+                    label.style.fontSize = 16;
                     label.text = Message;
                     label.style.color = LabelColor;
                     Debug.Log($"[HotUpdate] Label updated: '{Message}' color={LabelColor}");
