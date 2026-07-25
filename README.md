@@ -4,6 +4,12 @@ Unity 2022.3+ URP 制作的 3D RPG 游戏 Demo，从零搭建全链路闭环的 
 
 **76 C# 脚本 · 7 大系统闭环 · 自定义 HSM 框架 · Yarn Spinner 对话 · Cinemachine 摄像机**
 
+## 演示
+
+<video src="demo.mp4" controls width="800"></video>
+
+[下载演示视频](./demo.mp4)
+
 ---
 
 ## 项目概述
