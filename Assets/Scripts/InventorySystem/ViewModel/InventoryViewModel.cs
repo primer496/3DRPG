@@ -19,6 +19,12 @@ namespace InventorySystem.ViewModel
         private ItemCategory currentCategory = ItemCategory.Item;
         private int selectedSlotIndex = -1;
 
+        /// <summary>
+        /// View 层应订阅此事件来刷新格子显示，而不是直接订阅 inventoryModel.OnInventoryChanged。
+        /// 这样 View 不需要知道 Model 的存在，只依赖 ViewModel。
+        /// </summary>
+        public event Action OnDisplayChanged;
+
         private void Awake()
         {
             inventoryModel = new InventoryModel();
@@ -78,6 +84,7 @@ namespace InventorySystem.ViewModel
         private void RefreshDisplaySlots()
         {
             cachedDisplaySlots = GetCurrentDisplaySlots();
+            OnDisplayChanged?.Invoke();
         }
 
         public List<InventorySlot> GetCurrentDisplaySlots()

@@ -81,6 +81,7 @@ QuestManager.Instance.CompleteQuest(...); // 不要这样做
 - **ViewModel/Presenter** — MonoBehaviour 桥接层，监听 Model 变化，驱动 View
 - **View** — MonoBehaviour 挂 UI 上，只负责显示，不包含业务逻辑
 - 例：`ItemData(SO/Model)` → `InventoryViewModel` → `InventoryUIController(View)`
+- **依赖方向**：`View → ViewModel → Model`；反向只靠事件/绑定通知。View **禁止**直接订阅 Model 事件（如 `viewModel.inventoryModel.OnXxx`），应订阅 ViewModel 对外暴露的事件（如 `OnDisplayChanged`）
 
 ---
 
@@ -181,6 +182,7 @@ public event Action<bool> OnInputLockStateChanged;
 5. **攻击检测中遍历 Collider 必须按角色去重** — `Physics.OverlapSphere` / `SphereCastAll` 返回的是所有碰撞体，一个角色身上可能有多个 Collider（CharacterController + 子碰撞体）。必须用 `HashSet<PlayerStateDriver>` 对已命中的 Driver 去重，否则一次攻击触发多次伤害/跳字。
 6. **DOTween 操作 `Time.timeScale` 必须用 `SetUpdate(true)`** — 帧冻结（Hit Stop）场景中 timeScale 被压低，如果 DOTween 自身也用 scaled time，tween 会被冻结无法完成恢复。`SetUpdate(true)` 强制使用 unscaled time。连段攻击时记得先 `_freezeTween?.Kill()` 再创建新 tween，避免多个 tween 竞争 timeScale。
 7. **外部创建 .cs 文件后必须在 Unity 中 Reimport** — 通过 VS Code 或脚本创建的 .cs 文件，Unity 不会自动识别。手动编写 .meta 文件的 GUID 格式与 Unity 不兼容，会导致 `CS0246: 类型名未找到`。正确做法：创建 .cs 后删除手写 .meta，在 Unity Project 窗口中右键该文件 → Reimport，让 Unity 自动生成 GUID 和更新 Assembly-CSharp.csproj。
+8. **MVVM 中 View 不得直接订阅 Model** — `InventoryUIController` 曾写 `viewModel.inventoryModel.OnInventoryChanged += RefreshUI`，导致 View 感知 Model。正确做法：ViewModel 暴露 `OnDisplayChanged`，在刷新显示缓存后广播；View 只订阅 ViewModel。详见 `docs/changelog/2026-07-26_InventoryMVVMDisplayChanged.md`。
 
 ### UI Toolkit
 5. **`.Q<>()` 查不到 UXML 根元素自身** — `.Q()` 只搜索子元素。要获取 UXML 的根 `VisualElement`，直接用 `_root = _uiDoc.rootVisualElement`，不要用 `.Q<VisualElement>("root-name")`。

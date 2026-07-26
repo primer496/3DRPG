@@ -171,7 +171,8 @@ public class InventoryUIController : MonoBehaviour
     {
         if (viewModel != null)
         {
-            viewModel.inventoryModel.OnInventoryChanged += RefreshUI;
+            // 只订阅 ViewModel 暴露的事件，View 不再感知 Model 的存在
+            viewModel.OnDisplayChanged += RefreshUI;
             RefreshUI();
         }
 
@@ -181,8 +182,8 @@ public class InventoryUIController : MonoBehaviour
 
     private void OnDisable()
     {
-        if (viewModel != null && viewModel.inventoryModel != null)
-            viewModel.inventoryModel.OnInventoryChanged -= RefreshUI;
+        if (viewModel != null)
+            viewModel.OnDisplayChanged -= RefreshUI;
 
         UnsubscribeBindableChanges();
 
