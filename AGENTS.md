@@ -21,6 +21,22 @@ Unity 2022.3+ 的 2.5D/3D RPG 示例项目，渲染管线为 **URP**。
 
 ---
 
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `primer496/3DRPG` (via `gh`). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md` + `docs/adr/`. See `docs/agents/domain.md`.
+
+---
+
 ## 二、命名空间约定
 
 | 命名空间 | 用途 |
@@ -132,12 +148,10 @@ public event Action<bool> OnInputLockStateChanged;
 ### 参考文档（按需手动引用）
 | 文档 | 路径 |
 |---|---|
-| 项目代码结构说明 | `docs/architecture/项目代码结构说明.md` |
+| 领域词表 | `GLOSSARY.md` |
+| 架构决策 (ADR) | `docs/adr/` |
 | 对话任务系统详解 | `docs/architecture/Dialogue_Quest_System_Explanation.md` |
-| 对话 MVP 重构总结 | `docs/changelog/DialogueTransitionSummary.md` |
-| 属性&背包闭环报告 | `docs/changelog/RPG属性系统与背包任务闭环_实施报告.md` |
-| 斜坡检测实践 | `docs/practices/斜坡检测与移动实践总结.md` |
-| 急停&动画过渡经验 | `docs/practices/急停与动画过渡经验总结.md` |
+| 变更历史 | `docs/changelog/` |
 
 ---
 
@@ -190,14 +204,17 @@ public event Action<bool> OnInputLockStateChanged;
 7. **跳字/头顶 UI 需要 Y 轴偏移** — 传入的世界坐标通常是 `transform.position`（脚底），需加 `_headHeight` 偏移到头顶。
 8. **透视相机下不要对世界坐标做 Z 轴随机散布** — Z 轴偏移会显著改变屏幕投影位置，导致 UI 偏离目标。只保留 X 轴微小散布即可。
 9. **USS 样式可能不加载，UI 元素需内联兜底** — `AddToClassList("damage-text")` 后如果 USS 路径不对或未加载，Label 可能完全不可见。在代码中设置 `style.color`、`style.fontSize` 等内联样式作为保底。
+10. **禁止对挂有 UIDocument 的 GameObject 调 `SetActive(false)`** — 会重建 VisualTree，导致 `Awake` 里缓存的 `VisualElement` 引用失效（第二次打开对话 UI 停在默认文案）。显隐只用 `root.style.display = DisplayStyle.None/Flex`（或封装好的 `ShowDialogue`）。
 
 ### 动画 & 移动
-5. **HSM 不要直接驱动 Animator 状态切换** — 让 Animator 自己管理 Transition（Exit Time / Speed 条件），HSM 用 `GetCurrentAnimatorStateInfo(0).IsName()` 轮询同步。
-6. **FBX 动画导入时检查 Root Transform 设置** — Position(Y/XZ) Based Upon 建议用 Original，否则不同 pose 的质心位置不一致会导致 Idle/Stop 混搭时根节点跳动。详见 `docs/practices/急停与动画过渡经验总结.md`。
+5. **HSM 不要直接驱动 Animator 状态切换** — 让 Animator 自己管理 Transition（Exit Time / Speed 条件），HSM 用 `GetCurrentAnimatorStateInfo(0).IsName()` 轮询同步。进入急停可由代码 `CrossFade`；离开急停交给 Animator Transition，HSM 轮询同步切回。
+6. **FBX 动画导入时检查 Root Transform 设置** — Position(Y/XZ) Based Upon 建议用 Original；参与混合的 Stop/Idle/Locomotion 用同一基准。`Write Default Values` 建议 true，避免通道残留。急停期间用指数衰减把 Animator `Speed` 收到 0。
 7. **急停时不要在代码里直接设 velocity=0** — 会导致脚部 IK 跳变，应通过 Animator Transition + deceleration 曲线平滑过渡。
-8. **接地检测不能只靠单帧射线** — 坡道边缘容易闪断，需要多帧平滑或 buffer。详见 `docs/practices/斜坡检测与移动实践总结.md`。
+8. **接地检测不能只靠单帧射线** — 坡道边缘容易闪断，需要 SphereCast + fallback + 多帧 grace/buffer。
 9. **斜坡移动方向必须沿坡面切线** — 不能直接用世界 XZ 平面投影，否则上坡会卡顿/抖动。
 10. **不要双重注入 Y 轴位移** — 同时在代码和物理里修改 Y 会导致角色逐渐离开坡面。
+11. **Animator 参数/状态名必须与 `AnimatorKeys` 契约一致** — 否则动作不播或切换异常。
+12. **敌人不要误绑玩家 `InputAction`** — 会被设备输入污染 Intent；敌人只用 `EnemyBrain` 经 Intent Provider 写意图。
 
 ### 移动端适配
 1. **`IIntentProvider` 替换必须注意 Awake/Start 顺序** — `PlayerStateDriver.Awake()` 中初始化 intentProvider 时读取 `intentProviderOverride`。若 Bridge 在 `Start()` 才设置 override，为时已晚，HSM 会一直使用默认 `PlayerInputProvider`。修复：Bridge 在 `Awake()` 设置 override，`InitializeIntentProvider()` 移至 `Start()`。
@@ -234,6 +251,11 @@ public event Action<bool> OnInputLockStateChanged;
 24. **Addressables 的 Address Key 必须与 `LoadAssetAsync(key)` 完全一致** — 大小写、拼写都要匹配，否则 `InvalidKeyException: No Location found for Key=xxx`。Group 中的 Address 列就是运行时加载用的 key。
 25. **Addressables 句柄和 Instantiate 的对象必须在 OnDestroy 释放** — `LoadAssetAsync` 返回的 handle 要用 `Addressables.Release(handle)` 释放；`Instantiate` 出的 GameObject 要用 `Destroy()` 清理。否则场景关闭时报警告。
 
+### 工程环境
+1. **`Packages/manifest.json` 勿提交本机绝对路径包** — 例如 `file:D:/BaiduNetdiskDownload/...`，换机器会直接解析失败。
+2. **包源为 `https://packages.tuanjie.cn`** — 不同网络环境可能拉包失败，换机先确认 Package Manager 可达。
+3. **敌人挂载检查清单** — `PlayerStateDriver` + `intentProviderOverride`→`EnemyBrain` + `EnemyBrain.target`→玩家 + `enemyConfigSet` 已配 + Animator 参数对齐 `AnimatorKeys`。
+
 ---
 
 ## 九、自动化记录规则（强制执行）
@@ -243,7 +265,7 @@ public event Action<bool> OnInputLockStateChanged;
 | 触发条件 | 自动操作 | 目标位置 |
 |---|---|---|
 | 修复了一个 Bug | 追加根因 + 修复方式 | `docs/changelog/YYYY-MM-DD_<简述>.md`，同时提炼到本文第八节 |
-| 新增/修改了架构或设计模式 | 更新或新建说明文档 | `docs/architecture/` 对应文件 |
+| 新增/修改了架构或设计模式 | 难逆决策写 ADR；流程说明可更新 architecture | `docs/adr/NNNN-slug.md`；可选 `docs/architecture/` |
 | 发现了新的禁止事项或常见踩坑 | 追加到本文第八节，按子类别分组 | `AGENTS.md` 第八节 |
 | 完成了有意义的配置/数据变更 | 记录变更摘要 | `docs/changelog/YYYY-MM-DD_<简述>.md` |
 | 遇到并解决了一个非显而易见的工程问题 | 追加到 `/memories/repo/` | `/memories/repo/<主题>.md` |
